@@ -13,3 +13,9 @@ python -m pip install -e '.[dev]'
 pytest -q
 python tools/source_audit.py
 ```
+
+The engineering-pilot dataset semantics, including the meaning of every current
+scene, fault mechanism, companion run, and public/private field boundary, are
+documented in [`docs/dataset/CAGE_AD_D0_DATASET_CARD.md`](docs/dataset/CAGE_AD_D0_DATASET_CARD.md).
+The card is deliberately marked non-release-ready until the preregistered smoke,
+leakage, reproducibility, checksum, and licensing gates pass.
