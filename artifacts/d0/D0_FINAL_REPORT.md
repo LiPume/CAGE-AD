@@ -46,7 +46,7 @@ a stable, domain-identifiable active-diagnosis benchmark.
 - evaluation SHA-256:
   `956b3f65833aced0104734d3011c1d5ad53e3d53fc4883db6034f396f002055a`;
 - public manifest file SHA-256:
-  `9b5600bb2c2ae86fb101d085cb903d0ca7d71dc26c2efbcddf105cd42d04812a`.
+  `42a22209f7f5b2f132be3c4c15fd510643008f2c92ba9a24e1c34f611c7d52c0`.
 
 ## Quantitative result
 
