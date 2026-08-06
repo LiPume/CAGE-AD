@@ -1,33 +1,14 @@
-# Apollo D0 limitations
+# Apollo D0 局限性
 
-- D0 stopped at the 12-episode smoke gate. D0-A1, split freeze, 36-episode
-  generation, non-agent baselines, LLM policies, calibration, and equal-budget
-  comparisons were not run.
-- The study contains two deterministic Town01 traffic templates and one seed.
-  It is a pilot, not a population-level benchmark.
-- Perfect perception excludes sensor, detector, association, and tracking
-  uncertainty from the evaluated responsibility set.
-- The fault mechanisms are strong semantic-boundary perturbations rather than
-  empirical models of a specific production defect.
-- Mechanism activation was usually observable (33/36 repeats), but task impact
-  was not (16/36 combined votes). Observable perturbation is therefore not
-  equivalent to a diagnostically useful failure.
-- Only 2/12 correct-domain probes removed the registered failure, and one of
-  those episodes also had a wrong-domain false repair. Domain selectivity is
-  inadequate.
-- Forecast faults and control transport delay produced no task failures under
-  the frozen envelope despite most mechanism signals being present.
-- Two planning-constraint episodes and the lead control-gain episode produced
-  repeatable failures without correct-domain repair, showing that the current
-  probes do not form reliable causal tests.
-- A transient Apollo route/planning initialization failure required one exact
-  retry. Its original evidence is retained; it was not counted as a scientific
-  negative.
-- Statistical significance, bootstrap intervals, calibration, AURC, Brier,
-  ECE, prediction-set metrics, and matched-risk cost are unavailable because
-  the prerequisite benchmark failed.
-- The data are synthetic and cannot certify safety or justify real-vehicle
-  automated intervention.
-- A public dataset release still requires an explicit code/data license,
-  third-party redistribution review, archival identifier, maintainer contact,
-  and release-time checksum/redaction audit.
+- 实验在 12 个 episode 的 smoke gate 停止。没有运行 D0-A1、36 集生成、非 Agent baseline、LLM policy、校准或 equal-budget 比较。
+- 只有两个 Town01 确定性交通模板和一个 seed，只能算 pilot。
+- 完美感知排除了传感器、检测、关联和跟踪不确定性。
+- 故障是为工程试验设计的强边界扰动，不是某个生产故障的经验模型。
+- 33/36 次故障重复能够看到机制信号，但只有 16/36 次同时造成任务失败；“注入成功”不等于“形成了有用的诊断题”。
+- 只有 2/12 个正确域 probe 消除了失败，其中一个还出现错误域 false repair，责任域选择性不足。
+- 预测故障和控制传输延迟在冻结条件下没有造成任务失败。
+- 两个规划约束故障和前车控制增益故障虽然稳定失败，但正确域 probe 不能修复，说明现有 probe 不是可靠因果测试。
+- 一次 Apollo route/planning 初始化失败需要原配置重试；原始证据已保留，没有把它算成科学负例。
+- 因主 benchmark 失败，没有统计显著性、bootstrap interval、AURC、Brier、ECE、prediction-set 或 matched-risk cost 结果。
+- 仿真数据不能证明真实车辆安全，也不能支持真实车辆自动修复或干预。
+- 公开数据集仍需要明确代码/数据许可证、第三方再分发审查、归档 ID、维护者联系方式和发布时校验审计。

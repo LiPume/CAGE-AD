@@ -14,8 +14,7 @@ pytest -q
 python tools/source_audit.py
 ```
 
-The engineering-pilot dataset semantics, including the meaning of every current
-scene, fault mechanism, companion run, and public/private field boundary, are
-documented in [`docs/dataset/CAGE_AD_D0_DATASET_CARD.md`](docs/dataset/CAGE_AD_D0_DATASET_CARD.md).
-The card is deliberately marked non-release-ready until the preregistered smoke,
-leakage, reproducibility, checksum, and licensing gates pass.
+工程 pilot 的中文数据集说明书位于
+[`docs/dataset/CAGE_AD_D0_DATASET_CARD.md`](docs/dataset/CAGE_AD_D0_DATASET_CARD.md)，
+其中逐项解释了每个场景、故障机制、配套运行以及公开/私有字段边界。当前数据只通过
+2/12 个完整科学 gate，因此文档明确标记为尚不可正式发布。

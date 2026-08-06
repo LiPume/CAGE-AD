@@ -26,5 +26,5 @@ def test_dataset_card_covers_every_registered_scene_fault_and_action():
 
 def test_dataset_card_does_not_claim_release_readiness_or_a_license():
     text = CARD.read_text()
-    assert "not yet a release-ready benchmark" in text
-    assert "No dataset license has been selected yet" in text
+    assert "尚不具备公开发布为正式 benchmark 的条件" in text
+    assert "当前尚未选择数据集许可证" in text

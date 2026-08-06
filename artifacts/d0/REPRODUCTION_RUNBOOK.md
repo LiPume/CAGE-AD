@@ -1,10 +1,8 @@
-# D0 terminal reproduction runbook
+# D0 终态复现手册
 
-This runbook reproduces the completed `d0_a0_repaired_v3` execution and its
-terminal evaluation. It uses the existing G0-approved persistent runtime; it
-does not reinstall Apollo or CARLA.
+本文用于复现 `d0_a0_repaired_v3` 的执行和最终评估。它直接使用已经通过 G0 的持久盘环境，不重新安装 Apollo 或 CARLA。
 
-## Fixed roots and revisions
+## 1. 固定路径和版本
 
 ```bash
 export CAGE_BUNDLE_ROOT=/root/autodl_apollo10_g0_bundle
@@ -17,11 +15,9 @@ export CAGE_BATCH=d0_a0_repaired_v3
 export CAGE_EXECUTION_COMMIT=edf09c6af0a1de2e6d68c35ce0abbebc0f2a9df8
 ```
 
-The existing batch was generated and run at `CAGE_EXECUTION_COMMIT`. The later
-`fc0b09a` checkpoint adds only dataset documentation and public result indexing.
-Do not regenerate the existing batch under a different commit or config.
+现有 batch 是用 `CAGE_EXECUTION_COMMIT` 生成和执行的。后续 commit 只增加数据集文档、结果导出和终态 provenance。不要用另一个 commit 或配置重新生成并覆盖现有 batch。
 
-## Verify the source and frozen identity
+## 2. 检查源码和冻结配置身份
 
 ```bash
 cd "$CAGE_REPO"
@@ -32,7 +28,7 @@ sha256sum \
   "$CAGE_STATE_ROOT/evidence/${CAGE_BATCH}_evaluation.json"
 ```
 
-Expected SHA-256 values are, in order:
+预期 SHA-256 依次为：
 
 ```text
 b496234a10871cf7d26dc52219bac8164a25a5e905308d1c7540b942c08a2112
@@ -40,7 +36,7 @@ b496234a10871cf7d26dc52219bac8164a25a5e905308d1c7540b942c08a2112
 956b3f65833aced0104734d3011c1d5ad53e3d53fc4883db6034f396f002055a
 ```
 
-## CPU and source audits
+## 3. 运行 CPU 测试和源码审计
 
 ```bash
 cd "$CAGE_REPO"
@@ -48,12 +44,9 @@ cd "$CAGE_REPO"
 "$CAGE_RUNTIME_ROOT/envs/cage-ad-py310/bin/python" tools/source_audit.py
 ```
 
-## Resume semantics
+## 4. 崩溃恢复规则
 
-The following command skips a run only when its PASS status, private metrics,
-scenario stats, interposer stats, and retained semantic capture all exist. It is
-safe for crash recovery, but should not be run merely to manufacture a new
-outcome. The completed batch currently skips all 84 runs.
+下面的命令只有在某个 run 同时具有 PASS status、private metrics、scenario stats、interposer stats 和 retained semantic capture 时才跳过它。它可用于真正的中断恢复，但不能为了制造新结果而重复运行。当前 batch 会跳过全部 84 个已 PASS run。
 
 ```bash
 cd "$CAGE_REPO"
@@ -67,7 +60,7 @@ cd "$CAGE_REPO"
   --batch-id "$CAGE_BATCH"
 ```
 
-## Re-evaluate without rerunning simulation
+## 5. 不重跑仿真，直接复现评估
 
 ```bash
 cd "$CAGE_REPO"
@@ -78,12 +71,17 @@ cd "$CAGE_REPO"
   --batch-id "$CAGE_BATCH"
 ```
 
-Expected output is `d0_a0_evaluation=FAIL pass=2/12` and exit code 1. That exit
-code is the registered scientific result, not a command malfunction.
+预期输出为：
 
-## Rebuild release inventory and result files
+```text
+d0_a0_evaluation=FAIL pass=2/12
+```
 
-Install the optional result writer exactly once in the isolated evaluation env:
+预期退出码是 1。这里的 1 是预注册科学结果“没有通过”，不是程序运行故障。
+
+## 6. 重建公开 manifest 和结果文件
+
+Parquet 导出需要隔离评估环境中的固定版本：
 
 ```bash
 "$CAGE_RUNTIME_ROOT/envs/cage-ad-py310/bin/python" -m pip install \
@@ -107,17 +105,8 @@ cd "$CAGE_REPO"
   --svg "$CAGE_STATE_ROOT/evidence/${CAGE_BATCH}_summary.svg"
 ```
 
-Expected result checksums:
+文档翻译会改变 public manifest 中的数据集卡 SHA，因此最终文件校验值统一以 `runtime_state/d0/FINAL_ARTIFACT_CHECKSUMS.sha256` 为准。
 
-```text
-RESULTS.csv      0eeb779175eb80057ce3022f55ceccaf3b964578c1badd3e7246ceba2e9a191b
-RESULTS.parquet  85f62c29be0809901dc738f9e5ee6b359417beccc185c693963ad564642a023c
-summary.svg      5fecf7de07aff6b79c7ba2918474298ff16057191eb2e8ab363a0747303e6842
-```
+## 7. 隔离要求
 
-## Isolation checks
-
-The diagnosis path may read only an episode's `visible/` subtree. Never grant it
-access to `CAGE_PRIVATE_ORACLE_ROOT`, evaluation JSON, semantic labels, or run
-linkage. Confirm the private roots remain mode 0700 and that Apollo/CARLA are
-stopped when running CPU tests or evaluation.
+诊断进程只能读取每个 episode 的 `visible/` 子目录。绝不能向诊断进程开放 `CAGE_PRIVATE_ORACLE_ROOT`、evaluation JSON、语义标签或 run linkage。CPU 测试和离线评估期间应确认 Apollo/CARLA 已停止，private oracle 权限应保持 `0700`。

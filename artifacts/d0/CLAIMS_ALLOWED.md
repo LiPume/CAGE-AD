@@ -1,38 +1,25 @@
-# Claims allowed for Apollo D0
+# Apollo D0 可以和不可以声称什么
 
-The following claims are supported by the retained evidence:
+## 有证据支持的说法
 
-- The existing Apollo 10 + CARLA 0.9.15 G0 environment remained usable and was
-  not moved or reinstalled.
-- The D0 contracts, central execution gate, budget/evidence/event ledgers,
-  crash-resume logic, and evaluator isolation have passing CPU tests.
-- Two deterministic perfect-perception PnC scenes, six semantic-boundary fault
-  mechanisms, three responsibility probes, and six observation actions were
-  implemented.
-- The repaired D0-A0 batch has 12 diagnosis episodes and 84 current
-  runtime-valid companion simulations.
-- All 12 nominal runs passed the frozen runtime/task envelope.
-- The visible evidence scan found zero private scenario, mechanism, or run-ID
-  token hits.
-- The repaired combined scientific gate passed for 2 of 12 episodes.
-- The proper terminal result under the preregistered rule is
-  `D0_MODIFY_INFRA`.
-- The current pilot has a detailed dataset card and deterministic public
-  manifest tooling, but is not release-ready and has no selected dataset
-  license.
+- 原有 Apollo 10 + CARLA 0.9.15 G0 环境保持可用，没有移动或重装。
+- D0 的数据合同、central gate、预算/证据/event ledger、崩溃恢复和 evaluator 隔离通过 CPU 测试。
+- 已实现两个确定性完美感知 PnC 场景、六种边界故障、三种责任域 probe 和六种观察动作。
+- repaired v3 包含 12 个诊断 episode 和 84 个当前运行有效的配套仿真。
+- 12 个 nominal 都满足冻结运行和任务条件。
+- 可见证据中没有发现私有场景、故障机制或 run ID token 泄漏。
+- repaired v3 的完整科学 gate 结果是 2/12。
+- 按预注册规则，正确终态是 `D0_MODIFY_INFRA`。
+- 当前 pilot 已有详细中文数据集说明书和确定性 public manifest 工具，但还不能正式发布，也没有选定数据许可证。
 
-The following claims are not allowed:
+## 不允许声称的说法
 
-- that CAGE-AD D0 is a validated, release-ready, or statistically powered
-  benchmark;
-- that adaptive diagnosis beats fixed, greedy, Single-Agent, or Multi-Agent
-  baselines—none of those comparisons was run;
-- that Multi-Agent improves on Single-Agent;
-- that these results generalize to perception, end-to-end ADS, Autoware,
-  public-road data, or real vehicles;
-- that 84 companion runs are 84 independent diagnosis samples;
-- that a mechanism signal alone proves a causal or safety-relevant fault;
-- that correct-domain probes were reliably selective;
-- that the pilot or repository is open source without an explicit license;
-- that the failed v2/v3 episodes may be relabelled, removed, or reevaluated
-  under relaxed thresholds as the same formal experiment.
+- 不能说 CAGE-AD D0 已经是验证完成、可以发布或统计功效充分的 benchmark。
+- 不能说 adaptive 胜过 fixed、greedy、Single-Agent 或 Multi-Agent，因为这些比较没有运行。
+- 不能说 Multi-Agent 胜过 Single-Agent。
+- 不能把结论推广到感知、端到端 ADS、Autoware、真实道路或真实车辆。
+- 不能把 84 次配套运行说成 84 个独立诊断样本。
+- 不能把“出现了故障机制信号”等同于“造成了有用且可诊断的安全故障”。
+- 不能说正确域 probe 具有稳定选择性。
+- 在没有明确许可证前，不能说仓库或数据集已经开源。
+- 不能删除、重标或用放松阈值重新评价 v2/v3 的失败样本，然后仍把它称为同一正式实验。
