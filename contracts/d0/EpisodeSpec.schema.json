@@ -1,0 +1,134 @@
+{
+  "$defs": {
+    "AccessRegime": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2"
+      ],
+      "title": "AccessRegime",
+      "type": "string"
+    },
+    "ArtifactReference": {
+      "additionalProperties": false,
+      "properties": {
+        "relative_path": {
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "visibility": {
+          "const": "diagnosis_visible",
+          "default": "diagnosis_visible",
+          "title": "Visibility",
+          "type": "string"
+        }
+      },
+      "required": [
+        "relative_path",
+        "sha256",
+        "size_bytes"
+      ],
+      "title": "ArtifactReference",
+      "type": "object"
+    },
+    "FailureWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "end_s": {
+          "exclusiveMinimum": 0,
+          "title": "End S",
+          "type": "number"
+        },
+        "start_s": {
+          "minimum": 0,
+          "title": "Start S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "start_s",
+        "end_s"
+      ],
+      "title": "FailureWindow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "allowed_action_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Allowed Action Ids",
+      "type": "array"
+    },
+    "budget_profile": {
+      "pattern": "^B[0-4]$",
+      "title": "Budget Profile",
+      "type": "string"
+    },
+    "episode_id": {
+      "minLength": 8,
+      "title": "Episode Id",
+      "type": "string"
+    },
+    "failure_type": {
+      "minLength": 1,
+      "title": "Failure Type",
+      "type": "string"
+    },
+    "failure_window": {
+      "$ref": "#/$defs/FailureWindow"
+    },
+    "initial_evidence_refs": {
+      "items": {
+        "$ref": "#/$defs/ArtifactReference"
+      },
+      "title": "Initial Evidence Refs",
+      "type": "array"
+    },
+    "observable_regime": {
+      "$ref": "#/$defs/AccessRegime"
+    },
+    "scenario_template": {
+      "minLength": 1,
+      "title": "Scenario Template",
+      "type": "string"
+    },
+    "seed": {
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "stack": {
+      "const": "apollo_10",
+      "default": "apollo_10",
+      "title": "Stack",
+      "type": "string"
+    }
+  },
+  "required": [
+    "episode_id",
+    "scenario_template",
+    "failure_type",
+    "failure_window",
+    "observable_regime",
+    "allowed_action_ids",
+    "budget_profile",
+    "seed"
+  ],
+  "title": "EpisodeSpec",
+  "type": "object"
+}

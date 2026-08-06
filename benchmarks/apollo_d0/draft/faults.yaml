@@ -1,0 +1,12 @@
+status: draft_for_d0_a0_smoke
+faults:
+  interaction_forecasting:
+    - forecast_stale_or_delayed
+    - forecast_heading_or_maneuver_bias
+  motion_planning:
+    - planning_constraint_omitted
+    - planning_unsafe_cost_or_speed_bias
+  tracking_execution:
+    - control_command_transport_delay
+    - control_gain_saturation_tracking_bias
+note: Mechanisms and thresholds remain smoke-stage drafts; failed episodes may not be deleted.

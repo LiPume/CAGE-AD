@@ -1,0 +1,8 @@
+# Apollo G0 deterministic Town01 runtime flags.
+# Keep the upstream defaults explicit, then set the canonical map once.
+--vehicle_config_path=modules/common/data/vehicle_param.pb.txt
+--log_dir=data/log
+--use_navigation_mode=false
+--use_sim_time=true
+--use_cyber_time=true
+--map_dir=__CAGE_RUNTIME_ROOT__/maps/carla_town01

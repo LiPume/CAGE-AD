@@ -1,0 +1,33 @@
+schema_version: 1
+captured_at: "2026-08-06T05:16:06Z"
+g0_status: APOLLO_GO
+source_bundle_revision: 2026-08-05-v1
+source_collections:
+  scripts:
+    aggregate_sha256: 28ba06e0408e26d3aca97d8073c870d91018d109a1e852855d1eb73f022e94c8
+  coordination:
+    aggregate_sha256: cae9a1a29b87eaa78051d89f6eb37e11f92182d072d7b1411201e46a67fbaec9
+  apollo_g0:
+    aggregate_sha256: 605368bc0c22b67fb0de2d1e41efa835a6fb08c7b9bb75ed5c4a67153f139a83
+  g0_report:
+    sha256: edecc3f2a65a8493284a1b8ad60ba67811f656162fff1b302ec771cebc32dcb3
+  g0_runbook:
+    sha256: a5e13acb1ec9658a946529b034dd945326e22c50d7f46c2d825b775cf8ee5565
+  bridge_audit:
+    sha256: 3d8aceec084fe102b5fb80e060b8a3033088eedd820440f3d8022eeeeaa2fbf7
+  versions_lock:
+    sha256: 0a7331d7c3367969625e5ca46d55d5a3739e815c7afbc26b8b539a62f742d3f0
+d0_design_documents:
+  D0_ACTIVE_DIAGNOSIS_SYSTEM_DESIGN.md: 1ff7dfe6050dc70be95054b7e3ef18d076307c23911aa55130078ac6708a16a1
+  GITHUB_HANDOFF_SPEC.md: b79b4c42c82ddee7d2998e3c06fb48ed6c8a5a9997a5e2cdebef45a93b5f2e50
+  CODEX_D0_IMPLEMENTATION_PROMPT.md: 5652ec5711b5a7c25b063f22fe4592ee23bf235060461cfa802de3b0795fff03
+excluded:
+  - Apollo and CARLA binaries
+  - build and package caches
+  - raw sensor data and maps
+  - evaluator-private oracle and injector state
+  - bridge logs and dumps
+  - historical Zhijia-Guardian source, data, and results
+notes:
+  - The two requested G0 documents existed under the actual names APOLLO_G0_RUNBOOK.md and bridge_audit.md.
+  - Archived G0 prose and deploy configuration use environment placeholders in this repository; original checksums above bind the server evidence.

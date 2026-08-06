@@ -1,0 +1,30 @@
+schema_version: apollo_native_mapping_v0
+stack: Apollo 10 application-pnc
+scope: adapter_implementation_only
+warning: Native names are provenance mappings, never responsibility labels.
+mappings:
+  - semantic_slot: ego_state
+    native_sources: [/apollo/localization/pose, /apollo/canbus/chassis]
+    transforms: [CARLA_y_sign_inversion, speed_mps_identity, simulator_timestamp]
+  - semantic_slot: motion_plan
+    native_sources: [/apollo/planning]
+    transforms: [trajectory_points_to_metric_world_frame]
+  - semantic_slot: control_target
+    native_sources: [/apollo/control]
+    transforms: [percentage_identity]
+  - semantic_slot: vehicle_response
+    native_sources: [/apollo/canbus/chassis]
+    transforms: [speed_and_applied_actuator_percentages]
+  - semantic_slot: tracking_execution
+    native_sources: [/apollo/control, /apollo/canbus/chassis]
+    transforms: [bounded_window_alignment_by_adapter_receive_time]
+interventions:
+  - contract_action: I2_semantic_replacement
+    semantic_slot: control_target
+    native_sink: /apollo/control_guarded
+    probe_request_mapping: /apollo/guardian/control_probe
+    ground_truth_used: false
+    known_side_effects:
+      - clears queued stale control targets
+      - temporarily suppresses nominal downstream control targets
+      - changes vehicle longitudinal response

@@ -1,0 +1,61 @@
+schema_version: 1
+provider_image: "AutoDL Pro Ubuntu 22.04.1 base container (exact image identifier unavailable in-container)"
+ubuntu: "22.04.1 LTS"
+kernel: "5.15.0-78-generic"
+nvidia_driver: "580.105.08"
+cuda_driver_capability: "13.0"
+cuda_toolkit_apollo: "11.8"
+apollo_release: "10.0"
+application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
+aem_version: 10.0.0-rc1-r4
+buildtool_version: 10.0.0-rc1-r1
+carla_release: "0.9.15"
+carla_archive_bytes: 8386636048
+carla_archive_sha256: 7b2f432ce74b251593f95dcc8dee6d99ad9625c2a71a2d6d48f24d879de19ef7
+openh264_release: "2.1.1"
+openh264_source_commit: 50a1fcf70fafe962c526749991cb4646406933ba
+bridge_repository: https://github.com/guardstrikelab/carla_apollo_bridge.git
+bridge_commit: b0c2e088fb703ec5c601cd20616112b46150b180
+bridge_license: Apache-2.0
+bridge_upstream_tested_versions: "CARLA 0.9.14 / Apollo 8.0.0"
+guardian_source_commit: 4b3b741fa41a4bcfe6c6294ae7e4a7d019168711
+guardian_snapshot_dirty: true
+guardian_python: "3.10"
+guardian_environment_export: runtime_state/guardian-conda-explicit.lock.txt
+tensorrt: "8.6.1.6-1+cuda11.8"
+cudnn: "8.9.7.29-1+cuda11.8"
+qt_release: "5.12.9"
+qt_installer_bytes: 1410748558
+qt_installer_sha256: 63ef2b991d5fea2045b4e7058f86e36868cafae0738f36f8b0a88dc8de64ab2e
+shellcheck: "0.7.1"
+shellcheck_archive_sha256: 64f17152d96d7ec261ad3086ed42d18232fcb65148b44571b564d688269d36c8
+patchelf: "0.12"
+patchelf_archive_sha256: 3dca33fb862213b3541350e1da262249959595903f559eae0fbc68966e9c3f56
+pypcd: "0.1.1"
+pypcd_source_commit: 796e545df2ee5e7836df6fe2f274aae3428d1ac2
+apollo_core_build_log_sha256: 5d8d9b307c4d738c7c4dc4aad02843e0bc0de99abcfd4e0c2a8250a2d749c1ff
+apollo_core_manifest_sha256: 355d03d065fe31d230454c7855d837b35786a5aedc4e41113e39c93b62767fbe
+apollo_host_python: "3.10.12"
+apollo_host_python_protobuf: "3.12.4-1ubuntu7.22.04.6"
+apollo_native_protobuf: "3.14.0.0"
+carla_client_wheel: "carla-0.9.15-cp310-cp310-manylinux_2_27_x86_64.whl"
+carla_client_wheel_sha256: 61449e33260f6a0cfd2f88d56f2463a5797a0b51bc46618beec07365422d4ad6
+bridge_python_target: runtime/bridge/python
+bridge_python_packages:
+  PyYAML: "6.0.3"
+  numpy: "1.26.4"
+  loguru: "0.7.0"
+  networkx: "3.4.2"
+  transforms3d: "0.4.1"
+town01_map_manifest: runtime_state/evidence/a1/town01_map.sha256
+a1_bridge_settings_sha256: 15314ef65b5279458d3043f123681de16189fd608462d102650d519de686aaca
+a1_bridge_objects_sha256: 4fc1529f935e48bd9a0b9d98e4d200ec2b3c47d0594956edac56c834bfcb35c2
+a1_pnc_launch_sha256: 9aa211aa18895d8fba3b63b6dc6f49dd83031c68b37c8b625cd3b886cf501bd6
+bridge_patched_diff_sha256: 6e52f4524635a317433a2c29a18a56486f9d4545e79aee737631e7a4df0890ef
+guardian_contract_validator: "jsonschema 4.26.0"
+guardian_contract_validator_dependencies:
+  attrs: "26.1.0"
+  jsonschema-specifications: "2025.9.1"
+  referencing: "0.37.0"
+  rpds-py: "0.30.0"
+guardian_pip_freeze_sha256: 956a99a5a25c7aae4a3cad67b7b470b244986db7dc4332411de5c709790d77a4

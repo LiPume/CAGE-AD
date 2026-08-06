@@ -1,0 +1,222 @@
+{
+  "$defs": {
+    "AccessRegime": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2"
+      ],
+      "title": "AccessRegime",
+      "type": "string"
+    },
+    "CostVector": {
+      "additionalProperties": false,
+      "properties": {
+        "access": {
+          "$ref": "#/$defs/AccessRegime",
+          "default": "L0"
+        },
+        "api_cost_usd": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Api Cost Usd",
+          "type": "number"
+        },
+        "bytes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "compute_seconds": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Compute Seconds",
+          "type": "number"
+        },
+        "human_minutes": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Human Minutes",
+          "type": "number"
+        },
+        "intervention_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Intervention Count",
+          "type": "integer"
+        },
+        "replay_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Replay Count",
+          "type": "integer"
+        },
+        "risk": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Risk",
+          "type": "number"
+        },
+        "runtime_seconds": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Runtime Seconds",
+          "type": "number"
+        },
+        "signals": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Signals",
+          "type": "integer"
+        },
+        "tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "CostVector",
+      "type": "object"
+    },
+    "DiagnosisStatus": {
+      "enum": [
+        "CONTINUE",
+        "DIAGNOSE",
+        "ABSTAIN",
+        "TOOL_FAILURE"
+      ],
+      "title": "DiagnosisStatus",
+      "type": "string"
+    },
+    "EvidenceSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "evidence_id": {
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "measured_cost": {
+          "$ref": "#/$defs/CostVector"
+        },
+        "payload_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Payload Sha256",
+          "type": "string"
+        },
+        "semantic_slot": {
+          "minLength": 1,
+          "title": "Semantic Slot",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "action_id",
+        "semantic_slot",
+        "payload_sha256",
+        "measured_cost"
+      ],
+      "title": "EvidenceSummary",
+      "type": "object"
+    },
+    "ResponsibilityDomain": {
+      "enum": [
+        "interaction_forecasting",
+        "motion_planning",
+        "tracking_execution"
+      ],
+      "title": "ResponsibilityDomain",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "candidate_domains": {
+      "items": {
+        "$ref": "#/$defs/ResponsibilityDomain"
+      },
+      "minItems": 1,
+      "title": "Candidate Domains",
+      "type": "array"
+    },
+    "episode_id": {
+      "minLength": 8,
+      "title": "Episode Id",
+      "type": "string"
+    },
+    "evidence_ledger": {
+      "items": {
+        "$ref": "#/$defs/EvidenceSummary"
+      },
+      "title": "Evidence Ledger",
+      "type": "array"
+    },
+    "executed_actions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Executed Actions",
+      "type": "array"
+    },
+    "mapping_uncertainty": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Mapping Uncertainty",
+      "type": "object"
+    },
+    "posterior": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/ResponsibilityDomain"
+      },
+      "title": "Posterior",
+      "type": "object"
+    },
+    "prediction_set": {
+      "items": {
+        "$ref": "#/$defs/ResponsibilityDomain"
+      },
+      "title": "Prediction Set",
+      "type": "array"
+    },
+    "remaining_budget": {
+      "$ref": "#/$defs/CostVector"
+    },
+    "status": {
+      "$ref": "#/$defs/DiagnosisStatus",
+      "default": "CONTINUE"
+    },
+    "step": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Step",
+      "type": "integer"
+    },
+    "tool_failures": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tool Failures",
+      "type": "array"
+    }
+  },
+  "required": [
+    "episode_id",
+    "candidate_domains",
+    "posterior",
+    "remaining_budget"
+  ],
+  "title": "DiagnosticState",
+  "type": "object"
+}

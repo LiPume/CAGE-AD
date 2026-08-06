@@ -1,0 +1,5 @@
+status: draft_for_d0_a0_smoke
+scenarios:
+  - lead_vehicle_deceleration
+  - cut_in_or_crossing_actor
+note: IDs, envelopes, and thresholds are not frozen until D0-3.

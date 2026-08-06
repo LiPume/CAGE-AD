@@ -1,0 +1,10 @@
+schema_version: 1
+name: guardstrikelab carla_apollo_bridge
+repository: https://github.com/guardstrikelab/carla_apollo_bridge.git
+commit: b0c2e088fb703ec5c601cd20616112b46150b180
+license: Apache-2.0
+upstream_tested_versions: CARLA 0.9.14 / Apollo 8.0.0
+verified_runtime_versions: CARLA 0.9.15 / Apollo 10.0
+fetch: git clone https://github.com/guardstrikelab/carla_apollo_bridge.git
+patch: ../patches/carla_apollo_bridge_g0.patch
+patch_sha256: 6e52f4524635a317433a2c29a18a56486f9d4545e79aee737631e7a4df0890ef
