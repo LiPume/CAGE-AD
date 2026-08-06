@@ -1,0 +1,12 @@
+status: draft_for_d0_a0_smoke
+actions:
+  - {id: O0_failure_summary, type: observation, regime: L0}
+  - {id: O1_forecast_window, type: observation, regime: L1}
+  - {id: O1_motion_plan_window, type: observation, regime: L1}
+  - {id: O1_tracking_window, type: observation, regime: L1}
+  - {id: O2_timing_metadata, type: observation, regime: L2}
+  - {id: O3_semantic_replay, type: observation, regime: L1}
+  - {id: I2_F_constant_velocity, type: intervention, regime: L1, risk: 1}
+  - {id: I2_P_safety_envelope, type: intervention, regime: L1, risk: 2}
+  - {id: I2_C_bounded_brake, type: intervention, regime: L1, risk: 2}
+note: I2 actions are deterministic non-GT boundary probes.

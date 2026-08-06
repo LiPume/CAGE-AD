@@ -1,0 +1,6 @@
+<cyber>
+  <module><name>routing</name><dag_conf>modules/routing/dag/routing.dag</dag_conf><process_name>routing</process_name></module>
+  <module><name>old_routing_adapter</name><dag_conf>modules/external_command/old_routing_adapter/dag/old_routing_adapter.dag</dag_conf><process_name>old_routing_adapter</process_name></module>
+  <module><name>planning</name><dag_conf>modules/external_command/process_component/dag/external_command_process.dag</dag_conf><dag_conf>__CAGE_GENERATED_ROOT__/d0_planning.dag</dag_conf><process_name>planning</process_name></module>
+  <module><name>control</name><dag_conf>modules/control/control_component/dag/control.dag</dag_conf><process_name>control</process_name></module>
+</cyber>

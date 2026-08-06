@@ -1,0 +1,20 @@
+status: draft_for_d0_a0_smoke
+runtime:
+  observation_window_s: 32
+  nominal_forward_progress_m: 5.0
+  minimum_valid_planning_messages: 20
+failure:
+  collision_count_min: 1
+  minimum_ttc_s_lt: 2.5
+  route_or_motion_failure: true
+mechanism_delta:
+  forecast_stale_or_delayed: 1.0
+  forecast_heading_or_maneuver_bias: 1.0
+  planning_constraint_omitted: 2.0
+  planning_unsafe_cost_or_speed_bias: 1.0
+  control_command_transport_delay: 10.0
+  control_gain_saturation_tracking_bias: 5.0
+repeatability:
+  required_votes: 2
+  attempts: 3
+note: These values are engineering-stage D0-A0 criteria and must be frozen before D0-A1.
