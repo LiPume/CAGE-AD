@@ -5,6 +5,12 @@ Document version: 0.1
 Runtime target: Apollo 10 host mode + CARLA 0.9.15  
 Benchmark scope: perfect-perception, planning-and-control (PnC), active diagnosis
 
+Latest pilot disposition: `d0_a0_repaired_v3` completed 84/84 current runtime
+invocations but passed only 2/12 preregistered combined episode gates. Its
+terminal status is `D0_MODIFY_INFRA`; it must not be published as a validated
+benchmark. The failed evidence remains useful for generator and protocol
+research when clearly identified as such.
+
 This document describes what every D0-A0 scene, fault, companion run, and
 published field means. It is also the release checklist for a future public
 dataset. A batch is not promoted to a public benchmark merely because its files
