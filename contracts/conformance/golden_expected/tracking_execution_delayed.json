@@ -1,0 +1,17 @@
+{
+  "schema_version": "golden_expected_v0",
+  "input": "../golden_inputs/tracking_execution_delayed.json",
+  "expected": {
+    "evidence_id": "obs_tracking_lag_001",
+    "metric_name": "control_target_response_lag",
+    "status": "violation",
+    "observed_lag_seconds": 2.05,
+    "prediction_set": ["tracking_and_execution"],
+    "action_type": "intervention",
+    "intervention_class": "I2_semantic_replacement",
+    "semantic_slot": "control_target",
+    "uses_ground_truth": false,
+    "brake_pct": 60.0,
+    "duration_seconds": 2.0
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "semantic_window_v0",
+  "scenario_id": "golden_000001",
+  "stack": "reference_stack",
+  "semantic_slot": "tracking_execution",
+  "required_regime": "L1",
+  "window": {"start_seconds": 0.0, "end_seconds": 3.0},
+  "provenance": "golden_contract_fixture",
+  "native_topics_disclosed": false,
+  "oracle_fields_present": false,
+  "control_target": [
+    {"t": 0.0, "throttle_pct": 0.0, "brake_pct": 0.0, "steering_pct": 0.0},
+    {"t": 0.1, "throttle_pct": 12.0, "brake_pct": 0.0, "steering_pct": 0.0}
+  ],
+  "vehicle_response": [
+    {"t": 0.0, "speed_mps": 0.0, "throttle_pct": 0.0, "brake_pct": 0.0, "steering_pct": 0.0},
+    {"t": 2.15, "speed_mps": 0.05, "throttle_pct": 12.0, "brake_pct": 0.0, "steering_pct": 0.0}
+  ]
+}

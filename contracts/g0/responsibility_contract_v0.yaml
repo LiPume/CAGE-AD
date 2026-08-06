@@ -1,0 +1,61 @@
+schema_version: responsibility_contract_v0
+status: frozen_for_autoware_g0_port
+frozen_at: "2026-08-05T13:51:29Z"
+scope: modular_ADS_runtime_diagnosis
+claim_boundary: Apollo-only conformance does not establish cross-stack transfer.
+responsibility_domains:
+  - id: world_state_estimation
+    function: Estimate ego and external-world state from available observations.
+  - id: interaction_forecasting
+    function: Predict the future motion and interaction of relevant actors.
+  - id: rule_intent_interpretation
+    function: Interpret route, traffic rules, and behavioral intent constraints.
+  - id: behavior_decision
+    function: Select a maneuver-level behavior under scene constraints.
+  - id: motion_planning_safety_constraints
+    function: Produce a dynamically feasible and safety-constrained motion plan.
+  - id: tracking_and_execution
+    function: Convert motion intent into control targets and realize them in vehicle response.
+  - id: timing_configuration_integration
+    function: Maintain valid timing, configuration, transport, and component integration.
+semantic_slots:
+  - id: ego_state
+    regime: L0
+    responsibility_domains: [world_state_estimation]
+  - id: predicted_actors
+    regime: L1
+    responsibility_domains: [interaction_forecasting]
+  - id: behavior_intent
+    regime: L1
+    responsibility_domains: [rule_intent_interpretation, behavior_decision]
+  - id: motion_plan
+    regime: L1
+    responsibility_domains: [motion_planning_safety_constraints]
+  - id: control_target
+    regime: L1
+    responsibility_domains: [tracking_and_execution]
+  - id: vehicle_response
+    regime: L1
+    responsibility_domains: [tracking_and_execution]
+  - id: tracking_execution
+    regime: L1
+    composition: [control_target, vehicle_response]
+    responsibility_domains: [tracking_and_execution]
+action_classes:
+  O1:
+    kind: observation
+    semantics: Query one retained semantic slot over a bounded local time window.
+  I2:
+    kind: intervention
+    semantics: Replace or probe one contract input/output without simulator ground truth.
+    required_disclosures: [uses_ground_truth, duration_seconds, side_effects]
+forbidden_diagnosis_inputs:
+  - fault labels and root-cause oracle
+  - injector private state or configuration
+  - source code and design documents
+  - simulator ground truth used as an undeclared low-permission signal
+units:
+  time: second
+  speed: meter_per_second
+  control_percentage: percent
+  angle: radian

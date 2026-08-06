@@ -1,0 +1,11 @@
+schema_version: 1
+name: Apollo application-pnc
+repository: https://github.com/ApolloAuto/application-pnc.git
+commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
+release: "10.0"
+license: Apache-2.0
+fetch: git clone --branch 10.0 https://github.com/ApolloAuto/application-pnc.git
+patch: ../patches/application_pnc_g0.patch
+actual_runtime_diff_sha256: cd9fe6afa11a29486ab26ec6d840b7c1a5365c412687d8d0a93f47e38f4c76b8
+checkpoint_patch_sha256: 3c0030303ef73829a99f27b462cb7d16afab1535bfdf97e70ae229ec6fe762b1
+normalization: The runtime-specific Apollo neo source path is represented by __CAGE_APOLLO_NEO_SRC__; deploy tooling must substitute the resolved AEM path after applying the patch.

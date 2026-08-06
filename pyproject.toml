@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cage-ad"
+version = "0.1.0"
+description = "Cost-aware contract-grounded active diagnosis"
+requires-python = ">=3.10"
+dependencies = [
+  "pydantic>=2.8,<3",
+  "PyYAML>=6,<7",
+  "jsonschema>=4.20,<5",
+]
+
+[project.optional-dependencies]
+dev = [
+  "hypothesis>=6.100,<7",
+  "pytest>=8,<9",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

@@ -1,0 +1,550 @@
+diff --git a/carla_bridge/actor/ego_vehicle.py b/carla_bridge/actor/ego_vehicle.py
+index 36bcea7..f53b8c3 100644
+--- a/carla_bridge/actor/ego_vehicle.py
++++ b/carla_bridge/actor/ego_vehicle.py
+@@ -10,6 +10,7 @@
+ Classes to handle Carla vehicles
+ """
+ import math
++import os
+ 
+ import numpy as np
+ import carla
+@@ -53,6 +54,7 @@ class EgoVehicle(Vehicle):
+         self.vehicle_info_writed = False
+         self.vehicle_control_override = False
+         self.vehicle_loc_set = False
++        self.filtered_linear_acceleration = np.zeros(3)
+         
+         self.right_turn_ratio = 0.7
+         self.left_turn_ratio = 0.85
+@@ -71,16 +73,26 @@ class EgoVehicle(Vehicle):
+             qos_depth=10)
+         self.tf_writer = node.new_writer("/tf", TransformStampeds)
+ 
++        configured_control_topic = self.node.carla_parameters.get(
++            "control_input_topic", "/apollo/control"
++        )
++        self.control_input_topic = os.environ.get(
++            "CARLA_BRIDGE_CONTROL_TOPIC", configured_control_topic
++        )
++        print(
++            "ego_control_input_topic={}".format(self.control_input_topic),
++            flush=True,
++        )
+         self.control_reader = node.new_reader(
+-            "/apollo/control",
++            self.control_input_topic,
+             ControlCommand,
+             lambda data: self.control_command_updated(data, manual_override=False))
+ 
+-    def get_tf_msg(self):
++    def get_tf_msg(self, timestamp):
+         pose = self.get_current_cyber_pose()
+ 
+         tf_msg = TransformStamped()
+-        tf_msg.header.timestamp_sec = self.node.get_time()
++        tf_msg.header.timestamp_sec = timestamp
+         tf_msg.header.frame_id = 'world'
+         tf_msg.child_frame_id = 'localization'
+ 
+@@ -95,14 +107,14 @@ class EgoVehicle(Vehicle):
+ 
+         return tf_msg
+ 
+-    def send_vehicle_msgs(self):
++    def send_vehicle_msgs(self, timestamp):
+         """
+         send messages related to vehicle status
+ 
+         :return:
+         """
+         vehicle_chassis = Chassis()
+-        vehicle_chassis.header.timestamp_sec = self.node.get_time()
++        vehicle_chassis.header.timestamp_sec = timestamp
+         vehicle_chassis.header.frame_id = 'ego_vehicle'
+         vehicle_chassis.engine_started = True
+         vehicle_chassis.speed_mps = self.get_vehicle_speed_abs(self.carla_actor)
+@@ -122,18 +134,18 @@ class EgoVehicle(Vehicle):
+                             carla.Rotation(pitch=-45, yaw=transform.rotation.yaw)))
+ 
+         tf_stampeds = TransformStampeds()
+-        tf_stampeds.transforms.append(self.get_tf_msg())
++        tf_stampeds.transforms.append(self.get_tf_msg(timestamp))
+         self.tf_writer.write(tf_stampeds)
+-        self.write_localization()
++        self.write_localization(timestamp)
+     
+-    def write_localization(self):
++    def write_localization(self, timestamp):
+         transform = self.carla_actor.get_transform()
+         linear_vel = self.carla_actor.get_velocity()
+         angular_vel = self.carla_actor.get_angular_velocity()
+         accel = self.carla_actor.get_acceleration()
+ 
+         localization_estimate = LocalizationEstimate()
+-        localization_estimate.header.timestamp_sec = self.node.get_time()
++        localization_estimate.header.timestamp_sec = timestamp
+         localization_estimate.header.frame_id = "novatel"
+ 
+         cyber_pose = trans.carla_transform_to_cyber_pose(transform)
+@@ -156,6 +168,19 @@ class EgoVehicle(Vehicle):
+         localization_estimate.pose.angular_velocity.z = cyber_twist.angular.z
+ 
+         cyber_line_accel = trans.carla_acceleration_to_cyber_accel(accel)
++        conversion = self.node.carla_parameters.get("control_conversion", {})
++        accel_alpha = float(conversion.get("localization_accel_alpha", 1.0))
++        raw_acceleration = np.array(
++            [cyber_line_accel.linear.x, cyber_line_accel.linear.y,
++             cyber_line_accel.linear.z]
++        )
++        self.filtered_linear_acceleration = (
++            accel_alpha * raw_acceleration
++            + (1.0 - accel_alpha) * self.filtered_linear_acceleration
++        )
++        cyber_line_accel.linear.x = self.filtered_linear_acceleration[0]
++        cyber_line_accel.linear.y = self.filtered_linear_acceleration[1]
++        cyber_line_accel.linear.z = self.filtered_linear_acceleration[2]
+         localization_estimate.pose.linear_acceleration.x = cyber_line_accel.linear.x
+         localization_estimate.pose.linear_acceleration.y = cyber_line_accel.linear.y
+         localization_estimate.pose.linear_acceleration.z = cyber_line_accel.linear.z
+@@ -211,7 +236,7 @@ class EgoVehicle(Vehicle):
+ 
+         :return:
+         """
+-        self.send_vehicle_msgs()
++        self.send_vehicle_msgs(timestamp)
+         super(EgoVehicle, self).update(frame, timestamp)
+ 
+     def destroy(self):
+@@ -248,18 +273,24 @@ class EgoVehicle(Vehicle):
+         """
+         if manual_override == self.vehicle_control_override:
+             vehicle_control = VehicleControl()
+-            vehicle_control.throttle = cyber_vehicle_control.throttle / 100.0
+-            vehicle_control.brake = cyber_vehicle_control.brake / 100.0
+-            rate = cyber_vehicle_control.steering_rate / 100.0
++            conversion = self.node.carla_parameters.get("control_conversion", {})
++            throttle_gain = float(conversion.get("throttle_gain", 1.0))
++            brake_gain = float(conversion.get("brake_gain", 1.0))
++            vehicle_control.throttle = min(
++                1.0, max(0.0, cyber_vehicle_control.throttle * throttle_gain / 100.0)
++            )
++            vehicle_control.brake = min(
++                1.0, max(0.0, cyber_vehicle_control.brake * brake_gain / 100.0)
++            )
+             if cyber_vehicle_control.steering_target < 0:
+-                cyber_vehicle_control.steering_target = (
++                steering_target = (
+                         cyber_vehicle_control.steering_target * self.right_turn_ratio
+                 )
+             else:
+-                cyber_vehicle_control.steering_target = (
++                steering_target = (
+                         cyber_vehicle_control.steering_target * self.left_turn_ratio
+                 )
+-            vehicle_control.steer = -cyber_vehicle_control.steering_target / 100.0
++            vehicle_control.steer = -steering_target / 100.0
+             vehicle_control.hand_brake = cyber_vehicle_control.parking_brake
+             vehicle_control.reverse = cyber_vehicle_control.gear_location == Chassis.GearPosition.GEAR_REVERSE
+             self.carla_actor.apply_control(vehicle_control)
+diff --git a/carla_bridge/actor/traffic.py b/carla_bridge/actor/traffic.py
+index daa0cb4..0e224cc 100755
+--- a/carla_bridge/actor/traffic.py
++++ b/carla_bridge/actor/traffic.py
+@@ -15,7 +15,7 @@ from modules.common_msgs.perception_msgs.traffic_light_detection_pb2 import (
+     TrafficLight as ApolloTrafficLight,
+ )
+ 
+-from actor.actor import Actor
++from carla_bridge.actor.actor import Actor
+ 
+ 
+ class Traffic(Actor):
+diff --git a/carla_bridge/carla_api/controller.py b/carla_bridge/carla_api/controller.py
+index 0c069f8..9364de6 100644
+--- a/carla_bridge/carla_api/controller.py
++++ b/carla_bridge/carla_api/controller.py
+@@ -11,7 +11,7 @@ from collections import deque
+ import carla
+ import numpy as np
+ 
+-from carla_api.misc import get_speed
++from carla_bridge.carla_api.misc import get_speed
+ 
+ 
+ # pylint: disable=C0103
+diff --git a/carla_bridge/carla_api/global_route_planner.py b/carla_bridge/carla_api/global_route_planner.py
+index 90e9ac1..c9b1ba1 100644
+--- a/carla_bridge/carla_api/global_route_planner.py
++++ b/carla_bridge/carla_api/global_route_planner.py
+@@ -14,8 +14,8 @@ import carla
+ import networkx as nx
+ import numpy as np
+ 
+-from carla_api.local_planner import RoadOption
+-from carla_api.misc import vector
++from carla_bridge.carla_api.local_planner import RoadOption
++from carla_bridge.carla_api.misc import vector
+ 
+ 
+ class GlobalRoutePlanner(object):
+diff --git a/carla_bridge/carla_api/local_planner.py b/carla_bridge/carla_api/local_planner.py
+index 284cea9..43e15af 100644
+--- a/carla_bridge/carla_api/local_planner.py
++++ b/carla_bridge/carla_api/local_planner.py
+@@ -11,8 +11,8 @@ from enum import Enum
+ 
+ import carla
+ 
+-from carla_api.controller import VehiclePIDController
+-from carla_api.misc import draw_waypoints, get_speed
++from carla_bridge.carla_api.controller import VehiclePIDController
++from carla_bridge.carla_api.misc import draw_waypoints, get_speed
+ 
+ 
+ class RoadOption(Enum):
+diff --git a/carla_bridge/config/objects.json b/carla_bridge/config/objects.json
+index 61d5fd7..1e2e2f6 100755
+--- a/carla_bridge/config/objects.json
++++ b/carla_bridge/config/objects.json
+@@ -1,74 +1,12 @@
+ {
+     "objects":
+     [
+-        {
+-            "type": "sensor.pseudo.traffic_lights",
+-            "id": "traffic_lights"
+-        },
+         {
+             "type": "vehicle.lincoln.mkz_2017",
+             "id": "ego_vehicle",
++            "spawn_point": {"x": 202.550003, "y": -59.330017, "z": 0.3, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
+             "sensors":
+             [
+-                {
+-                    "type": "sensor.camera.rgb",
+-                    "id": "front_6mm",
+-                    "spawn_point": {"x": 2.0, "y": 0.0, "z": 2.0, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
+-                    "image_size_x": 800,
+-                    "image_size_y": 600,
+-                    "fov": 90.0,
+-                    "fstop": 8.0
+-                },
+-                {
+-                    "type": "sensor.camera.rgb",
+-                    "id": "front_12mm",
+-                    "spawn_point": {"x": 2.5, "y": 0.0, "z": 2.8, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
+-                    "image_size_x": 800,
+-                    "image_size_y": 600,
+-                    "focal_distance": 2000,
+-                    "fov": 90.0,
+-                    "fstop": 8.0
+-                },
+-                {
+-                    "type": "sensor.lidar.ray_cast",
+-                    "id": "lidar128",
+-                    "spawn_point": {"x": 0.0, "y": 0.0, "z": 2.4, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
+-                    "range": 50,
+-                    "channels": 128,
+-                    "points_per_second": 320000,
+-                    "upper_fov": 2.0,
+-                    "lower_fov": -26.8,
+-                    "rotation_frequency": 20,
+-                    "noise_stddev": 0.0
+-                },
+-                {
+-                    "type": "sensor.other.radar",
+-                    "id": "radar/front",
+-                    "spawn_point": {"x": 2.0, "y": 0.0, "z": 2.0, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
+-                    "horizontal_fov": 30.0,
+-                    "vertical_fov": 10.0,
+-                    "points_per_second": 1500,
+-                    "range": 100.0
+-                },
+-                {
+-                    "type": "sensor.other.gnss",
+-                    "id": "gnss",
+-                    "spawn_point": {"x": 1.0, "y": 0.0, "z": 2.0},
+-                    "noise_alt_stddev": 0.0, "noise_lat_stddev": 0.0, "noise_lon_stddev": 0.0,
+-                    "noise_alt_bias": 0.0, "noise_lat_bias": 0.0, "noise_lon_bias": 0.0
+-                },
+-                {
+-                    "type": "sensor.other.imu",
+-                    "id": "gnss/imu",
+-                    "spawn_point": {"x": 2.0, "y": 0.0, "z": 2.0, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
+-                    "noise_accel_stddev_x": 0.0, "noise_accel_stddev_y": 0.0, "noise_accel_stddev_z": 0.0,
+-                    "noise_gyro_stddev_x": 0.0, "noise_gyro_stddev_y": 0.0, "noise_gyro_stddev_z": 0.0,
+-                    "noise_gyro_bias_x": 0.0, "noise_gyro_bias_y": 0.0, "noise_gyro_bias_z": 0.0
+-                },
+-                {
+-                    "type": "sensor.pseudo.objects",
+-                    "id": "obstacles"
+-                }
+             ]
+         }
+     ]
+diff --git a/carla_bridge/config/settings.yaml b/carla_bridge/config/settings.yaml
+index 00b3ff1..3d53d12 100755
+--- a/carla_bridge/config/settings.yaml
++++ b/carla_bridge/config/settings.yaml
+@@ -1,12 +1,17 @@
+ carla:
+-  host: '172.17.0.1'
++  host: '127.0.0.1'
+   port: 2000
+   timeout: 30
+   passive: False
+   synchronous_mode: True
+   synchronous_mode_wait_for_vehicle_control_command: False
+   fixed_delta_seconds: 0.05
+-  register_all_sensors: True
++  realtime_factor: 1.0
++  register_all_sensors: False
+   town: 'Town01'
+   ego_vehicle:
+     role_name: ["hero", "ego_vehicle"]
++  control_conversion:
++    throttle_gain: 1.5
++    brake_gain: 1.0
++    localization_accel_alpha: 0.0
+diff --git a/carla_bridge/core/actor_factory.py b/carla_bridge/core/actor_factory.py
+index 11f3df0..104cf7f 100755
+--- a/carla_bridge/core/actor_factory.py
++++ b/carla_bridge/core/actor_factory.py
+@@ -16,13 +16,7 @@ from carla_bridge.actor.static import Static
+ from carla_bridge.actor.traffic import TrafficLight, Traffic
+ from carla_bridge.actor.vehicle import Vehicle
+ from carla_bridge.actor.walker import Walker
+-from carla_bridge.sensor.camera import RgbCamera, DepthCamera, SemanticSegmentationCamera, DVSCamera, Camera
+-from carla_bridge.sensor.gnss import Gnss
+-from carla_bridge.sensor.imu import ImuSensor
+-from carla_bridge.sensor.lidar import Lidar, SemanticLidar
+ from carla_bridge.sensor.object_sensor import ObjectSensor
+-from carla_bridge.sensor.radar import Radar
+-from carla_bridge.sensor.sensor import Sensor
+ from carla_bridge.sensor.traffic_lights_sensor import TrafficLightsSensor
+ 
+ try:
+@@ -313,6 +307,13 @@ class ActorFactory(object):
+                 actor = Vehicle(uid, name, parent, self.node, carla_actor)
+         elif carla_actor.type_id.startswith("sensor"):
+             if carla_actor.type_id.startswith("sensor.camera"):
++                from carla_bridge.sensor.camera import (
++                    Camera,
++                    DVSCamera,
++                    DepthCamera,
++                    RgbCamera,
++                    SemanticSegmentationCamera,
++                )
+                 if carla_actor.type_id.startswith("sensor.camera.rgb"):
+                     actor = RgbCamera(uid, name, parent, spawn_pose, self.node,
+                                       carla_actor, self.sync_mode)
+@@ -332,6 +333,7 @@ class ActorFactory(object):
+                     actor = Camera(uid, name, parent, spawn_pose, self.node,
+                                    carla_actor, self.sync_mode)
+             elif carla_actor.type_id.startswith("sensor.lidar"):
++                from carla_bridge.sensor.lidar import Lidar, SemanticLidar
+                 if carla_actor.type_id.endswith("sensor.lidar.ray_cast"):
+                     actor = Lidar(uid, name, parent, spawn_pose, self.node,
+                                   carla_actor, self.sync_mode)
+@@ -341,15 +343,19 @@ class ActorFactory(object):
+                                           self.node, carla_actor,
+                                           self.sync_mode)
+             elif carla_actor.type_id.startswith("sensor.other.radar"):
++                from carla_bridge.sensor.radar import Radar
+                 actor = Radar(uid, name, parent, spawn_pose, self.node,
+                               carla_actor, self.sync_mode)
+             elif carla_actor.type_id.startswith("sensor.other.gnss"):
++                from carla_bridge.sensor.gnss import Gnss
+                 actor = Gnss(uid, name, parent, spawn_pose, self.node,
+                              carla_actor, self.sync_mode)
+             elif carla_actor.type_id.startswith("sensor.other.imu"):
++                from carla_bridge.sensor.imu import ImuSensor
+                 actor = ImuSensor(uid, name, parent, spawn_pose, self.node,
+                                   carla_actor, self.sync_mode)
+             else:
++                from carla_bridge.sensor.sensor import Sensor
+                 actor = Sensor(uid, name, parent, spawn_pose, self.node,
+                                carla_actor, self.sync_mode)
+         elif carla_actor.type_id.startswith("spectator"):
+diff --git a/carla_bridge/core/geometry.py b/carla_bridge/core/geometry.py
+index 3907741..5d77d62 100644
+--- a/carla_bridge/core/geometry.py
++++ b/carla_bridge/core/geometry.py
+@@ -1,14 +1,13 @@
+-from modules.data.proto.frame_pb2 import Vector3
++from modules.common_msgs.basic_msgs.geometry_pb2 import Point3D
+ 
+ 
+ class Twist:
+ 	def __init__(self):
+-		self.linear = Vector3()
+-		self.angular = Vector3()
++		self.linear = Point3D()
++		self.angular = Point3D()
+ 
+ 
+ class Accel:
+ 	def __init__(self):
+-		self.linear = Vector3()
+-		self.angular = Vector3()
+-		
+\ No newline at end of file
++		self.linear = Point3D()
++		self.angular = Point3D()
+diff --git a/carla_bridge/core/node.py b/carla_bridge/core/node.py
+index 9ee83f0..95afe1c 100755
+--- a/carla_bridge/core/node.py
++++ b/carla_bridge/core/node.py
+@@ -7,7 +7,7 @@
+ # For a copy, see <https://opensource.org/licenses/MIT>.
+ #
+ """cyber node wraper"""
+-from cyber_py3 import cyber, cyber_time, cyber_timer, parameter
++from cyber.python.cyber_py3 import cyber, cyber_time, cyber_timer, parameter
+ 
+ 
+ class CyberNode(object):
+diff --git a/carla_bridge/main.py b/carla_bridge/main.py
+index 52b47fe..6748047 100644
+--- a/carla_bridge/main.py
++++ b/carla_bridge/main.py
+@@ -6,6 +6,7 @@
+ import os
+ import sys
+ import threading
++import time
+ from threading import Event, Thread
+ 
+ import carla
+@@ -84,14 +85,14 @@ class CarlaCyberBridge(CyberNode):
+             self.synchronous_mode_update_thread = Thread(
+                 target=self._synchronous_mode_update
+             )
+-            self.synchronous_mode_update_thread.daemo = True
++            self.synchronous_mode_update_thread.daemon = True
+             self.synchronous_mode_update_thread.start()
+         self._registered_actors = []
+ 
+         carla_spawn_objects_thread = threading.Thread(
+             target=self.carla_spawn_objects
+         )
+-        carla_spawn_objects_thread.daemo = True
++        carla_spawn_objects_thread.daemon = True
+         carla_spawn_objects_thread.start()
+         self.spin()
+ 
+@@ -117,6 +118,11 @@ class CarlaCyberBridge(CyberNode):
+         """
+         execution loop for synchronous mode
+         """
++        realtime_factor = float(self.carla_parameters.get("realtime_factor", 0.0))
++        wall_period = 0.0
++        if realtime_factor > 0.0:
++            wall_period = self.carla_settings.fixed_delta_seconds / realtime_factor
++        next_tick_at = time.monotonic()
+         while not self.shutdown.is_set():
+             frame = self.carla_world.tick()
+ 
+@@ -125,6 +131,13 @@ class CarlaCyberBridge(CyberNode):
+             self.update_clock(world_snapshot.timestamp)
+             self._update(frame, world_snapshot.timestamp.elapsed_seconds)
+             self.actor_factory.update_available_objects()
++            if wall_period > 0.0:
++                next_tick_at += wall_period
++                remaining = next_tick_at - time.monotonic()
++                if remaining > 0.0:
++                    self.shutdown.wait(remaining)
++                elif remaining < -wall_period:
++                    next_tick_at = time.monotonic()
+ 
+     def _update(self, frame_id, timestamp):
+         """
+@@ -142,12 +155,12 @@ class CarlaCyberBridge(CyberNode):
+         :return:
+         """
+         if self.ok():
+-            self.timestamp = self.get_timestamp(
+-                carla_timestamp.elapsed_seconds, from_sec=True
+-            )
+-            self.clock_writer.write(
+-                Clock(clock=int(self.timestamp["secs"]))
+-            )
++            clock_nsec = int(round(carla_timestamp.elapsed_seconds * 1_000_000_000))
++            self.timestamp = {
++                "secs": clock_nsec // 1_000_000_000,
++                "nsecs": clock_nsec % 1_000_000_000,
++            }
++            self.clock_writer.write(Clock(clock=clock_nsec))
+ 
+     def destroy(self):
+         """
+@@ -193,8 +206,10 @@ def main():
+         )
+         carla_client.set_timeout(carla_parameters["timeout"])
+ 
+-        carla_client.load_world(carla_parameters["town"])
+         carla_world = carla_client.get_world()
++        requested_town = carla_parameters["town"]
++        if not carla_world.get_map().name.endswith("/" + requested_town):
++            carla_world = carla_client.load_world(requested_town, reset_settings=True)
+ 
+         log.info(f"Connect to {carla_parameters['host']}:{carla_parameters['port']} successfully.")
+ 
+@@ -207,17 +222,17 @@ def main():
+     except Exception as e:  # pylint: disable=W0718
+         log.error(e)
+     finally:
+-        carla_world = carla_client.get_world()
+-        settings = carla_world.get_settings()
+-        settings.synchronous_mode = False
+-        settings.fixed_delta_seconds = None
+-        carla_world.apply_settings(settings)
+         log.warning("Shutting down.")
+         if carla_bridge.shutdown :
+             carla_bridge.shutdown.set()
+-        carla_bridge.destroy()
+-        del carla_world
+-        del carla_client
++        if carla_bridge.actor_factory is not None:
++            carla_bridge.destroy()
++        if carla_client is not None:
++            carla_world = carla_client.get_world()
++            settings = carla_world.get_settings()
++            settings.synchronous_mode = False
++            settings.fixed_delta_seconds = None
++            carla_world.apply_settings(settings)
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/carla_bridge/utils/transforms.py b/carla_bridge/utils/transforms.py
+index 2813461..10658f7 100755
+--- a/carla_bridge/utils/transforms.py
++++ b/carla_bridge/utils/transforms.py
+@@ -17,7 +17,6 @@ import numpy
+ from modules.common_msgs.basic_msgs.geometry_pb2 import Point3D, PointENU, Quaternion
+ from modules.common_msgs.localization_msgs.pose_pb2 import Pose
+ from modules.common_msgs.transform_msgs.transform_pb2 import Transform
+-from modules.data.proto.frame_pb2 import Vector3
+ from transforms3d.euler import euler2mat, euler2quat, quat2euler
+ from transforms3d.quaternions import mat2quat, quat2mat
+ 
+@@ -51,7 +50,7 @@ def carla_location_to_cyber_vector3(carla_location):
+     :return: a Cyber Vector3
+     :rtype: Vector3
+     """
+-    cyber_translation = Vector3()
++    cyber_translation = Point3D()
+     cyber_translation.x = carla_location.x
+     cyber_translation.y = -carla_location.y
+     cyber_translation.z = carla_location.z
+@@ -189,7 +188,7 @@ def carla_vector_to_cyber_vector_rotated(carla_vector, carla_rotation):
+     tmp_array = rotation_matrix.dot(
+         numpy.array([carla_vector.x, carla_vector.y, carla_vector.z])
+     )
+-    cyber_vector = Vector3()
++    cyber_vector = Point3D()
+     cyber_vector.x = tmp_array[0]
+     cyber_vector.y = -tmp_array[1]
+     cyber_vector.z = tmp_array[2]

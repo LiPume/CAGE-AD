@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "g0_status": "APOLLO_GO",
+  "source_only": true,
+  "runtime_included": false,
+  "primary_artifacts": [
+    "APOLLO_G0_REPORT.md",
+    "APOLLO_G0_RUNBOOK.md",
+    "BRIDGE_INTEGRATION_AUDIT.md",
+    "versions.lock.yaml",
+    "SOURCE_PROVENANCE.yaml"
+  ],
+  "runtime_evidence_root": "CAGE_STATE_ROOT parent / evidence",
+  "claim_boundary": "This index proves source handoff completeness, not a standalone Apollo/CARLA installation."
+}

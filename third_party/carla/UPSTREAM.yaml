@@ -1,0 +1,9 @@
+schema_version: 1
+name: CARLA packaged release
+repository: https://github.com/carla-simulator/carla
+release: "0.9.15"
+license: MIT
+archive: CARLA_0.9.15.tar.gz
+archive_bytes: 8386636048
+archive_sha256: 7b2f432ce74b251593f95dcc8dee6d99ad9625c2a71a2d6d48f24d879de19ef7
+redistribution: Not included in this source-only repository.

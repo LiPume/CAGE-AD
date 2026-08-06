@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cage-ad.local/contracts/run_manifest.schema.json",
+  "title": "CAGE-AD run manifest v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scenario_id", "seed", "fault", "versions", "permissions", "artifacts", "checks", "result"],
+  "properties": {
+    "schema_version": {"const": "run_manifest_v0"},
+    "scenario_id": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "fault": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "responsibility_domain", "start_time", "private_during_diagnosis"],
+      "properties": {
+        "type": {"type": "string"},
+        "responsibility_domain": {"type": "string"},
+        "start_time": {"type": "number"},
+        "private_during_diagnosis": {"const": true}
+      }
+    },
+    "versions": {"type": "object", "minProperties": 5},
+    "permissions": {
+      "type": "object",
+      "required": ["observation", "intervention", "diagnosis_uid", "oracle_uid"],
+      "properties": {
+        "observation": {"const": "L1"},
+        "intervention": {"const": "R2_non_GT_semantic_replacement"},
+        "diagnosis_uid": {"type": "integer"},
+        "oracle_uid": {"type": "integer"}
+      }
+    },
+    "artifacts": {"type": "object", "minProperties": 5},
+    "checks": {"type": "object", "minProperties": 7},
+    "result": {"enum": ["PASS", "FAIL"]}
+  }
+}
