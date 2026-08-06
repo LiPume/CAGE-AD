@@ -83,7 +83,7 @@ class ScenarioRuntime:
         forward = transform.get_forward_vector()
         right = transform.get_right_vector()
         scenario = self.config["scenario_kind"]
-        longitudinal = 22.0 if scenario == "lead_vehicle_deceleration" else 20.0
+        longitudinal = 30.0 if scenario == "lead_vehicle_deceleration" else 25.0
         lateral = 0.0 if scenario == "lead_vehicle_deceleration" else -3.5
         location = transform.location + forward * longitudinal + right * lateral
         location.z += 0.5
@@ -98,10 +98,10 @@ class ScenarioRuntime:
     def intended_state(self, elapsed: float, horizon: float) -> tuple[float, float]:
         future = elapsed + horizon
         if self.config["scenario_kind"] == "lead_vehicle_deceleration":
-            speed = 4.0 if future < 5.0 else max(0.0, 4.0 - (future - 5.0) * 2.0)
+            speed = 5.0 if future < 6.0 else max(0.0, 5.0 - (future - 6.0) * 3.0)
             return speed, 0.0
-        longitudinal = 2.5
-        lateral = 0.0 if future < 4.0 else min(1.2, (future - 4.0) * 0.45)
+        longitudinal = 3.0
+        lateral = 0.0 if future < 3.0 else min(1.5, (future - 3.0) * 0.6)
         return longitudinal, lateral
 
     def drive_actor(self, elapsed: float, active: bool) -> None:

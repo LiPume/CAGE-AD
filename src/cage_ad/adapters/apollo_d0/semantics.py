@@ -56,7 +56,7 @@ def forecast_fault(points: list[MotionPoint], mechanism: FaultMechanism) -> list
         anchor = points[0]
         return [replace(point, x=anchor.x, y=anchor.y, speed=0.0) for point in points]
     if mechanism == FaultMechanism.FORECAST_HEADING_BIAS:
-        bias = math.radians(35)
+        bias = math.radians(75)
         if not points:
             return []
         origin = points[0]
@@ -94,10 +94,10 @@ def constant_velocity_probe(points: list[MotionPoint]) -> list[MotionPoint]:
 
 def planning_fault(points: list[MotionPoint], mechanism: FaultMechanism) -> list[MotionPoint]:
     if mechanism == FaultMechanism.PLAN_CONSTRAINT_OMITTED:
-        return [replace(point, speed=max(point.speed, 6.0), acceleration=max(point.acceleration, 0.0)) for point in points]
+        return [replace(point, speed=max(point.speed, 10.0), acceleration=max(point.acceleration, 1.5)) for point in points]
     if mechanism == FaultMechanism.PLAN_UNSAFE_SPEED_BIAS:
         return [
-            replace(point, speed=min(15.0, point.speed * 1.8 + 1.0), acceleration=point.acceleration + 0.8)
+            replace(point, speed=min(18.0, point.speed * 3.0 + 3.0), acceleration=point.acceleration + 1.5)
             for point in points
         ]
     raise ValueError("mechanism is not a planning fault")
@@ -122,8 +122,8 @@ def control_fault(target: ControlTarget, mechanism: FaultMechanism) -> ControlTa
     if mechanism == FaultMechanism.CONTROL_GAIN_BIAS:
         return replace(
             target,
-            throttle_pct=min(100.0, target.throttle_pct * 1.7 + 8.0),
-            brake_pct=max(0.0, target.brake_pct * 0.15),
+            throttle_pct=min(100.0, target.throttle_pct * 2.5 + 20.0),
+            brake_pct=0.0,
             steering_pct=max(-35.0, min(35.0, target.steering_pct * 0.6)),
         )
     raise ValueError("transport delay is implemented by the runtime queue")

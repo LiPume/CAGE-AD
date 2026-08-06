@@ -109,6 +109,7 @@ class BoundaryInterposer:
         self.started_sim = None
         self.diagnostic_started_sim = None
         self.delayed_controls = deque()
+        self.delayed_predictions = deque()
         self.counters = {
             "prediction_in": 0,
             "prediction_out": 0,
@@ -176,13 +177,26 @@ class BoundaryInterposer:
             output.CopyFrom(message)
             before = prediction_points(message)
             after = before
-            if self.mechanism in {
-                FaultMechanism.FORECAST_STALE,
-                FaultMechanism.FORECAST_HEADING_BIAS,
-            }:
+            if self.mechanism == FaultMechanism.FORECAST_STALE:
+                delayed = PredictionObstacles()
+                delayed.CopyFrom(message)
+                now = self.sim_time or message.header.timestamp_sec
+                self.delayed_predictions.append((now, delayed))
+                target = now - 2.0
+                while (
+                    len(self.delayed_predictions) > 1
+                    and self.delayed_predictions[1][0] <= target
+                ):
+                    self.delayed_predictions.popleft()
+                if self.delayed_predictions[0][0] <= target:
+                    output.CopyFrom(self.delayed_predictions[0][1])
+                after = prediction_points(output)
+                self.counters["fault_applications"] += 1
+            elif self.mechanism == FaultMechanism.FORECAST_HEADING_BIAS:
                 after = forecast_fault(before, self.mechanism)
                 self.counters["fault_applications"] += 1
             if self.probe_active("interaction_forecasting"):
+                output.CopyFrom(message)
                 after = constant_velocity_probe(before)
                 self.counters["probe_applications"] += 1
             set_prediction_points(output, after)

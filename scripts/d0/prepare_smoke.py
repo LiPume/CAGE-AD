@@ -107,9 +107,9 @@ def main() -> None:
                         "schema_version": 1,
                         "fault_mechanism": fault,
                         "probe_domain": probe,
-                        "probe_start_s": 8.0,
-                        "probe_duration_s": 3.0,
-                        "control_delay_s": 1.5,
+                        "probe_start_s": 6.0,
+                        "probe_duration_s": 10.0,
+                        "control_delay_s": 3.5,
                     },
                     0o600,
                 )
