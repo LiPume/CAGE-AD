@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import signal
 import subprocess
 import time
 
@@ -17,6 +18,20 @@ def atomic_json(path: Path, value: dict, mode: int = 0o640) -> None:
     temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
     os.chmod(temporary, mode)
     os.replace(temporary, path)
+
+
+def run_isolated(command: list[str], cwd: Path, env: dict[str, str]) -> int:
+    process = subprocess.Popen(command, cwd=cwd, env=env, start_new_session=True)
+    try:
+        return process.wait(timeout=180)
+    except subprocess.TimeoutExpired:
+        os.killpg(process.pid, signal.SIGINT)
+        try:
+            process.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            os.killpg(process.pid, signal.SIGKILL)
+            process.wait()
+        return 124
 
 
 def main() -> None:
@@ -53,10 +68,16 @@ def main() -> None:
         for role, run_id in oracle["runs"].items():
             status_path = args.state_root / "runs" / args.batch_id / f"{run_id}.status"
             metrics_path = private_batch / run_id / "run_metrics.json"
+            scenario_stats = private_batch / run_id / "scenario_stats.json"
+            interposer_stats = private_batch / run_id / "interposer_stats.json"
+            retained = args.data_root / args.batch_id / oracle["episode_id"] / "retained" / f"{run_id}.json"
             already_pass = (
                 status_path.exists()
                 and status_path.read_text().splitlines()[0] == "status=PASS"
                 and metrics_path.exists()
+                and scenario_stats.exists()
+                and interposer_stats.exists()
+                and retained.exists()
             )
             if already_pass:
                 outcome = "SKIP_ALREADY_PASS"
@@ -67,8 +88,7 @@ def main() -> None:
                     oracle["episode_id"],
                     run_id,
                 ]
-                completed = subprocess.run(command, cwd=args.repo_root, env=env, check=False)
-                returncode = completed.returncode
+                returncode = run_isolated(command, args.repo_root, env)
                 outcome = "PASS" if returncode == 0 else "FAIL"
             checkpoint["runs"][run_id] = {
                 "episode_id": oracle["episode_id"],

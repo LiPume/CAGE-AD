@@ -208,9 +208,6 @@ class ScenarioRuntime:
             self.frames += 1
 
     def close(self) -> None:
-        # Stop callback dispatch before acquiring the shared callback lock.
-        # Acquiring first can starve forever while /clock continues at 20 Hz.
-        cyber.shutdown()
         with self.lock:
             if self.actor is not None:
                 self.actor.destroy()
@@ -242,6 +239,10 @@ def main() -> None:
     while not runtime.stopping.wait(0.2):
         pass
     runtime.close()
+    # Cyber's CPython teardown can race its callback threads and segfault.
+    # State is already atomically persisted and the per-run server reset owns
+    # actor cleanup, so bypass interpreter/global-library destructors.
+    os._exit(0)
 
 
 if __name__ == "__main__":

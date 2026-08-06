@@ -274,9 +274,6 @@ class BoundaryInterposer:
                 )
 
     def close(self) -> None:
-        # Stop callback dispatch before taking the callback lock; otherwise a
-        # live /clock stream can prevent graceful process termination.
-        cyber.shutdown()
         with self.lock:
             atomic_json(self.capture_path, self.capture)
             atomic_json(
@@ -306,6 +303,7 @@ def main() -> None:
     while not runtime.stopping.wait(0.2):
         pass
     runtime.close()
+    os._exit(0)
 
 
 if __name__ == "__main__":

@@ -120,29 +120,31 @@ def main() -> None:
     started = time.monotonic()
     snapshot = world.get_snapshot()
     sim_started = snapshot.timestamp.elapsed_seconds
-    while time.monotonic() - started < args.duration:
-        snapshot = world.wait_for_tick(2)
-        ego_location = ego.get_location()
-        actor_location = interaction.get_location()
-        ego_velocity = ego.get_velocity()
-        actor_velocity = interaction.get_velocity()
-        separation = ego_location.distance(actor_location)
-        relative_x = actor_location.x - ego_location.x
-        closing_speed = ego_velocity.x - actor_velocity.x
-        ttc = relative_x / closing_speed if relative_x > 0 and closing_speed > 0.05 else None
-        samples.append(
-            {
-                "t": round(time.monotonic() - started, 3),
-                "ego_speed_mps": round(math.hypot(ego_velocity.x, ego_velocity.y), 6),
-                "actor_speed_mps": round(math.hypot(actor_velocity.x, actor_velocity.y), 6),
-                "separation_m": round(separation, 6),
-                "ttc_s": None if ttc is None else round(ttc, 6),
-            }
-        )
-        frames.append(snapshot.frame)
+    try:
+        while time.monotonic() - started < args.duration:
+            snapshot = world.wait_for_tick(5)
+            ego_location = ego.get_location()
+            actor_location = interaction.get_location()
+            ego_velocity = ego.get_velocity()
+            actor_velocity = interaction.get_velocity()
+            separation = ego_location.distance(actor_location)
+            relative_x = actor_location.x - ego_location.x
+            closing_speed = ego_velocity.x - actor_velocity.x
+            ttc = relative_x / closing_speed if relative_x > 0 and closing_speed > 0.05 else None
+            samples.append(
+                {
+                    "t": round(time.monotonic() - started, 3),
+                    "ego_speed_mps": round(math.hypot(ego_velocity.x, ego_velocity.y), 6),
+                    "actor_speed_mps": round(math.hypot(actor_velocity.x, actor_velocity.y), 6),
+                    "separation_m": round(separation, 6),
+                    "ttc_s": None if ttc is None else round(ttc, 6),
+                }
+            )
+            frames.append(snapshot.frame)
+    finally:
+        sensor.stop()
+        sensor.destroy()
     final = ego.get_transform()
-    sensor.stop()
-    sensor.destroy()
     frame_gaps = [right - left for left, right in zip(frames, frames[1:])]
     criteria = {
         "route_success": route["success"] and route["roads"] > 0,

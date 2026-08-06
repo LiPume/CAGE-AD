@@ -19,7 +19,11 @@ LOG_ROOT="${CAGE_STATE_ROOT}/logs/${BATCH_ID}/${RUN_ID}"
 RESULT="${PRIVATE_RUN}/run_metrics.json"
 STATUS="${CAGE_STATE_ROOT}/runs/${BATCH_ID}/${RUN_ID}.status"
 
-if [[ -s "${STATUS}" ]] && grep -qx 'status=PASS' "${STATUS}" && [[ -s "${RESULT}" ]]; then
+if [[ -s "${STATUS}" ]] && grep -qx 'status=PASS' "${STATUS}" \
+  && [[ -s "${RESULT}" ]] \
+  && [[ -s "${PRIVATE_RUN}/scenario_stats.json" ]] \
+  && [[ -s "${PRIVATE_RUN}/interposer_stats.json" ]] \
+  && [[ -s "${RETAINED_ROOT}/${RUN_ID}.json" ]]; then
   echo "smoke_run=SKIP_ALREADY_PASS run_id=${RUN_ID}"
   exit 0
 fi
@@ -81,6 +85,33 @@ stop_d0_runtime() {
   return 1
 }
 
+stop_carla_runtime() {
+  local pid
+  "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_server.sh" stop || true
+  while read -r pid; do
+    [[ -n "${pid}" ]] || continue
+    kill -TERM "${pid}" 2>/dev/null || true
+  done < <(pgrep -f '/CarlaUE4-Linux-Shipping .*carla-rpc-port=2000' || true)
+  for _ in $(seq 1 15); do
+    if ! pgrep -f '/CarlaUE4-Linux-Shipping .*carla-rpc-port=2000' >/dev/null; then
+      return 0
+    fi
+    sleep 1
+  done
+  while read -r pid; do
+    [[ -n "${pid}" ]] || continue
+    kill -KILL "${pid}" 2>/dev/null || true
+  done < <(pgrep -f '/CarlaUE4-Linux-Shipping .*carla-rpc-port=2000' || true)
+  for _ in $(seq 1 5); do
+    if ! pgrep -f '/CarlaUE4-Linux-Shipping .*carla-rpc-port=2000' >/dev/null; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "CARLA process remains after exact SIGKILL cleanup" >&2
+  return 1
+}
+
 cleanup() {
   local exit_code=$?
   trap - EXIT INT TERM
@@ -92,6 +123,7 @@ cleanup() {
   stop_group "${SCENARIO_PID}"
   stop_d0_runtime || true
   "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_bridge.sh" stop || true
+  stop_carla_runtime
   if [[ ${exit_code} -ne 0 ]]; then
     write_status FAIL
   fi
@@ -102,9 +134,8 @@ write_status RUNNING
 "${CAGE_BUNDLE_ROOT}/scripts/manage_a1_apollo_stack.sh" stop || true
 "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_bridge.sh" stop || true
 stop_d0_runtime
-if ! "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_server.sh" status; then
-  "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_server.sh" start
-fi
+stop_carla_runtime
+"${CAGE_BUNDLE_ROOT}/scripts/manage_carla_server.sh" start
 APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" \
   "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" python3 \
   "${REPO_ROOT}/scripts/d0/wait_for_carla.py" --timeout 90
@@ -149,5 +180,7 @@ cleanup
 trap - EXIT INT TERM
 test -s "${RESULT}"
 test -s "${RETAINED_ROOT}/${RUN_ID}.json"
+test -s "${PRIVATE_RUN}/scenario_stats.json"
+test -s "${PRIVATE_RUN}/interposer_stats.json"
 write_status PASS
 echo "smoke_run=PASS run_id=${RUN_ID}"
