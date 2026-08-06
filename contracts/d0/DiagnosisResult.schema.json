@@ -1,0 +1,191 @@
+{
+  "$defs": {
+    "AccessRegime": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2"
+      ],
+      "title": "AccessRegime",
+      "type": "string"
+    },
+    "CostVector": {
+      "additionalProperties": false,
+      "properties": {
+        "access": {
+          "$ref": "#/$defs/AccessRegime",
+          "default": "L0"
+        },
+        "api_cost_usd": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Api Cost Usd",
+          "type": "number"
+        },
+        "bytes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "compute_seconds": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Compute Seconds",
+          "type": "number"
+        },
+        "human_minutes": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Human Minutes",
+          "type": "number"
+        },
+        "intervention_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Intervention Count",
+          "type": "integer"
+        },
+        "replay_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Replay Count",
+          "type": "integer"
+        },
+        "risk": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Risk",
+          "type": "number"
+        },
+        "runtime_seconds": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Runtime Seconds",
+          "type": "number"
+        },
+        "signals": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Signals",
+          "type": "integer"
+        },
+        "tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "CostVector",
+      "type": "object"
+    },
+    "ResponsibilityDomain": {
+      "enum": [
+        "interaction_forecasting",
+        "motion_planning",
+        "tracking_execution"
+      ],
+      "title": "ResponsibilityDomain",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "audit_status": {
+      "const": "VERIFIED",
+      "default": "VERIFIED",
+      "title": "Audit Status",
+      "type": "string"
+    },
+    "contradicting_evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Contradicting Evidence Ids",
+      "type": "array"
+    },
+    "decision": {
+      "enum": [
+        "diagnose",
+        "abstain"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "episode_id": {
+      "minLength": 8,
+      "title": "Episode Id",
+      "type": "string"
+    },
+    "executed_actions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Executed Actions",
+      "type": "array"
+    },
+    "posterior": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/ResponsibilityDomain"
+      },
+      "title": "Posterior",
+      "type": "object"
+    },
+    "prediction_set": {
+      "items": {
+        "$ref": "#/$defs/ResponsibilityDomain"
+      },
+      "minItems": 1,
+      "title": "Prediction Set",
+      "type": "array"
+    },
+    "selective_risk_estimate": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selective Risk Estimate"
+    },
+    "stop_reason": {
+      "enum": [
+        "risk_met",
+        "non_identifiable",
+        "insufficient_budget",
+        "tool_failure"
+      ],
+      "title": "Stop Reason",
+      "type": "string"
+    },
+    "supporting_evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Supporting Evidence Ids",
+      "type": "array"
+    },
+    "total_cost": {
+      "$ref": "#/$defs/CostVector"
+    }
+  },
+  "required": [
+    "episode_id",
+    "decision",
+    "prediction_set",
+    "posterior",
+    "total_cost",
+    "stop_reason"
+  ],
+  "title": "DiagnosisResult",
+  "type": "object"
+}

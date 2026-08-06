@@ -1,0 +1,99 @@
+{
+  "$defs": {
+    "AccessRegime": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2"
+      ],
+      "title": "AccessRegime",
+      "type": "string"
+    },
+    "ActionType": {
+      "enum": [
+        "observation",
+        "intervention"
+      ],
+      "title": "ActionType",
+      "type": "string"
+    },
+    "ResponsibilityDomain": {
+      "enum": [
+        "interaction_forecasting",
+        "motion_planning",
+        "tracking_execution"
+      ],
+      "title": "ResponsibilityDomain",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "action_id": {
+      "minLength": 1,
+      "title": "Action Id",
+      "type": "string"
+    },
+    "action_type": {
+      "$ref": "#/$defs/ActionType"
+    },
+    "predicted_outcome_partitions": {
+      "items": {
+        "items": {
+          "$ref": "#/$defs/ResponsibilityDomain"
+        },
+        "type": "array"
+      },
+      "title": "Predicted Outcome Partitions",
+      "type": "array"
+    },
+    "proposal_id": {
+      "minLength": 8,
+      "title": "Proposal Id",
+      "type": "string"
+    },
+    "proposed_by": {
+      "minLength": 1,
+      "title": "Proposed By",
+      "type": "string"
+    },
+    "rationale_evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Rationale Evidence Ids",
+      "type": "array"
+    },
+    "requested_parameters": {
+      "additionalProperties": true,
+      "title": "Requested Parameters",
+      "type": "object"
+    },
+    "required_regime": {
+      "$ref": "#/$defs/AccessRegime"
+    },
+    "self_reported_confidence": {
+      "default": null,
+      "title": "Self Reported Confidence",
+      "type": "null"
+    },
+    "target_hypotheses": {
+      "items": {
+        "$ref": "#/$defs/ResponsibilityDomain"
+      },
+      "minItems": 1,
+      "title": "Target Hypotheses",
+      "type": "array"
+    }
+  },
+  "required": [
+    "proposal_id",
+    "proposed_by",
+    "action_id",
+    "target_hypotheses",
+    "required_regime",
+    "action_type"
+  ],
+  "title": "ActionProposal",
+  "type": "object"
+}

@@ -1,0 +1,181 @@
+{
+  "$defs": {
+    "AccessRegime": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2"
+      ],
+      "title": "AccessRegime",
+      "type": "string"
+    },
+    "ArtifactReference": {
+      "additionalProperties": false,
+      "properties": {
+        "relative_path": {
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "visibility": {
+          "const": "diagnosis_visible",
+          "default": "diagnosis_visible",
+          "title": "Visibility",
+          "type": "string"
+        }
+      },
+      "required": [
+        "relative_path",
+        "sha256",
+        "size_bytes"
+      ],
+      "title": "ArtifactReference",
+      "type": "object"
+    },
+    "CostVector": {
+      "additionalProperties": false,
+      "properties": {
+        "access": {
+          "$ref": "#/$defs/AccessRegime",
+          "default": "L0"
+        },
+        "api_cost_usd": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Api Cost Usd",
+          "type": "number"
+        },
+        "bytes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "compute_seconds": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Compute Seconds",
+          "type": "number"
+        },
+        "human_minutes": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Human Minutes",
+          "type": "number"
+        },
+        "intervention_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Intervention Count",
+          "type": "integer"
+        },
+        "replay_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Replay Count",
+          "type": "integer"
+        },
+        "risk": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Risk",
+          "type": "number"
+        },
+        "runtime_seconds": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Runtime Seconds",
+          "type": "number"
+        },
+        "signals": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Signals",
+          "type": "integer"
+        },
+        "tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "CostVector",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "action_id": {
+      "minLength": 1,
+      "title": "Action Id",
+      "type": "string"
+    },
+    "evidence_id": {
+      "minLength": 8,
+      "title": "Evidence Id",
+      "type": "string"
+    },
+    "measured_cost": {
+      "$ref": "#/$defs/CostVector"
+    },
+    "payload_ref": {
+      "$ref": "#/$defs/ArtifactReference"
+    },
+    "permission_valid": {
+      "const": true,
+      "default": true,
+      "title": "Permission Valid",
+      "type": "boolean"
+    },
+    "provenance": {
+      "minLength": 1,
+      "title": "Provenance",
+      "type": "string"
+    },
+    "schema_valid": {
+      "const": true,
+      "default": true,
+      "title": "Schema Valid",
+      "type": "boolean"
+    },
+    "semantic_slot": {
+      "minLength": 1,
+      "title": "Semantic Slot",
+      "type": "string"
+    },
+    "side_effects": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Side Effects",
+      "type": "array"
+    },
+    "tool_success": {
+      "const": true,
+      "default": true,
+      "title": "Tool Success",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "action_id",
+    "evidence_id",
+    "semantic_slot",
+    "provenance",
+    "measured_cost",
+    "payload_ref"
+  ],
+  "title": "VerifiedEvidence",
+  "type": "object"
+}
