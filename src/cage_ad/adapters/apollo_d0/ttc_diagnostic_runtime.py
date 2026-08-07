@@ -27,6 +27,7 @@ from cage_ad.diagnostics.ttc_null import (
     DiagnosticTraceRow,
     classify_root_cause,
     relative_state_in_ego_frame,
+    sampled_prediction_geometry,
     sat_separation_m,
     world_obb_from_carla_state,
 )
@@ -95,18 +96,10 @@ def _prediction_geometry(
     horizon_s: float = 10.0,
     step_s: float = 0.01,
 ) -> tuple[float | None, float, float]:
-    first_overlap = None
-    minimum = math.inf
-    minimum_time = 0.0
-    for index in range(int(round(horizon_s / step_s)) + 1):
-        seconds = index * step_s
-        separation = sat_separation_m(left.at(seconds), right.at(seconds))
-        if separation < minimum:
-            minimum = separation
-            minimum_time = seconds
-        if separation <= 1e-9 and first_overlap is None:
-            first_overlap = seconds
-    return first_overlap, minimum, minimum_time
+    ttc, approach = sampled_prediction_geometry(
+        left, right, horizon_s=horizon_s, step_s=step_s
+    )
+    return ttc, approach.separation_m, approach.time_s
 
 
 def _missing(value: Any, reason: str) -> tuple[Any, str | None]:

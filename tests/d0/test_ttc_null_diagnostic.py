@@ -13,6 +13,7 @@ from cage_ad.diagnostics.ttc_null import (
     closest_approach,
     fine_step_ttc,
     relative_state_in_ego_frame,
+    sampled_prediction_geometry,
     sat_separation_m,
     summarize_trace,
     world_obb_from_carla_state,
@@ -95,6 +96,18 @@ def test_independent_separation_and_closest_approach() -> None:
     approach = closest_approach(left, right, horizon_s=5.0)
     assert approach.time_s == pytest.approx(5.0)
     assert approach.separation_m == pytest.approx(5.0)
+    sampled_ttc, sampled_approach = sampled_prediction_geometry(left, right, horizon_s=5.0)
+    assert sampled_ttc is None
+    assert sampled_approach.time_s == pytest.approx(5.0)
+    assert sampled_approach.separation_m == pytest.approx(5.0)
+
+
+def test_vectorized_geometry_matches_golden_ttc() -> None:
+    ego = DiagnosticOBB(0, 0, 0, 4, 2, 10, 0)
+    actor = DiagnosticOBB(14, 0, 0, 4, 2, 5, 0)
+    sampled_ttc, approach = sampled_prediction_geometry(ego, actor)
+    assert sampled_ttc == fine_step_ttc(ego, actor) == pytest.approx(2.0)
+    assert approach.separation_m == 0.0
 
 
 def test_relative_state_uses_ego_frame() -> None:

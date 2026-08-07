@@ -211,6 +211,113 @@ def closest_approach(
     return best
 
 
+def sampled_prediction_geometry(
+    left: DiagnosticOBB,
+    right: DiagnosticOBB,
+    *,
+    horizon_s: float = 10.0,
+    step_s: float = 0.01,
+) -> tuple[float | None, ClosestApproach]:
+    """高效执行同一固定步长的独立 SAT/多边形距离扫描。
+
+    该函数不调用正式 evaluator；它与 ``fine_step_ttc`` 使用相同采样定义，
+    但复用固定朝向矩形的轴和角点，保证 20 Hz replay 不丢帧。实现只依赖
+    Python 标准库，因为 Apollo host Python 不包含 NumPy。
+    """
+
+    if horizon_s <= 0.0 or step_s <= 0.0:
+        raise DiagnosticValidationError("prediction horizon and step must be positive")
+    left_axes = _axes(left)
+    right_axes = _axes(right)
+    axes = (*left_axes, *right_axes)
+    left_radii = tuple(
+        (left.length_m / 2.0) * abs(_dot(axis, left_axes[0]))
+        + (left.width_m / 2.0) * abs(_dot(axis, left_axes[1]))
+        for axis in axes
+    )
+    right_radii = tuple(
+        (right.length_m / 2.0) * abs(_dot(axis, right_axes[0]))
+        + (right.width_m / 2.0) * abs(_dot(axis, right_axes[1]))
+        for axis in axes
+    )
+    start_dx, start_dy = right.x - left.x, right.y - left.y
+    velocity_dx = right.velocity_x_mps - left.velocity_x_mps
+    velocity_dy = right.velocity_y_mps - left.velocity_y_mps
+    relative_right_corners = tuple((x - left.x, y - left.y) for x, y in right.corners())
+    relative_left_corners = tuple((x - left.x, y - left.y) for x, y in left.corners())
+
+    def translated_right(seconds: float) -> tuple[tuple[float, float], ...]:
+        shift_x = velocity_dx * seconds
+        shift_y = velocity_dy * seconds
+        return tuple((x + shift_x, y + shift_y) for x, y in relative_right_corners)
+
+    def squared_point_segment_distance(
+        point: tuple[float, float],
+        start: tuple[float, float],
+        end: tuple[float, float],
+    ) -> float:
+        edge_x, edge_y = end[0] - start[0], end[1] - start[1]
+        denominator = edge_x * edge_x + edge_y * edge_y
+        scale = (
+            (point[0] - start[0]) * edge_x + (point[1] - start[1]) * edge_y
+        ) / denominator
+        scale = max(0.0, min(1.0, scale))
+        dx = point[0] - (start[0] + scale * edge_x)
+        dy = point[1] - (start[1] + scale * edge_y)
+        return dx * dx + dy * dy
+
+    count = int(math.floor(horizon_s / step_s + 1e-12)) + 1
+    first_overlap: float | None = None
+    best_squared = math.inf
+    best_time = 0.0
+    for index in range(count):
+        seconds = index * step_s
+        dx = start_dx + velocity_dx * seconds
+        dy = start_dy + velocity_dy * seconds
+        axis_gaps = tuple(
+            abs(dx * axis[0] + dy * axis[1]) - left_radius - right_radius
+            for axis, left_radius, right_radius in zip(
+                axes, left_radii, right_radii, strict=True
+            )
+        )
+        if max(axis_gaps) <= 1e-12:
+            if first_overlap is None:
+                first_overlap = seconds
+            if best_squared > 0.0:
+                best_squared = 0.0
+                best_time = seconds
+            continue
+
+        # SAT 最大轴间隙是欧氏距离下界；只有可能刷新最小值时才做角点-边距离。
+        lower_bound = max(0.0, max(axis_gaps))
+        if lower_bound * lower_bound >= best_squared:
+            continue
+        right_points = translated_right(seconds)
+        candidate = math.inf
+        for points, polygon in (
+            (relative_left_corners, right_points),
+            (right_points, relative_left_corners),
+        ):
+            for point in points:
+                for edge_index in range(4):
+                    candidate = min(
+                        candidate,
+                        squared_point_segment_distance(
+                            point,
+                            polygon[edge_index],
+                            polygon[(edge_index + 1) % 4],
+                        ),
+                    )
+        if candidate < best_squared:
+            best_squared = candidate
+            best_time = seconds
+
+    return first_overlap, ClosestApproach(
+        time_s=best_time,
+        separation_m=math.sqrt(max(0.0, best_squared)),
+    )
+
+
 def relative_state_in_ego_frame(ego: DiagnosticOBB, actor: DiagnosticOBB) -> dict[str, float]:
     dx, dy = actor.x - ego.x, actor.y - ego.y
     forward = (math.cos(ego.heading_rad), math.sin(ego.heading_rad))
