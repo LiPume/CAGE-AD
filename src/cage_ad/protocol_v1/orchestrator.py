@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import signal
 import subprocess
 from typing import Any, Mapping, Sequence
 
@@ -256,7 +257,21 @@ class RecipeOrchestrator:
             CAGE_DATA_ROOT=str(self.data_root),
             CAGE_PRIVATE_ORACLE_ROOT=str(self.private_oracle_root),
         )
-        subprocess.run(list(plan.command), cwd=self.repo_root, env=env, check=True, timeout=420)
+        process = subprocess.Popen(
+            list(plan.command), cwd=self.repo_root, env=env, start_new_session=True
+        )
+        try:
+            return_code = process.wait(timeout=420)
+        except subprocess.TimeoutExpired:
+            os.killpg(process.pid, signal.SIGINT)
+            try:
+                process.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGTERM)
+                process.wait(timeout=30)
+            raise ProtocolValidationError(f"attempt timed out and was cleaned: {plan.attempt_id}")
+        if return_code != 0:
+            raise subprocess.CalledProcessError(return_code, list(plan.command))
         return self._result(plan.attempt_id)
 
     def _check_budget(self) -> None:

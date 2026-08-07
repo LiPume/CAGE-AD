@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import threading
 import time
+import traceback
 
 import carla
 from cyber.python.cyber_py3 import cyber
@@ -200,10 +201,15 @@ def main() -> None:
         waypoint.pose.x = x
         waypoint.pose.y = y
         waypoint.heading = 0.0
-    writer.write(request)
-
     route_deadline = time.monotonic() + 10.0
+    next_route_publish = 0.0
     while time.monotonic() < route_deadline and not route_epoch_started:
+        now = time.monotonic()
+        if now >= next_route_publish:
+            request.header.timestamp_sec = time.time()
+            request.header.sequence_num += 1
+            writer.write(request)
+            next_route_publish = now + 0.5
         world.wait_for_tick(2)
     if not route_epoch_started:
         sensor.stop()
@@ -318,4 +324,10 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except BaseException:
+        traceback.print_exc()
+        # CyberRT callback threads can keep CPython alive after an exception.
+        # The shell owns process cleanup and persists the failed attempt.
+        os._exit(2)
