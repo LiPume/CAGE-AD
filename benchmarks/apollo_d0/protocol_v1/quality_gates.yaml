@@ -1,0 +1,99 @@
+protocol_version: cage-ad-d0-protocol-v1
+outcome_layers:
+  infrastructure_valid:
+    required: [apollo_modules_healthy, route_accepted, actor_spawned, clock_advanced, required_messages_present, no_injector_exception]
+    invalid_examples: [apollo_startup_failure, route_request_failure, actor_spawn_failure, missing_planning_stream, malformed_transformed_message]
+    definitions:
+      apollo_modules_healthy: routing_planning_control_and_bridge_processes_alive_at_route_epoch_and_run_end
+      route_accepted: routing_response_success_true_and_road_count_greater_than_zero
+      required_messages_present: planning_messages_greater_or_equal_20_and_guarded_control_messages_greater_or_equal_20
+      clock_advanced: exactly_one_CARLA_frame_per_fixed_0_05s_tick_with_zero_non_unit_frame_gaps
+  safety_outcome:
+    metrics: [collision_count, minimum_ttc_s, collision_object_id, collision_position_m, collision_angle_deg, collision_relative_speed_mps]
+  task_outcome:
+    metrics: [route_completion, forward_progress_m, timeout]
+  mechanism_outcome:
+    source: fault_recipes_activation_signature
+
+calibration_gates:
+  nominal:
+    repeats: 5
+    infrastructure_valid_required: 5
+    collision_free_required: 5
+    route_accepted_required: 5
+    sensitivity_band_required: 4
+  selected_fault:
+    repeats: 3
+    infrastructure_valid_required: 3
+    activation_required: 3
+    safety_degradation_required: 2
+    paired_risk_increase_minimum: 0.20
+    task_failure_is_not_required_when_safety_degradation_is_stable: true
+  collision_identity_when_collision_occurs:
+    same_counterpart_required: true
+    collision_position_tolerance_m: 2.0
+    collision_angle_tolerance_deg: 15.0
+    collision_relative_speed_tolerance_mps: 2.0
+    required_matching_repeats: 2
+  temporal_causality:
+    module_error_precedes_system_degradation: true
+    maximum_trigger_to_degradation_delay_s: 5.0
+    module_error_onset: first_tick_after_injection_start_where_fault_specific_activation_predicate_holds
+    system_degradation_onset: first_tick_where_collision_occurs_or_instantaneous_safety_risk_exceeds_same_seed_nominal_aligned_tick_by_0_20
+
+paired_effect:
+  risk_score_definition:
+    collision_component: any_collision_is_1_else_0
+    ttc_component: if_no_collision_clamp_0_1_of_2_5_div_minimum_ttc_s_else_1
+    safety_risk_aggregate: max_collision_component_and_ttc_component
+    minimum_ttc_s: >-
+      At each 0.05 s tick, extrapolate ego and interaction-actor oriented bounding boxes with their current constant
+      linear velocities for 10 s at 0.05 s resolution; TTC is the first future overlap time, or null. Run minimum TTC
+      is the minimum positive per-tick TTC. Collision sensor truth overrides TTC risk to 1.
+    task_component: route_failure_or_timeout_is_reported_separately_not_added_to_safety_risk
+  delta_definition: risk_fault_minus_risk_same_seed_probe
+  correct_domain_minimum_median_delta: 0.20
+  correct_domain_positive_repeats_required: 2
+  pre_intervention_trajectory_mse_max_m2: 0.25
+  wrong_domain_margin: correct_domain_median_delta_minus_max_wrong_domain_median_delta_must_be_strictly_greater_than_0_10
+  regression_false_repair_or_harm_rate_max: 0.05
+
+classification:
+  identifiable:
+    requires: [nominal_gate, selected_fault_gate, temporal_causality_gate, correct_probe_effect_gate, wrong_domain_margin_gate, no_oracle_leakage]
+  ambiguous:
+    requires: [nominal_gate, selected_fault_gate, temporal_causality_gate, no_oracle_leakage]
+    any_of:
+      - two_or_more_domain_probes_have_effects_within_margin
+      - correct_domain_effect_is_below_minimum_but_fault_causality_is_confirmed
+      - multiple_domain_errors_overlap_in_collision_effect_window
+    label: set_valued_responsibility_or_abstain_required
+  rejected:
+    any_of:
+      - infrastructure_invalid
+      - nominal_unsafe
+      - fault_not_activated
+      - no_paired_safety_degradation
+      - transformed_message_semantically_invalid
+      - collision_identity_not_reproducible
+      - temporal_causality_failed
+      - probe_pre_intervention_similarity_failed
+      - probe_output_invariant_failed
+      - probe_regression_harm_rate_exceeded
+      - oracle_leakage
+
+complete_classification_tree:
+  precedence:
+    - if_any_infrastructure_nominal_message_transform_leakage_collision_identity_or_temporal_causality_gate_fails_then_rejected
+    - if_no_candidate_and_dose_pass_pre_probe_gates_then_rejected_no_causal_dose
+    - if_any_probe_pre_intervention_MSE_or_regression_harm_or_output_invariant_gate_fails_then_rejected_probe_invalid
+    - if_multiple_domain_errors_overlap_in_effect_window_then_ambiguous_multi_domain
+    - if_correct_domain_median_delta_below_0_20_or_positive_repeats_below_2_then_ambiguous_insufficient_correct_effect
+    - if_correct_minus_best_wrong_is_less_than_or_equal_0_10_then_ambiguous_nonselective
+    - otherwise_identifiable
+  effects_within_margin_definition: correct_domain_median_delta_minus_best_wrong_domain_median_delta_less_than_or_equal_0_10
+
+formal_freeze:
+  required_hashes: [source_commit, scenario_recipe, selected_scenario_candidate, fault_recipe, selected_dose, trigger_window, probe_implementations, thresholds, split_manifest]
+  freeze_before_seeds: [2101, 2102, 2103]
+  mutation_after_freeze: create_new_protocol_version_never_overwrite

@@ -18,3 +18,13 @@ python tools/source_audit.py
 [`docs/dataset/CAGE_AD_D0_DATASET_CARD.md`](docs/dataset/CAGE_AD_D0_DATASET_CARD.md)，
 其中逐项解释了每个场景、故障机制、配套运行以及公开/私有字段边界。当前数据只通过
 2/12 个完整科学 gate，因此文档明确标记为尚不可正式发布。
+
+下一轮数据不再沿用 pilot 的场景×故障笛卡尔积。文献约束的逐 recipe 生成规范位于
+[`docs/dataset/CAGE_AD_D0_GENERATION_PROTOCOL.md`](docs/dataset/CAGE_AD_D0_GENERATION_PROTOCOL.md)，
+机器可校验的场景、故障、12 条 calibration recipe 与质量 gate 位于
+[`benchmarks/apollo_d0/protocol_v1/`](benchmarks/apollo_d0/protocol_v1/)。这些 recipe 尚待服务器校准，
+不是已经发布的 benchmark 数据。
+
+AutoDL 端应使用新的
+[`docs/d0/CODEX_D0_PROTOCOL_V1_PROMPT.md`](docs/d0/CODEX_D0_PROTOCOL_V1_PROMPT.md)；
+旧 D0 Prompt 是带校验和的 G0 checkpoint，只保留作历史 provenance。

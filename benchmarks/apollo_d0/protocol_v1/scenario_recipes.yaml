@@ -1,0 +1,92 @@
+protocol_version: cage-ad-d0-protocol-v1
+stack: apollo_10
+simulator: carla_0_9_15
+common:
+  map: Town01
+  route_start_apollo_xy: [202.550003, -59.330017]
+  route_end_apollo_xy: [288.237488, -59.330009]
+  actor_blueprint: vehicle.audi.tt
+  scenario_clock_origin: first routing response after all required Apollo modules are healthy
+  observation_window_s: 32.0
+  synchronous_mode: true
+  fixed_delta_seconds: 0.05
+  pre_epoch_rule: freeze_npc_until_scenario_clock_origin
+  forbidden_variations: [weather, map, route, actor_blueprint, background_traffic]
+  runtime_binding:
+    implementation_entry: src/cage_ad/adapters/apollo_d0/scenario_runtime.py
+    ego_reference_frame: ego_transform_at_actor_spawn_before_route_epoch
+    offset_definition: actor_center_equals_ego_center_plus_forward_times_longitudinal_offset_plus_right_times_lateral_offset
+    actor_rotation: copy_ego_spawn_rotation
+    actor_z_offset_m: 0.5
+    motion_application: set_target_velocity_every_synchronous_tick_from_analytic_candidate_velocity
+    reset: fresh_CARLA_server_or_reload_Town01_then_destroy_all_non_ego_cage_actors_before_spawn
+    seed_propagation: export_PYTHONHASHSEED_before_process_launch_then_seed_python_random_numpy_random_and_CARLA_traffic_manager_before_world_tick
+    source_hash_required_at_freeze: true
+  fixed_environment:
+    cloudiness: 0.0
+    precipitation: 0.0
+    precipitation_deposits: 0.0
+    wind_intensity: 0.0
+    sun_azimuth_angle: 0.0
+    sun_altitude_angle: 70.0
+    fog_density: 0.0
+    fog_distance: 0.0
+    wetness: 0.0
+    background_vehicle_count: 0
+    pedestrian_count: 0
+  conflict_onset_definition:
+    lead_vehicle_deceleration: candidate_brake_start_s
+    cut_in_or_crossing_actor: candidate_cut_in_start_s
+  analytic_velocity_program:
+    lead_vehicle_deceleration: longitudinal_v_equals_lead_speed_before_brake_then_max_0_of_lead_speed_minus_deceleration_times_elapsed_since_brake_lateral_v_zero
+    cut_in_or_crossing_actor: longitudinal_v_constant_lateral_v_equals_0_before_cut_in_then_min_maximum_lateral_speed_of_lateral_acceleration_times_elapsed_since_cut_in
+
+scenarios:
+  lead_brake_close:
+    semantic_family: lead_vehicle_deceleration
+    conflict_type: longitudinal_rear_end
+    candidate_order:
+      - {candidate_id: LBC0, initial_gap_m: 30.0, lead_speed_mps: 5.0, brake_start_s: 6.0, deceleration_mps2: 3.0}
+      - {candidate_id: LBC1, initial_gap_m: 27.0, lead_speed_mps: 5.0, brake_start_s: 6.0, deceleration_mps2: 3.0}
+      - {candidate_id: LBC2, initial_gap_m: 30.0, lead_speed_mps: 6.0, brake_start_s: 5.0, deceleration_mps2: 3.5}
+    calibration_rule: use_normative_nested_search_in_episode_recipes
+  lead_brake_moderate:
+    semantic_family: lead_vehicle_deceleration
+    conflict_type: longitudinal_rear_end
+    candidate_order:
+      - {candidate_id: LBM0, initial_gap_m: 35.0, lead_speed_mps: 6.0, brake_start_s: 7.0, deceleration_mps2: 2.5}
+      - {candidate_id: LBM1, initial_gap_m: 32.0, lead_speed_mps: 6.0, brake_start_s: 6.0, deceleration_mps2: 2.5}
+      - {candidate_id: LBM2, initial_gap_m: 35.0, lead_speed_mps: 7.0, brake_start_s: 6.0, deceleration_mps2: 3.0}
+    calibration_rule: use_normative_nested_search_in_episode_recipes
+  cut_in_early:
+    semantic_family: cut_in_or_crossing_actor
+    conflict_type: lateral_path_intrusion
+    candidate_order:
+      - {candidate_id: CIE0, longitudinal_offset_m: 25.0, lateral_offset_m: -3.5, longitudinal_speed_mps: 3.0, cut_in_start_s: 3.0, lateral_acceleration_mps2: 0.6, maximum_lateral_speed_mps: 1.5}
+      - {candidate_id: CIE1, longitudinal_offset_m: 22.0, lateral_offset_m: -3.5, longitudinal_speed_mps: 3.0, cut_in_start_s: 3.0, lateral_acceleration_mps2: 0.7, maximum_lateral_speed_mps: 1.6}
+      - {candidate_id: CIE2, longitudinal_offset_m: 25.0, lateral_offset_m: -3.2, longitudinal_speed_mps: 3.5, cut_in_start_s: 2.5, lateral_acceleration_mps2: 0.7, maximum_lateral_speed_mps: 1.6}
+    calibration_rule: use_normative_nested_search_in_episode_recipes
+  cut_in_late:
+    semantic_family: cut_in_or_crossing_actor
+    conflict_type: lateral_path_intrusion
+    candidate_order:
+      - {candidate_id: CIL0, longitudinal_offset_m: 30.0, lateral_offset_m: -3.5, longitudinal_speed_mps: 4.0, cut_in_start_s: 5.0, lateral_acceleration_mps2: 0.8, maximum_lateral_speed_mps: 1.8}
+      - {candidate_id: CIL1, longitudinal_offset_m: 27.0, lateral_offset_m: -3.5, longitudinal_speed_mps: 4.0, cut_in_start_s: 4.5, lateral_acceleration_mps2: 0.8, maximum_lateral_speed_mps: 1.8}
+      - {candidate_id: CIL2, longitudinal_offset_m: 27.0, lateral_offset_m: -3.2, longitudinal_speed_mps: 4.0, cut_in_start_s: 4.0, lateral_acceleration_mps2: 0.9, maximum_lateral_speed_mps: 2.0}
+    calibration_rule: use_normative_nested_search_in_episode_recipes
+
+scenario_admission:
+  calibration_trials_per_candidate:
+    seeds: [1101, 1102, 1103, 1104, 1105]
+    repeat_index_per_seed: 0
+  runtime_valid_required: 5
+  nominal_collision_count_max_total: 0
+  nominal_route_accepted_required: 5
+  nominal_min_ttc_s:
+    lower_exclusive: 2.5
+    upper_inclusive: 6.0
+    required_repeats_in_band: 4
+  note: >-
+    A candidate that is invalid, nominally unsafe, or never enters the sensitivity band is rejected. The five trials
+    use the five declared calibration seeds once each. The next listed candidate is tried; no unlisted parameter may
+    be introduced.

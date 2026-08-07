@@ -1,0 +1,123 @@
+protocol_version: cage-ad-d0-protocol-v1
+common:
+  calibration_trials_per_dose:
+    seeds: [1101, 1102, 1103]
+    repeat_index_per_seed: 0
+  formal_repeats_per_condition: 3
+  dose_selection: use_normative_nested_search_in_episode_recipes
+  injection_start: scenario_candidate_conflict_onset_minus_1_0s
+  injection_end: scenario_candidate_conflict_onset_plus_3_0s
+  injection_clock: simulator_time
+  required_log_fields: [boundary, target_fields, start_s, end_s, dose, input_sha256, output_sha256, transformed_message_count]
+  transform_validity:
+    strict_relative_time: true
+    monotone_path_s: true
+    nonnegative_speed: true
+    max_position_kinematic_residual_m: 0.25
+    max_speed_acceleration_residual_mps: 0.50
+  forbidden:
+    - changing_more_than_the_declared_fields
+    - changing_message_frequency_unless_delay_is_the_fault
+    - using_simulator_future_truth_in_fault_or_diagnostic_view
+    - changing_fault_dose_after_formal_seed_execution
+
+faults:
+  forecast_stale_or_delayed:
+    responsibility_domain: interaction_forecasting
+    boundary: semantic_prediction_output
+    runtime_binding:
+      implementation_entry: src/cage_ad/adapters/apollo_d0/interposer_runtime.py
+      input_topic: /apollo/prediction_raw
+      output_topic: /apollo/prediction
+      protobuf_type: modules.common_msgs.prediction_msgs.prediction_obstacle_pb2.PredictionObstacles
+    operation: fifo_content_delay_with_current_publication_cadence
+    target_fields: [prediction_obstacle_perception_state, prediction_obstacle_timestamp, predicted_trajectory_points]
+    dose_grid: [{delay_s: 0.5}, {delay_s: 1.0}, {delay_s: 1.5}, {delay_s: 2.0}]
+    state_consistency: retain_delayed_object_state_and_trajectory_as_one_atomic_content_sample
+    fifo_state_machine:
+      prebuffer: continuously_copy_whole_input_messages_for_maximum_grid_delay_before_injection_start_while_publishing_pass_through
+      source_time: input_message_header_timestamp_sec
+      selection_each_output_tick: newest_buffered_whole_message_with_source_time_less_or_equal_current_sim_time_minus_selected_delay
+      warmup_failure: if_no_eligible_message_at_injection_start_mark_injector_invalid_do_not_fall_back
+      downstream_header: copy_current_input_header_sequence_and_timestamp_to_delayed_content_for_current_cadence
+      delayed_internal_times: preserve_prediction_start_end_obstacle_and_perception_timestamps_from_selected_content
+      private_content_age: current_sim_time_minus_selected_source_time
+      queue_order: stable_source_time_then_arrival_index
+      window_end: next_tick_pass_through_current_input_then_clear_queue_without_flushing_delayed_messages
+    activation_signature:
+      metric: median_prediction_content_age_s
+      operator: greater_or_equal
+      expected_from_dose_field: delay_s
+      lower_tolerance: 0.1
+      required_fraction_of_window: 0.8
+  forecast_heading_or_maneuver_bias:
+    responsibility_domain: interaction_forecasting
+    boundary: semantic_prediction_output
+    operation: attenuate_future_lateral_displacement_about_current_actor_pose
+    target_fields: [predicted_trajectory_points, predicted_heading]
+    dose_grid: [{attenuation: 0.25}, {attenuation: 0.5}, {attenuation: 0.75}, {attenuation: 1.0}]
+    transform: lateral_displacement_out_equals_one_minus_attenuation_times_lateral_displacement_in
+    state_consistency: recompute_heading_from_transformed_adjacent_points_keep_t0_pose_unchanged
+    activation_signature:
+      metric: median_absolute_lateral_endpoint_change_m
+      operator: greater_than
+      threshold: 0.25
+      declared_transform_residual_max_m: 0.10
+      required_fraction_of_window: 0.8
+  planning_constraint_omitted:
+    responsibility_domain: motion_planning
+    boundary: planning_trajectory_output
+    operation: attenuate_only_the_nominal_braking_suffix_after_conflict_onset
+    target_fields: [path_point_s, v, a, relative_time]
+    dose_grid: [{braking_attenuation: 0.25}, {braking_attenuation: 0.5}, {braking_attenuation: 0.75}, {braking_attenuation: 1.0}]
+    transform: >-
+      blend nominal acceleration toward zero only where nominal a is negative; integrate v and s forward from the
+      unchanged trigger point; interpolate x/y/heading from the original geometric path by recomputed s
+    state_consistency: require_monotone_s_nonnegative_v_strict_time_and_kinematic_residual_below_tolerance
+    activation_signature:
+      metric: integrated_removed_braking_mps
+      operator: greater_than
+      threshold: 0.50
+      declared_transform_residual_max_mps: 0.10
+      required_fraction_of_window: 0.6
+  planning_unsafe_cost_or_speed_bias:
+    responsibility_domain: motion_planning
+    boundary: planning_trajectory_output
+    operation: compress_post_trigger_trajectory_time_while_preserving_geometric_path
+    target_fields: [v, a, relative_time]
+    dose_grid: [{time_scale: 0.9}, {time_scale: 0.8}, {time_scale: 0.7}, {time_scale: 0.6}]
+    transform: relative_time_out_equals_scale_times_relative_time_in_v_out_equals_v_in_div_scale_a_out_equals_a_in_div_scale_squared
+    state_consistency: keep_x_y_s_heading_and_curvature_unchanged_require_strict_time_and_speed_limits
+    activation_signature:
+      metric: median_post_trigger_time_scale
+      operator: within_absolute_tolerance
+      expected_from_dose_field: time_scale
+      absolute_tolerance: 0.02
+      required_fraction_of_window: 0.8
+  control_command_transport_delay:
+    responsibility_domain: tracking_execution
+    boundary: control_command_transport
+    operation: fifo_whole_command_delay
+    target_fields: [throttle, brake, steering_target, gear, timestamp]
+    dose_grid: [{delay_s: 0.2}, {delay_s: 0.4}, {delay_s: 0.6}, {delay_s: 0.8}]
+    state_consistency: preserve_command_order_and_atomicity_release_at_original_sim_time_plus_delay
+    activation_signature:
+      metric: median_request_to_release_delay_s
+      operator: within_absolute_tolerance
+      expected_from_dose_field: delay_s
+      absolute_tolerance: 0.05
+      required_fraction_of_window: 0.8
+  control_gain_saturation_tracking_bias:
+    responsibility_domain: tracking_execution
+    boundary: control_command_to_actuator
+    operation: scale_actuator_effectiveness_about_neutral_without_cross_channel_bias
+    target_fields: [throttle, brake, steering_target]
+    dose_grid: [{effectiveness: 0.8}, {effectiveness: 0.6}, {effectiveness: 0.4}, {effectiveness: 0.2}]
+    transform: throttle_out_equals_k_throttle_in_brake_out_equals_k_brake_in_steer_out_equals_k_steer_in
+    state_consistency: preserve_throttle_brake_mutual_exclusion_signs_gear_and_publication_cadence
+    activation_signature:
+      metric: median_nonzero_command_ratio
+      operator: within_absolute_tolerance
+      expected_from_dose_field: effectiveness
+      absolute_tolerance: 0.05
+      required_fraction_of_window: 0.8

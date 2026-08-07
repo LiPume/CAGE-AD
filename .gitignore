@@ -15,9 +15,11 @@ data/private/
 **/cache/
 **/__pycache__/
 .pytest_cache/
+.venv/
 .ruff_cache/
 *.log
 *.pid
 *.pyc
 dist/
 *.egg-info/
+tmp/

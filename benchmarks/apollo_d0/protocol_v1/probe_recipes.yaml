@@ -1,0 +1,67 @@
+protocol_version: cage-ad-d0-protocol-v1
+common:
+  calibration_trials_per_probe:
+    seeds: [1101, 1102, 1103]
+    repeat_index_per_seed: 0
+  start_s: scenario_candidate_conflict_onset_minus_1_0s
+  end_s: scenario_candidate_conflict_onset_plus_3_0s
+  receives_fault_id: false
+  receives_simulator_future_truth: false
+  required_pre_intervention_trajectory_mse_max_m2: 0.25
+  fault_free_regression_seeds: [3101, 3102, 3103, 3104, 3105]
+
+probes:
+  probe_forecasting:
+    responsibility_domain: interaction_forecasting
+    boundary: semantic_prediction_output
+    history_window_s: 1.0
+    minimum_history_samples: 5
+    candidate_models: [constant_acceleration, constant_turn_rate_and_velocity]
+    model_selection: lowest_rolling_one_step_ADE_on_history_tie_break_constant_acceleration
+    horizon_s: 5.0
+    step_s: 0.2
+    bounds:
+      speed_mps: [0.0, 20.0]
+      acceleration_mps2: [-6.0, 4.0]
+      yaw_rate_radps: [-0.7, 0.7]
+    output_invariants: [starts_at_current_actor_pose, strict_time, recomputed_heading, no_future_truth]
+  probe_planning:
+    responsibility_domain: motion_planning
+    boundary: planning_trajectory_output
+    geometric_path_source: current_nominal_planning_path_prefix
+    obstacle_motion_source: probe_forecasting_algorithm_run_on_same_legal_history
+    horizon_s: 5.0
+    step_s: 0.1
+    safety_buffer_m: 2.0
+    limits:
+      maximum_deceleration_mps2: 4.0
+      maximum_jerk_mps3: 5.0
+      minimum_speed_mps: 0.0
+    algorithm: earliest_conflict_stop_profile_with_jerk_limited_forward_integration
+    output_fields_generated_together: [x, y, heading, path_point_s, v, a, relative_time]
+    output_invariants: [strict_time, monotone_s, nonnegative_v, kinematic_consistency, no_path_teleport]
+  probe_control:
+    responsibility_domain: tracking_execution
+    boundary: control_command_to_actuator
+    target_source: current_legal_motion_plan
+    lateral_controller:
+      algorithm: pure_pursuit
+      wheelbase_m: 2.85
+      lookahead_m: max_3_0_or_0_8_times_speed_mps
+      maximum_steering_angle_deg: 70.0
+    longitudinal_controller:
+      algorithm: PID_on_target_minus_current_speed
+      kp: 0.35
+      ki: 0.05
+      kd: 0.02
+      integral_clamp: [-2.0, 2.0]
+      output_clamp: [-1.0, 1.0]
+      mapping: positive_to_throttle_negative_to_brake
+    output_invariants: [throttle_brake_mutual_exclusion, bounded_steering, current_state_only, fixed_parameters_for_all_scenarios]
+
+forbidden:
+  - constant_velocity_only_forecasting
+  - carla_future_trajectory
+  - fixed_sixty_percent_brake
+  - scene_specific_controller_tuning
+  - changing_pre_intervention_history

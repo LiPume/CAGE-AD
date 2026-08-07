@@ -1,0 +1,59 @@
+protocol_version: cage-ad-d0-protocol-v1
+sources:
+  HINT:
+    reference_url: https://arxiv.org/abs/2607.12598
+    local_pdf: paper/PDFs/01_HINT.pdf
+    construction_facts:
+      - reference ADS passes and faulty ADS fails
+      - each retained case is executed at least three times
+      - two experienced developers confirm that faulty code triggers the observed behavior
+      - failure oracles include collision, traffic-rule violation and task-completion failure
+    adopted_rules: [paired_pass_fail, minimum_three_repeats, trigger_to_failure_window, human_audit]
+  Minimal_Grey_Box:
+    reference_url: https://doi.org/10.1109/IV64158.2025.11097509
+    local_pdf: paper/PDFs/02_Minimal_Grey_Box.pdf
+    local_artifact: paper/SI/02_Minimal_Grey_Box/Apollo-VTD-master.zip
+    construction_facts:
+      - artifact records injection frame, affected frame count, fault type and fault parameters
+      - cleaning removes duplicates, Apollo crashes and startup-invalid data
+      - main text reports 1099 tested trajectories and six interaction scenario families
+    adopted_rules: [field_level_injection_recipe, infrastructure_invalid_is_not_failure, duplicate_filter]
+  ADSDx:
+    reference_url: https://doi.org/10.1145/3783993
+    local_pdf: paper/PDFs/03_ADSDx.pdf
+    local_artifact: paper/SI/03_ADSDx/ADSDx-3F20.zip
+    construction_facts:
+      - retain only fault-free-safe, reproducible and distinguishable collision cases
+      - collision identity uses object, position, angle and speed rather than a collision boolean alone
+      - benchmark includes non-ADS-responsible controls
+      - five artifact examples trim 10-68-agent scenarios to 2-3 causal actors and remove weather confounds
+      - a perfect upstream intervention can mask a downstream fault and cause wrong-domain attribution
+    adopted_rules: [collision_identity, causal_scene_trimming, non_ads_controls, ambiguous_not_relabelled]
+  ACAV:
+    reference_url: https://arxiv.org/abs/2401.07063
+    local_pdf: paper/PDFs/04_ACAV.pdf
+    construction_facts:
+      - eight code-level prediction/planning faults are tied to explicit functions and semantics
+      - causal events are timestamped and main causes are judged by persistence
+      - the injected evaluation contains 1206 fixed-duration accident recordings
+    adopted_rules: [mechanism_specific_signature, event_interval_not_single_proxy]
+  ROCAS:
+    reference_url: https://arxiv.org/abs/2409.07774
+    local_pdf: paper/PDFs/05_ROCAS.pdf
+    construction_facts:
+      - counterfactuals must suppress the accident while preserving pre-accident trajectory similarity
+      - physical and cyber mutations minimize changed variables and magnitudes
+      - repaired configurations are checked on 200 perturbed regression cases
+    adopted_rules: [pre_intervention_similarity, minimal_intervention, regression_side_effect_check]
+  MoDitector:
+    reference_url: https://arxiv.org/abs/2502.08504
+    local_pdf: paper/PDFs/06_MoDitector.pdf
+    construction_facts:
+      - module-induced cases require a system failure and a target-module error without other module errors in the effect window
+      - module perturbations are tested at three intensities and repeated three times
+      - perfect-output repair is below 100 percent for upstream modules
+    adopted_rules: [separate_error_failure_attribution, dose_grid, effect_window, abstain_on_multi_domain]
+
+inference_notice: >-
+  Numerical grids, Apollo-10 message transformations and quality thresholds in this protocol are CAGE-AD design
+  decisions informed by these sources; they are not copied experimental settings unless explicitly stated above.

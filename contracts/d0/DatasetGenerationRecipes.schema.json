@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CAGE-AD D0 Dataset Generation Recipe Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "status",
+    "calibration_seeds",
+    "formal_seeds_after_freeze",
+    "condition_set",
+    "repeats_per_formal_condition",
+    "formal_run_matrix",
+    "episodes",
+    "per_recipe_execution_order",
+    "normative_nested_search",
+    "prohibitions"
+  ],
+  "properties": {
+    "protocol_version": {"const": "cage-ad-d0-protocol-v1"},
+    "status": {"const": "calibration_only_not_a_released_benchmark"},
+    "calibration_seeds": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {"type": "integer", "minimum": 0}
+    },
+    "formal_seeds_after_freeze": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {"type": "integer", "minimum": 0}
+    },
+    "condition_set": {
+      "const": ["nominal", "fault", "probe_forecasting", "probe_planning", "probe_control"]
+    },
+    "repeats_per_formal_condition": {"type": "integer", "minimum": 3},
+    "formal_run_matrix": {"const": "each_formal_seed_times_each_condition_times_repeat_indices_0_1_2"},
+    "episodes": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["recipe_id", "scenario_id", "fault_id", "exposure_reason", "primary_outcome"],
+        "properties": {
+          "recipe_id": {"pattern": "^CAL-[FPC][0-9]{2}$", "type": "string"},
+          "scenario_id": {"minLength": 1, "type": "string"},
+          "fault_id": {"minLength": 1, "type": "string"},
+          "exposure_reason": {"minLength": 20, "type": "string"},
+          "primary_outcome": {
+            "enum": ["longitudinal_collision_or_ttc_degradation", "lateral_collision_or_ttc_degradation"]
+          }
+        }
+      }
+    },
+    "per_recipe_execution_order": {
+      "type": "array",
+      "minItems": 6,
+      "items": {"minLength": 1, "type": "string"}
+    },
+    "normative_nested_search": {
+      "type": "array",
+      "minItems": 8,
+      "items": {"minLength": 1, "type": "string"}
+    },
+    "prohibitions": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {"minLength": 1, "type": "string"}
+    }
+  }
+}

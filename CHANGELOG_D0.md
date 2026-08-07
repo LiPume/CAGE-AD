@@ -35,3 +35,13 @@
 - Added an open-release-oriented dataset card covering every scene, fault,
   action, companion role, field boundary, limitation, and release gate.
 - Added deterministic public manifest and CSV/Parquet/SVG result exporters.
+
+## D0-2 revision — literature-grounded dataset protocol v1
+
+- Audited why the Cartesian 12-case pilot produced only 2/12 scientifically admissible episodes.
+- Recovered construction rules from HINT, Minimal Grey Box, ADSDx, ACAV, ROCAS, and MoDitector.
+- Replaced implicit hard-coded generation guidance with four scenario recipes, six field-level fault recipes,
+  twelve mechanism-matched calibration items, and separate infrastructure/mechanism/safety/task/attribution gates.
+- Added weak-to-strong dose search, held-out formal seeds, collision identity, pre-intervention similarity,
+  wrong-domain selectivity, and explicit identifiable/ambiguous/rejected outcomes.
+- Marked the old 12→36 expansion as historical and prevented formal scaling before per-recipe calibration passes.

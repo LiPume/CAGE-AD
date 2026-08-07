@@ -1,0 +1,97 @@
+protocol_version: cage-ad-d0-protocol-v1
+status: calibration_only_not_a_released_benchmark
+calibration_seeds: [1101, 1102, 1103, 1104, 1105]
+formal_seeds_after_freeze: [2101, 2102, 2103]
+condition_set: [nominal, fault, probe_forecasting, probe_planning, probe_control]
+repeats_per_formal_condition: 3
+formal_run_matrix: each_formal_seed_times_each_condition_times_repeat_indices_0_1_2
+
+episodes:
+  - recipe_id: CAL-F01
+    scenario_id: lead_brake_close
+    fault_id: forecast_stale_or_delayed
+    exposure_reason: lead braking creates fresh information that a delayed forecast must miss
+    primary_outcome: longitudinal_collision_or_ttc_degradation
+  - recipe_id: CAL-F02
+    scenario_id: lead_brake_moderate
+    fault_id: forecast_stale_or_delayed
+    exposure_reason: a second headway and braking profile tests that staleness is not tied to one severity
+    primary_outcome: longitudinal_collision_or_ttc_degradation
+  - recipe_id: CAL-F03
+    scenario_id: cut_in_early
+    fault_id: forecast_heading_or_maneuver_bias
+    exposure_reason: lateral intrusion makes future maneuver shape decision-relevant
+    primary_outcome: lateral_collision_or_ttc_degradation
+  - recipe_id: CAL-F04
+    scenario_id: cut_in_late
+    fault_id: forecast_heading_or_maneuver_bias
+    exposure_reason: later faster intrusion tests the same semantic error under a different timing margin
+    primary_outcome: lateral_collision_or_ttc_degradation
+  - recipe_id: CAL-P01
+    scenario_id: lead_brake_close
+    fault_id: planning_constraint_omitted
+    exposure_reason: the nominal planner must first exhibit a measurable braking suffix to be attenuated
+    primary_outcome: longitudinal_collision_or_ttc_degradation
+  - recipe_id: CAL-P02
+    scenario_id: lead_brake_moderate
+    fault_id: planning_constraint_omitted
+    exposure_reason: a second braking envelope tests omission beyond one initial gap
+    primary_outcome: longitudinal_collision_or_ttc_degradation
+  - recipe_id: CAL-P03
+    scenario_id: cut_in_early
+    fault_id: planning_unsafe_cost_or_speed_bias
+    exposure_reason: time compression makes a geometrically valid but temporally unsafe plan around an intruder
+    primary_outcome: lateral_collision_or_ttc_degradation
+  - recipe_id: CAL-P04
+    scenario_id: cut_in_late
+    fault_id: planning_unsafe_cost_or_speed_bias
+    exposure_reason: a second intrusion timing tests the same cost bias without changing path geometry
+    primary_outcome: lateral_collision_or_ttc_degradation
+  - recipe_id: CAL-C01
+    scenario_id: lead_brake_close
+    fault_id: control_command_transport_delay
+    exposure_reason: a braking request creates an observable request-to-execution delay and stopping-margin loss
+    primary_outcome: longitudinal_collision_or_ttc_degradation
+  - recipe_id: CAL-C02
+    scenario_id: cut_in_early
+    fault_id: control_command_transport_delay
+    exposure_reason: a lateral conflict tests delay on a different command sequence and outcome geometry
+    primary_outcome: lateral_collision_or_ttc_degradation
+  - recipe_id: CAL-C03
+    scenario_id: lead_brake_close
+    fault_id: control_gain_saturation_tracking_bias
+    exposure_reason: braking demand exposes reduced actuator effectiveness without adding throttle bias
+    primary_outcome: longitudinal_collision_or_ttc_degradation
+  - recipe_id: CAL-C04
+    scenario_id: cut_in_early
+    fault_id: control_gain_saturation_tracking_bias
+    exposure_reason: combined steering and braking demand tests the same global effectiveness scalar
+    primary_outcome: lateral_collision_or_ttc_degradation
+
+per_recipe_execution_order:
+  - run_each_listed_scenario_candidate_once_on_each_calibration_seed_1101_to_1105
+  - reject_candidates_that_fail_scenario_admission
+  - for_each_nominal_admissible_candidate_run_fault_doses_on_seeds_1101_1102_1103_until_one_passes_pre_probe_gates
+  - select_first_dose_passing_activation_degradation_temporal_and_collision_identity_gates
+  - run_each_domain_probe_once_on_seeds_1101_1102_1103_on_the_selected_candidate_and_dose
+  - classify_as_identifiable_ambiguous_or_rejected_using_quality_gates
+  - freeze_candidate_dose_trigger_window_and_hashes_before_formal_seeds
+
+normative_nested_search:
+  - for_candidate_in_declared_order_run_nominal_gate
+  - if_nominal_gate_fails_record_and_continue_next_candidate
+  - for_dose_in_declared_weak_to_strong_order_run_activation_degradation_temporal_and_collision_identity_gates
+  - if_dose_gate_fails_record_and_continue_next_dose
+  - on_first_dose_passing_pre_probe_gates_run_all_three_probes_and_stop_all_candidate_and_dose_search
+  - if_probe_evidence_is_valid_apply_complete_classification_tree_identifiable_or_ambiguous
+  - if_probe_evidence_is_invalid_classify_rejected_probe_invalid
+  - if_all_doses_fail_for_candidate_continue_next_candidate
+  - if_all_candidates_exhausted_classify_rejected_no_causal_dose
+  - never_try_another_candidate_or_stronger_dose_after_a_causally_valid_dose_is_found
+
+prohibitions:
+  - no_full_cartesian_expansion
+  - no_manual_parameter_edit_outside_candidate_or_dose_grid
+  - no_formal_seed_used_for_tuning
+  - no_failed_or_ambiguous_attempt_deleted
+  - no_recipe_id_or_fault_id_exposed_to_diagnosis_policy
