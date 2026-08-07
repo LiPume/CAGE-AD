@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
+import subprocess
+import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -59,3 +62,48 @@ def test_runtime_repair_patch_is_source_only_and_maps_all_gears() -> None:
     assert "GEAR_PARKING" in patch
     assert "runtime_state" not in patch
     assert "private_oracle" not in patch
+
+
+def test_execution_smoke_evaluator_applies_frozen_gate(tmp_path: Path) -> None:
+    summary = {
+        "non_unit_frame_gaps": 0,
+        "sim_duration_s": 19.95,
+        "npc_vehicle_count": 0,
+        "route": {"route_accepted": True},
+        "drive_gear_mismatch_frames": 3,
+        "valid_trajectory_frame_coverage": 0.95,
+        "control_topic": "/apollo/control_guarded",
+        "tracking_window": {"passed": True},
+        "progress_m": 10.0,
+    }
+    summary_path = tmp_path / "summary.json"
+    summary_path.write_text(json.dumps(summary))
+    heartbeat_path = tmp_path / "heartbeat.json"
+    heartbeat_path.write_text(json.dumps({"label": "RUNTIME_REPAIR_SMOKE_NOT_DATASET"}))
+    stack_path = tmp_path / "stack.log"
+    stack_path.write_text("healthy\n")
+    output = tmp_path / "result.json"
+    command = [
+        sys.executable,
+        str(REPO_ROOT / "scripts/d0/repair/evaluate_execution_smoke.py"),
+        "--run-id", "NO_NPC_FIXTURE",
+        "--runtime-summary", str(summary_path),
+        "--stack-log", str(stack_path),
+        "--empty-road-stats", str(heartbeat_path),
+        "--runtime-exit", "0",
+        "--powered-on-seconds", "1.0",
+        "--source-commit", "fixture",
+        "--output", str(output),
+    ]
+
+    completed = subprocess.run(command, check=False)
+
+    assert completed.returncode == 0
+    assert json.loads(output.read_text())["result"] == "PASS"
+
+    stack_path.write_text("lane_follow_stage/path_decider.pb.txt is not found\n")
+    completed = subprocess.run(command, check=False)
+    result = json.loads(output.read_text())
+    assert completed.returncode == 2
+    assert result["result"] == "FAIL"
+    assert result["checks"]["no_lane_follow_config_missing"] is False
