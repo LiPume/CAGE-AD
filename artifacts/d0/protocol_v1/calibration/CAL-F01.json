@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "protocol_version": "cage-ad-d0-protocol-v1",
+  "recipe_id": "CAL-F01",
+  "terminal_classification": "rejected_no_causal_dose",
+  "formal_seeds_executed": false,
+  "scenario_candidates": [
+    {"candidate_id": "LBC0", "runtime_valid": 5, "collision_free": 5, "route_accepted": 5, "ttc_in_band": 0, "required_ttc_in_band": 4, "passed": false},
+    {"candidate_id": "LBC1", "runtime_valid": 5, "collision_free": 5, "route_accepted": 5, "ttc_in_band": 0, "required_ttc_in_band": 4, "passed": false},
+    {"candidate_id": "LBC2", "runtime_valid": 5, "collision_free": 5, "route_accepted": 5, "ttc_in_band": 0, "required_ttc_in_band": 4, "passed": false}
+  ],
+  "selected_candidate_id": null,
+  "selected_dose": null,
+  "fault_or_probe_runs_executed": 0,
+  "source_commit": "f8ab7fb4c5457810bef30486aa3326e65c5eb70a",
+  "protocol_bundle_sha256": "382567248f7cc03bda2c65ac8da90b6e0b2ea7c0ff7aa158e802f1d7390ba1a8",
+  "completed_at": "2026-08-07T06:26:26Z"
+}
