@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "language": "zh-CN",
+  "status": "CALIBRATION_REMAINS_PAUSED",
+  "primary_root_cause": {
+    "class": "B_EGO_EXECUTION_OR_RUNTIME_BUG",
+    "confidence": "high",
+    "observable_direct_cause": "ego remained abnormally slow and never established a geometric conflict with the interaction actor"
+  },
+  "secondary_root_causes": [
+    {
+      "class": "C_INTERACTION_ACTOR_EXECUTION_BUG",
+      "scope": "CIE0 cut-in execution",
+      "evidence": "actor velocity RMSE 2.5764097996010102 m/s and no ego-lane-center crossing"
+    },
+    {
+      "class": "D_PROTOCOL_SCENARIO_OR_ADMISSION_DESIGN_FAILURE",
+      "scope": "route-epoch trigger and cut-in terminal behavior",
+      "evidence": "LBM0 actor stopped at 9.300000138580799 s before ego ever reached 2 m/s"
+    }
+  ],
+  "evaluator_bug_supported": false,
+  "valid_replay": {
+    "run_id": "R3_LBM0_SEED1101_60S",
+    "trace_frames": 1200,
+    "sim_duration_s": 59.950000893324614,
+    "non_unit_frame_gaps": 0,
+    "ego_progress_m": 10.528091489589961,
+    "ego_speed_median_mps": 0.08239236557672194,
+    "ego_speed_max_mps": 0.8207448076656528,
+    "min_obb_separation_m": 30.7421946717659,
+    "production_finite_ttc_ticks": 0,
+    "independent_finite_ttc_ticks": 0,
+    "finite_null_disagreement_ticks": 0,
+    "planned_path_conflict": false,
+    "control_drive_chassis_neutral_ticks": 1200
+  },
+  "offline_audit": {
+    "nominal_attempt_finished": 75,
+    "completed_with_full_metrics": 61,
+    "completed_all_null": 61,
+    "legacy_missing_fields": [
+      "actor_ids",
+      "actor_xy_yaw_velocity_components",
+      "OBB local transforms and extents",
+      "Apollo planning/control/chassis values"
+    ]
+  },
+  "replay_budget": {
+    "executed": 4,
+    "limit": 4,
+    "powered_on_seconds": 338.317960391,
+    "powered_on_hours": 0.09397721121972222,
+    "limit_hours": 1.5,
+    "incremental_data_mib_approx": 32,
+    "limit_gib": 5
+  },
+  "artifact_roots": {
+    "state": "/root/autodl_apollo10_g0_bundle/runtime_state/diagnostics/ttc_null_20260807T074356Z",
+    "data": "/root/autodl-tmp/cage_ad_diagnostics/ttc_null_20260807T074356Z"
+  },
+  "verification": {
+    "full_cpu_tests_passed": 146,
+    "targeted_isolation_and_leakage_tests_passed": 26,
+    "source_candidates_scanned": 186,
+    "upstream_provenance_files": 3,
+    "source_audit": "PASS",
+    "bundle_final_audit": "PASS",
+    "artifact_validation": "PASS"
+  },
+  "required_action": "repair execution chain, preregister protocol v2 pilot, then rerun F01-F04; do not reuse old attempts as dataset episodes",
+  "fail_fast": {
+    "audit_after_first_null": true,
+    "stop_candidate_after_ttc_band_failures": 2,
+    "stop_all_after_consecutive_nulls": 2,
+    "admit_requirement": "at least 4 of 5 nominal seeds in (2.5, 6.0] seconds"
+  }
+}

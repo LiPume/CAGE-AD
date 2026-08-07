@@ -12,6 +12,7 @@ from cage_ad.diagnostics.ttc_null import (
     classify_tick_disagreement,
     closest_approach,
     fine_step_ttc,
+    has_stable_true,
     relative_state_in_ego_frame,
     sampled_prediction_geometry,
     sat_separation_m,
@@ -144,6 +145,10 @@ def test_disagreement_classes() -> None:
     assert classify_tick_disagreement(1.0, None) == "production_finite_independent_null"
     assert classify_tick_disagreement(1.0, 1.05) == "agree"
     assert classify_tick_disagreement(1.0, 1.2) == "finite_value_mismatch"
+    assert has_stable_true([False, True, True, True])
+    assert not has_stable_true([True, True, False, True])
+    with pytest.raises(DiagnosticValidationError, match="positive"):
+        has_stable_true([True], consecutive=0)
 
 
 def _trace_row(frame: int, sim: float) -> dict:

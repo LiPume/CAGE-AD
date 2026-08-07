@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "label": "DIAGNOSTIC_ONLY_NOT_DATASET",
+  "run_id": "<diagnostic-run-id>",
+  "seed": 1101,
+  "source_commit": "<40-hex-git-commit>",
+  "config_sha256": "<sha256>",
+  "protocol_bundle_sha256": "<sha256>",
+  "trace": {
+    "relative_path": "retained/trace.jsonl",
+    "line_count": 0,
+    "sha256": "<sha256>"
+  },
+  "summary": {
+    "relative_path": "retained/summary.json",
+    "sha256": "<sha256>"
+  },
+  "visualization": {
+    "xy_plot": "retained/xy_trajectory.png",
+    "timeseries_plot": "retained/semantic_timeseries.png",
+    "video": "retained/diagnostic_replay.mp4",
+    "video_expected": {
+      "codec": "h264",
+      "width": 1280,
+      "height": 720,
+      "fps": 20
+    }
+  },
+  "dataset_eligible": false,
+  "private_oracle_in_git": false
+}

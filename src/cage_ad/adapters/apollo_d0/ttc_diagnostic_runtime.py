@@ -26,6 +26,7 @@ from cage_ad.diagnostics.ttc_null import (
     DiagnosticOBB,
     DiagnosticTraceRow,
     classify_root_cause,
+    has_stable_true,
     relative_state_in_ego_frame,
     sampled_prediction_geometry,
     sat_separation_m,
@@ -480,7 +481,7 @@ def main() -> None:
     production_finite = sum(row["geometry"]["production_ttc_s"] is not None for row in rows)
     independent_finite = sum(row["geometry"]["independent_ttc_s"] is not None for row in rows)
     mismatch_flags = [row["geometry"]["production_ttc_s"] is None and row["geometry"]["independent_ttc_s"] is not None for row in rows]
-    stable_mismatch = max((sum(mismatch_flags[index:index + 3]) for index in range(max(1, len(rows) - 2))), default=0) >= 3
+    stable_mismatch = has_stable_true(mismatch_flags)
     planned_values = [row["geometry"]["planned_path_min_separation_m"] for row in rows if row["geometry"]["planned_path_min_separation_m"] is not None]
     planning_stop = any(row["apollo"].get("planning") and ((row["apollo"]["planning"].get("target_speed_1s_mps") is not None and row["apollo"]["planning"]["target_speed_1s_mps"] < 0.30) or row["apollo"]["planning"].get("decision_mentions_obstacle_1001")) for row in rows)
     control_brake = [float(item["brake"]) for item in controls]
@@ -502,6 +503,17 @@ def main() -> None:
     planned_min = min(planned_values) if planned_values else None
     admission_mismatch = production_finite == 0 and planned_min is not None and planned_min < 1.0 and safety_stop
     first_finite_elapsed = next((row["sim_time_s"] for row in rows if row["geometry"]["production_ttc_s"] is not None), None)
+    gear_mismatches = [
+        bool(row["apollo"].get("control_guarded"))
+        and bool(row["apollo"].get("chassis"))
+        and int(row["apollo"]["control_guarded"]["gear_location"]) == 1
+        and int(row["apollo"]["chassis"]["gear_location"]) != 1
+        for row in rows
+    ]
+    topic_mismatches = [
+        row["apollo"].get("bridge_subscribed_control_topic") != "/apollo/control_guarded"
+        for row in rows
+    ]
     summary = {
         "schema_version": 1,
         "label": "DIAGNOSTIC_ONLY_NOT_DATASET",
@@ -545,7 +557,9 @@ def main() -> None:
             "minimum_geometric_separation_s": minimum_separation_time,
         },
         "ego_execution_bug": ego_execution_bug,
-        "control_topic_or_gear_mismatch": False,
+        "control_topic_or_gear_mismatch": has_stable_true(gear_mismatches)
+        or has_stable_true(topic_mismatches),
+        "stable_drive_gear_feedback_mismatch": has_stable_true(gear_mismatches),
         "apollo_active_safety_stop": safety_stop,
         "trigger_too_early": trigger_too_early,
         "cut_in_has_no_terminal_condition": cut_no_terminal,

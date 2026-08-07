@@ -361,6 +361,19 @@ def classify_tick_disagreement(
     return "agree" if abs(float(production_ttc) - float(independent_ttc)) <= tolerance_s else "finite_value_mismatch"
 
 
+def has_stable_true(values: list[bool], consecutive: int = 3) -> bool:
+    """Return whether a diagnostic condition persists for consecutive samples."""
+
+    if consecutive <= 0:
+        raise DiagnosticValidationError("consecutive sample count must be positive")
+    run = 0
+    for value in values:
+        run = run + 1 if value else 0
+        if run >= consecutive:
+            return True
+    return False
+
+
 TRACE_REQUIRED_KEYS = {
     "frame",
     "sim_time_s",
