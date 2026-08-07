@@ -65,5 +65,34 @@ Git 只保存代码、YAML、schema、small fixtures、decision/manifest 摘要�
 - calibration 结束后不要自动跑 formal seeds。先提交一份 freeze proposal，列出通过 parents、selected candidate/dose/window/hash、ambiguous/rejected 分布、预计 formal runs/小时/空间和能否支持 abstention。等待用户或主研究任务确认后，才进入 held-out generation。
 - 不开始 Autoware，不运行 Agent/baselines，不为凑 36 条复制数据，不修改 protocol v1 gate 来提高通过率。若规范本身必须修改，创建 protocol v2 和新分支，绝不覆盖 v1。
 
+六、校准完成后的典型场景演示视频
+
+这一步已获用户授权，但只能在 12 个 calibration recipes 全部获得终态、校准报告和 freeze proposal 已生成之后执行。演示录制是独立 replay，不是科学评测的一部分；不得在原始校准 run 中开启录屏，也不得用视频 replay 的数值替换原始实验结果。
+
+1. 按固定规则选择案例，禁止按画面效果挑最好看的结果：
+   - forecasting、planning、control 各取 protocol 顺序中第一个 identifiable recipe；
+   - 再取 protocol 顺序中第一个 ambiguous recipe，用于展示证据不足与拒答；若前三个案例已含 ambiguous，或当前没有 ambiguous，则总数保持最多 4 个；
+   - 某责任域没有 identifiable recipe 时，不得伪造成功案例：改取该域第一个 ambiguous/rejected 案例并明确标注终态和原因；
+   - 每个案例复用冻结的 candidate、dose、trigger window、一个已完成 calibration seed 和完全相同的初始条件。
+2. 每个 identifiable 案例独立重放并录制三段：`nominal`、`fault_no_probe`、`correct_domain_probe`。ambiguous 案例至少录制 `fault_no_probe`、三个 domain probes，并展示它们为何不能被可靠区分。所有成组视频必须使用同一相机位姿、相同裁剪、起止时间和编码参数。
+3. 最低可视化要求：
+   - 使用 CARLA spectator、固定路侧相机或固定 chase camera，优先选择能同时看清 ego、关键 NPC 和冲突区域的视角；
+   - 画面叠加 `NOMINAL`、`FAULT / NO PROBE`、`CORRECT PROBE` 或 `AMBIGUOUS / ABSTAIN` 标签，以及仿真时间、ego speed、关键 NPC speed、TTC、fault/probe 生效窗口、collision/near-miss/task outcome；
+   - recipe、责任域和 ground-truth fault 只允许出现在演示叠层与私有 metadata，不得回流到 diagnosis-visible 输入；
+   - 每个画面永久加注 `DEMONSTRATION REPLAY — NOT AN EVALUATION SAMPLE`；成片开头和结尾明确写明：`CARLA simulation + Apollo 10 + controlled injected faults; not real-road safety evidence.`
+4. 输出规格与目录：
+   - 所有二进制和临时帧写入 `$CAGE_DATA_ROOT/demo_videos/protocol_v1/<opaque_case_id>/`，不得写入 Git；
+   - 单段视频优先为 30–45 秒、1280×720、30 fps、H.264 MP4、`yuv420p`、CRF 约 23、无音频；没有硬件编码时使用 `libx264`，不得因此修改实验容器或 Apollo/CARLA 的核心依赖；
+   - 每个案例输出原子视频、`comparison_3up.mp4`（ambiguous 可为 4-up）、`metadata.json` 和 `README.md`；另生成 2–4 分钟的 `$CAGE_DATA_ROOT/demo_videos/protocol_v1/CAGE_AD_PROTOCOL_V1_SHOWCASE.mp4`，按 forecasting、planning、control、ambiguous/abstain 排列；
+   - 临时帧只可在 MP4 可解码、时长/分辨率正确且 SHA-256 已写入 manifest 后清理。
+5. 科学一致性与审计：
+   - 视频 replay 必须与来源 calibration run 的 collision identity、task outcome 和终态一致；TTC 等连续值允许的偏差阈值须在代码中预先声明并写入报告；
+   - 若渲染或编码负载改变了结局，标记该 replay 为 invalid，降低录制开销或采用离线渲染后重试；不得隐藏不一致，也不得把失真的演示当成证据；
+   - 在 `$CAGE_STATE_ROOT/demo_videos/manifest.json` 记录 opaque case ID、source run ID、replay run ID、commit、config hashes、相机配置、编码命令、文件大小、时长、SHA-256、一致性检查结果和失败重试；私有 recipe/fault 映射仍只放 private oracle；
+   - Git 只提交录制/合成代码、小型 manifest 索引、复现命令和 `DEMO_VIDEO_REPORT.md`，不提交 MP4、原始帧或含 private oracle 的 metadata。
+6. 本阶段额外上限为 4 个案例、2 个 powered-on hours 和 10 GiB 持久盘增量。预计超过任一上限时，先完成已有文件的校验与 manifest，关闭 Apollo/CARLA，再在 `USER_ACTION_REQUIRED.md` 中报告缺口；不得静默扩展预算。
+
+完成后在报告中给出每个视频的绝对路径、案例选择依据、对应原始 run、可演示的现象和不可据此宣称的结论。若后来获得 formal generation 授权，可按同一固定规则另做 held-out showcase，但不得用其挑选或调参。
+
 现在开始：先同步包含 protocol v1 的最新仓库，完成只读现状审计和实现差距表；随后持续实现、离线验证，并从 CAL-F01 开始逐 recipe 校准，直到满足上述暂停条件。
 ```
