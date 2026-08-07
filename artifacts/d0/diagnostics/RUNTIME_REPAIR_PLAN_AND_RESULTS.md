@@ -120,7 +120,7 @@ Stage B 需 3/3 通过才称“运行链修复成功”。若只有 gear 一致�
 
 | 阶段 | source commit / config SHA | 精确命令 | 实际结果 | 与预期偏差 | 是否成功 |
 |---|---|---|---|---|---|
-| Stage A CPU/静态 | 待填 | 待填 | 待填 | 待填 | 待填 |
+| Stage A CPU/静态 | `231a4a0a27ce9de878d428eb3975adcc34e81a3c`；installed Neo pipeline 由 `PLANNING_PREFLIGHT.json` 记录 | `python -m pytest -q`；`verify_bridge_gear_mapping.py`；`preflight_apollo10_planning.py`；compile/secret/large-file/diff checks | 全量 `148 passed`；真实 bridge 方法映射 drive/reverse/parking=`1/2/3`，转换序列=`[1,2,1,3]`；Apollo 10 task plugin/default config `12/12 PASS`；其余静态审计 PASS | 第一次验证使用的 `cage-ad` Python 未安装 CARLA，第二次使用 `guardian` 又缺 protobuf；最终仅组合服务器已有只读 Python 路径并启用旧 pb2 兼容模式后成功，未安装/下载依赖。另确认 stage-local 文件是可选覆盖，不能按原先猜测复制配置；插件默认配置本身完整 | **Stage A 成功** |
 | Stage B no-NPC #1 | 待填 | 待填 | 待填 | 待填 | 待填 |
 | Stage B no-NPC #2 | 待填 | 待填 | 待填 | 待填 | 待填 |
 | Stage B no-NPC #3 | 待填 | 待填 | 待填 | 待填 | 待填 |
@@ -134,3 +134,5 @@ Stage B 需 3/3 通过才称“运行链修复成功”。若只有 gear 一致�
 - `REPAIR_BLOCKED_EXTERNAL`
 
 当前状态：`PRE_REPAIR_PLAN_FROZEN`。
+
+实施进度（追加）：`STAGE_A_PASS_STAGE_B_PENDING`。这只证明 gear 源码修复和 Apollo 10 安装完整，尚未证明车辆能正常跟踪，也尚未允许恢复数据集构建。
