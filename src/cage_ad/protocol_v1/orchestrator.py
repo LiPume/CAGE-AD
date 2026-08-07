@@ -84,7 +84,41 @@ class RecipeOrchestrator:
         self.execute = execute
         self.ledger_path = self.state_root / "ledger/attempts.jsonl"
         self.source_commit = self._source_commit()
+        self._supersede_stale_pending_plans()
         self._enforce_recipe_order()
+
+    def _supersede_stale_pending_plans(self) -> None:
+        ledger = self._ledger()
+        for record in ledger.records:
+            if record.event_type != "attempt_planned":
+                continue
+            plan = AttemptPlan(**record.payload)
+            if (
+                plan.recipe_id != self.recipe_id
+                or plan.source_commit == self.source_commit
+                or ledger.find_operation(f"attempt-result/{plan.attempt_id}") is not None
+            ):
+                continue
+            ledger.complete_attempt(
+                AttemptResult(
+                    attempt_id=plan.attempt_id,
+                    status="interrupted",
+                    runtime_valid=False,
+                    five_layer_metrics={
+                        "infrastructure_valid": False,
+                        "mechanism_activated": None,
+                        "safety_outcome": None,
+                        "task_outcome": None,
+                        "attribution_outcome": None,
+                    },
+                    wall_seconds=0.0,
+                    powered_on_seconds=0.0,
+                    incremental_storage_bytes=0,
+                    output_sha256={},
+                    failure_reason="source_checkpoint_superseded_before_execution",
+                ),
+                recorded_at=_utc_now(),
+            )
 
     def _source_commit(self) -> str:
         status = subprocess.run(
@@ -144,6 +178,7 @@ class RecipeOrchestrator:
             plan = AttemptPlan(**record.payload)
             if (
                 plan.recipe_id == self.recipe_id
+                and plan.source_commit == self.source_commit
                 and plan.candidate_id == candidate_id
                 and plan.seed == seed
                 and plan.condition == condition
