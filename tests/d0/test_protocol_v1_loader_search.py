@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
+import sys
 
 import pytest
 import yaml
@@ -47,6 +48,14 @@ def test_real_protocol_loads_with_stable_order_and_hashes():
     )
     assert len(bundle.file_sha256) == 7
     assert len(bundle.bundle_sha256) == 64
+
+
+def test_runtime_hash_validation_path_does_not_mutate_apollo_python_dependencies(monkeypatch):
+    monkeypatch.setitem(sys.modules, "jsonschema", None)
+    bundle = load_protocol(ROOT, validate_json_schema=False)
+    assert len(bundle.bundle_sha256) == 64
+    with pytest.raises(ProtocolValidationError, match="jsonschema is required"):
+        load_protocol(ROOT)
 
 
 @pytest.mark.parametrize(

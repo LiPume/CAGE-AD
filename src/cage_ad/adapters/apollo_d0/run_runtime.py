@@ -84,7 +84,9 @@ def main() -> None:
     parser.add_argument("--repo-root", type=Path, default=_repo_root())
     args = parser.parse_args()
 
-    bundle = load_protocol(args.repo_root)
+    # Full schema validation is done before the attempt is planned; host mode
+    # verifies the same registry/schema hash without importing extra packages.
+    bundle = load_protocol(args.repo_root, validate_json_schema=False)
     config = json.loads(args.private_run_config.read_text())
     if config.get("protocol_version") != PROTOCOL_VERSION:
         raise ProtocolValidationError("private run protocol version mismatch")

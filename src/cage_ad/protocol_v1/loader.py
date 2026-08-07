@@ -9,7 +9,6 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping
 
-import jsonschema
 import yaml
 
 
@@ -167,7 +166,7 @@ def _validate_cross_references(documents: Mapping[str, dict[str, Any]]) -> None:
     _require(bool(gates.get("complete_classification_tree", {}).get("precedence")), "classification precedence missing")
 
 
-def load_protocol(repo_root: Path) -> ProtocolBundle:
+def load_protocol(repo_root: Path, *, validate_json_schema: bool = True) -> ProtocolBundle:
     repo_root = repo_root.resolve()
     root = repo_root / "benchmarks/apollo_d0/protocol_v1"
     schema_path = repo_root / "contracts/d0/DatasetGenerationRecipes.schema.json"
@@ -175,9 +174,19 @@ def load_protocol(repo_root: Path) -> ProtocolBundle:
     documents = {name: _load_mapping(root / name) for name in REGISTRY_FILES}
     try:
         schema = json.loads(schema_path.read_text())
-        jsonschema.Draft202012Validator(schema).validate(documents["episode_recipes.yaml"])
-    except (OSError, json.JSONDecodeError, jsonschema.ValidationError, jsonschema.SchemaError) as exc:
-        raise ProtocolValidationError(f"episode schema validation failed: {exc}") from exc
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ProtocolValidationError(f"episode schema loading failed: {exc}") from exc
+    if validate_json_schema:
+        try:
+            import jsonschema
+        except ImportError as exc:
+            raise ProtocolValidationError(
+                "jsonschema is required in the offline protocol-validation process"
+            ) from exc
+        try:
+            jsonschema.Draft202012Validator(schema).validate(documents["episode_recipes.yaml"])
+        except (jsonschema.ValidationError, jsonschema.SchemaError) as exc:
+            raise ProtocolValidationError(f"episode schema validation failed: {exc}") from exc
     _validate_cross_references(documents)
 
     hashes = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in REGISTRY_FILES}

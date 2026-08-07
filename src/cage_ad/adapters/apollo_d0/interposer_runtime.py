@@ -124,7 +124,9 @@ def _replace_planning_points(message: ADCTrajectory, points: Sequence[Trajectory
 
 class BoundaryInterposer:
     def __init__(self, config: dict, capture_path: Path, private_stats: Path, repo_root: Path) -> None:
-        self.bundle = load_protocol(repo_root)
+        # The conda-side planner already performed Draft 2020-12 validation.
+        # Apollo host mode repeats cross-checks and requires that exact bundle SHA.
+        self.bundle = load_protocol(repo_root, validate_json_schema=False)
         self._validate_config(config)
         self.config = config
         self.fault_id = config.get("fault_id")

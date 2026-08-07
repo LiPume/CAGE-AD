@@ -57,7 +57,10 @@ def _seed_everything(seed: int, client: carla.Client) -> None:
 
 class ScenarioRuntime:
     def __init__(self, config: dict, stats_path: Path, repo_root: Path) -> None:
-        bundle = load_protocol(repo_root)
+        # Full JSON-Schema validation is mandatory in prepare_attempt. Apollo's
+        # host Python deliberately stays dependency-minimal; this process repeats
+        # all cross-registry checks and verifies the exact prevalidated bundle SHA.
+        bundle = load_protocol(repo_root, validate_json_schema=False)
         if config.get("protocol_version") != PROTOCOL_VERSION:
             raise ProtocolValidationError("private scenario protocol version mismatch")
         if config.get("protocol_bundle_sha256") != bundle.bundle_sha256:
