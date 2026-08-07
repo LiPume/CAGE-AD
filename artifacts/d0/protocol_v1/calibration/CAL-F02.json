@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "protocol_version": "cage-ad-d0-protocol-v1",
+  "recipe_id": "CAL-F02",
+  "terminal_classification": "rejected_no_causal_dose",
+  "formal_seeds_executed": false,
+  "scenario_candidates": [
+    {"candidate_id": "LBM0", "runtime_valid": 5, "collision_free": 5, "route_accepted": 5, "ttc_in_band": 0, "required_ttc_in_band": 4, "passed": false},
+    {"candidate_id": "LBM1", "runtime_valid": 5, "collision_free": 5, "route_accepted": 5, "ttc_in_band": 0, "required_ttc_in_band": 4, "passed": false},
+    {"candidate_id": "LBM2", "runtime_valid": 5, "collision_free": 5, "route_accepted": 5, "ttc_in_band": 0, "required_ttc_in_band": 4, "passed": false}
+  ],
+  "selected_candidate_id": null,
+  "selected_dose": null,
+  "fault_or_probe_runs_executed": 0,
+  "source_commit": "472ba9562eec39215b29280bf373a0b0d5372c45",
+  "protocol_bundle_sha256": "382567248f7cc03bda2c65ac8da90b6e0b2ea7c0ff7aa158e802f1d7390ba1a8",
+  "ledger_tail_sha256": "e6e4dbe89b828c05da315f3a5cf55ed13a7743e178dec856154e658958355152",
+  "powered_on_seconds": 1164.250700518,
+  "incremental_storage_bytes": 4547723,
+  "completed_at": "2026-08-07T06:47:55Z"
+}
