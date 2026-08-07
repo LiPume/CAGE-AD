@@ -268,30 +268,41 @@ def sampled_prediction_geometry(
 
     count = int(math.floor(horizon_s / step_s + 1e-12)) + 1
     first_overlap: float | None = None
-    best_squared = math.inf
-    best_time = 0.0
+    lower_bounds: list[tuple[float, int]] = []
+    projected_start = tuple(start_dx * axis[0] + start_dy * axis[1] for axis in axes)
+    projected_velocity = tuple(
+        velocity_dx * axis[0] + velocity_dy * axis[1] for axis in axes
+    )
+    combined_radii = tuple(a + b for a, b in zip(left_radii, right_radii, strict=True))
     for index in range(count):
         seconds = index * step_s
-        dx = start_dx + velocity_dx * seconds
-        dy = start_dy + velocity_dy * seconds
-        axis_gaps = tuple(
-            abs(dx * axis[0] + dy * axis[1]) - left_radius - right_radius
-            for axis, left_radius, right_radius in zip(
-                axes, left_radii, right_radii, strict=True
-            )
+        lower_bound = max(
+            0.0,
+            *(
+                abs(start + rate * seconds) - radius
+                for start, rate, radius in zip(
+                    projected_start,
+                    projected_velocity,
+                    combined_radii,
+                    strict=True,
+                )
+            ),
         )
-        if max(axis_gaps) <= 1e-12:
-            if first_overlap is None:
-                first_overlap = seconds
-            if best_squared > 0.0:
-                best_squared = 0.0
-                best_time = seconds
-            continue
+        if lower_bound <= 1e-12 and first_overlap is None:
+            first_overlap = seconds
+        lower_bounds.append((lower_bound, index))
 
-        # SAT 最大轴间隙是欧氏距离下界；只有可能刷新最小值时才做角点-边距离。
-        lower_bound = max(0.0, max(axis_gaps))
+    if first_overlap is not None:
+        return first_overlap, ClosestApproach(time_s=first_overlap, separation_m=0.0)
+
+    # SAT 最大轴间隙是欧氏距离下界。按下界由小到大求精确距离；一旦
+    # 下界已不可能刷新当前最小值，其余 1001 个固定采样点也不可能刷新。
+    best_squared = math.inf
+    best_time = 0.0
+    for lower_bound, index in sorted(lower_bounds):
         if lower_bound * lower_bound >= best_squared:
-            continue
+            break
+        seconds = index * step_s
         right_points = translated_right(seconds)
         candidate = math.inf
         for points, polygon in (

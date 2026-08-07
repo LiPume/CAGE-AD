@@ -102,12 +102,31 @@ def test_independent_separation_and_closest_approach() -> None:
     assert sampled_approach.separation_m == pytest.approx(5.0)
 
 
-def test_vectorized_geometry_matches_golden_ttc() -> None:
+def test_optimized_geometry_matches_golden_ttc() -> None:
     ego = DiagnosticOBB(0, 0, 0, 4, 2, 10, 0)
     actor = DiagnosticOBB(14, 0, 0, 4, 2, 5, 0)
     sampled_ttc, approach = sampled_prediction_geometry(ego, actor)
     assert sampled_ttc == fine_step_ttc(ego, actor) == pytest.approx(2.0)
     assert approach.separation_m == 0.0
+
+
+@pytest.mark.parametrize(
+    ("ego", "actor"),
+    [
+        (DiagnosticOBB(0, 0, 0.1, 4.8, 2.1, 0.5, 0.1), DiagnosticOBB(8, 4, -0.2, 4.2, 2, -0.2, -0.3)),
+        (DiagnosticOBB(-2, 3, -0.7, 4, 1.8, 2, 1), DiagnosticOBB(12, -1, 1.2, 5, 2.2, -1, 0.2)),
+        (DiagnosticOBB(1, -4, 2.4, 4.5, 2, -0.5, 1.5), DiagnosticOBB(-8, 7, -1.1, 4, 2, 0.8, -1.2)),
+    ],
+)
+def test_optimized_closest_approach_matches_exhaustive_scan(
+    ego: DiagnosticOBB, actor: DiagnosticOBB
+) -> None:
+    expected_ttc = fine_step_ttc(ego, actor, horizon_s=2.0)
+    expected_approach = closest_approach(ego, actor, horizon_s=2.0)
+    actual_ttc, actual_approach = sampled_prediction_geometry(ego, actor, horizon_s=2.0)
+    assert actual_ttc == expected_ttc
+    assert actual_approach.time_s == pytest.approx(expected_approach.time_s)
+    assert actual_approach.separation_m == pytest.approx(expected_approach.separation_m)
 
 
 def test_relative_state_uses_ego_frame() -> None:
