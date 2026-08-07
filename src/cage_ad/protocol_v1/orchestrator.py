@@ -267,6 +267,22 @@ class RecipeOrchestrator:
             )
             if result is None:
                 result = self._execute_plan(plan)
+            if (
+                result is not None
+                and not result.runtime_valid
+                and plan.infrastructure_attempt == 0
+            ):
+                retry_plan, retry_result = self._prepare_or_resume(
+                    phase=phase,
+                    candidate_id=candidate_id,
+                    seed=seed,
+                    condition=condition,
+                    dose=dose,
+                )
+                plan = retry_plan
+                if retry_result is None:
+                    retry_result = self._execute_plan(retry_plan)
+                result = retry_result
             selected.append(plan)
             complete &= result is not None
         return selected, complete
