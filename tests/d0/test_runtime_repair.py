@@ -80,6 +80,10 @@ def test_execution_smoke_evaluator_applies_frozen_gate(tmp_path: Path) -> None:
     summary_path.write_text(json.dumps(summary))
     heartbeat_path = tmp_path / "heartbeat.json"
     heartbeat_path.write_text(json.dumps({"label": "RUNTIME_REPAIR_SMOKE_NOT_DATASET"}))
+    interposer_path = tmp_path / "interposer.json"
+    interposer_path.write_text(
+        json.dumps({"injector_exception": None, "prediction_in": 20, "prediction_out": 20})
+    )
     stack_path = tmp_path / "stack.log"
     stack_path.write_text("healthy\n")
     output = tmp_path / "result.json"
@@ -90,6 +94,7 @@ def test_execution_smoke_evaluator_applies_frozen_gate(tmp_path: Path) -> None:
         "--runtime-summary", str(summary_path),
         "--stack-log", str(stack_path),
         "--empty-road-stats", str(heartbeat_path),
+        "--interposer-stats", str(interposer_path),
         "--runtime-exit", "0",
         "--powered-on-seconds", "1.0",
         "--source-commit", "fixture",
@@ -107,3 +112,27 @@ def test_execution_smoke_evaluator_applies_frozen_gate(tmp_path: Path) -> None:
     assert completed.returncode == 2
     assert result["result"] == "FAIL"
     assert result["checks"]["no_lane_follow_config_missing"] is False
+
+
+def test_execution_smoke_prepare_materializes_noop_overrides(tmp_path: Path) -> None:
+    run_state = tmp_path / "state"
+    run_data = tmp_path / "data"
+    command = [
+        sys.executable,
+        str(REPO_ROOT / "scripts/d0/repair/prepare_execution_smoke.py"),
+        "--repo-root", str(REPO_ROOT),
+        "--run-id", "NO_NPC_FIXTURE",
+        "--run-state", str(run_state),
+        "--run-data", str(run_data),
+    ]
+
+    completed = subprocess.run(command, check=False)
+
+    assert completed.returncode == 0
+    planned = json.loads((run_state / "planned.json").read_text())
+    assert planned["interaction_actor"] is False
+    assert planned["fault_id"] is None
+    stage_root = run_data / "apollo_conf/modules/planning/scenarios/lane_follow/conf/lane_follow_stage"
+    overrides = sorted(stage_root.glob("*.pb.txt"))
+    assert len(overrides) == 11
+    assert all(path.read_bytes() == b"" for path in overrides)

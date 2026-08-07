@@ -34,7 +34,7 @@ def main() -> None:
     stopping = threading.Event()
     cyber.init("cage_d0_empty_road_" + args.run_id)
     node = cyber.Node("cage_d0_empty_road_" + args.run_id)
-    prediction_writer = node.create_writer("/apollo/prediction", PredictionObstacles, 10)
+    prediction_writer = node.create_writer("/apollo/prediction_raw", PredictionObstacles, 10)
     perception_writer = node.create_writer(
         "/apollo/perception/obstacles", PerceptionObstacles, 10
     )
@@ -75,6 +75,7 @@ def main() -> None:
             "counts": counts,
             "oracle_access": False,
             "interaction_actor": False,
+            "prediction_output_topic": "/apollo/prediction_raw",
         },
     )
     del reader

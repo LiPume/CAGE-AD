@@ -18,15 +18,21 @@ TRACE="${RUN_DATA}/trace.jsonl"
 SUMMARY="${RUN_DATA}/runtime_summary.json"
 RESULT="${RUN_STATE}/result.json"
 EMPTY_STATS="${RUN_DATA}/empty_road_stats.json"
+INTERPOSER_STATS="${RUN_DATA}/private/interposer_stats.json"
+INTERPOSER_CAPTURE="${RUN_DATA}/private/interposer_capture.json"
+INTERPOSER_CONFIG="${RUN_DATA}/private/interposer.json"
+APOLLO_CONF_ROOT="${RUN_DATA}/apollo_conf"
 LAUNCH="$(${CAGE_PYTHON} "${REPO_ROOT}/scripts/d0/render_apollo_runtime.py" --repo-root "${REPO_ROOT}" --state-root "${CAGE_STATE_ROOT}")"
 APOLLO_EXTRA="${CAGE_RUNTIME_ROOT}/bridge/python:${CAGE_RUNTIME_ROOT}/bridge/apollo-carla:${REPO_ROOT}/src"
 EMPTY_PID=""
+INTERPOSER_PID=""
 STACK_PID=""
 POWER_STARTED_NS=""
 RUNTIME_EXIT=1
 
 [[ ! -e "${RESULT}" ]] || { echo "execution smoke already finished" >&2; exit 2; }
 install -d -m 0700 "${RUN_STATE}" "${RUN_DATA}" "${LOG_ROOT}"
+"${CAGE_PYTHON}" "${REPO_ROOT}/scripts/d0/repair/prepare_execution_smoke.py" --repo-root "${REPO_ROOT}" --run-id "${RUN_ID}" --run-state "${RUN_STATE}" --run-data "${RUN_DATA}" >"${LOG_ROOT}/prepare.log"
 
 stop_group() {
   local pid="$1"
@@ -42,8 +48,10 @@ stop_group() {
 }
 
 cleanup() {
-  APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" cyber_launch stop "${LAUNCH}" >>"${LOG_ROOT}/stack.log" 2>&1 || true
+  # shellcheck disable=SC2016 # expansion belongs to the activated child shell
+  APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" bash -c 'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; shift; exec "$@"' bash "${APOLLO_CONF_ROOT}" cyber_launch stop "${LAUNCH}" >>"${LOG_ROOT}/stack.log" 2>&1 || true
   stop_group "${STACK_PID}"
+  stop_group "${INTERPOSER_PID}"
   stop_group "${EMPTY_PID}"
   "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_bridge.sh" stop >>"${LOG_ROOT}/cleanup.log" 2>&1 || true
   "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_server.sh" stop >>"${LOG_ROOT}/cleanup.log" 2>&1 || true
@@ -71,7 +79,13 @@ EMPTY_PID=$!
 sleep 2
 kill -0 "${EMPTY_PID}"
 
-setsid env APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" cyber_launch start "${LAUNCH}" >"${LOG_ROOT}/stack.log" 2>&1 </dev/null &
+setsid env APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" python3 -m cage_ad.adapters.apollo_d0.interposer_runtime --private-config "${INTERPOSER_CONFIG}" --capture "${INTERPOSER_CAPTURE}" --private-stats "${INTERPOSER_STATS}" --repo-root "${REPO_ROOT}" >"${LOG_ROOT}/interposer.log" 2>&1 </dev/null &
+INTERPOSER_PID=$!
+sleep 2
+kill -0 "${INTERPOSER_PID}"
+
+# shellcheck disable=SC2016 # expansion belongs to the activated child shell
+setsid env APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" bash -c 'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; shift; exec "$@"' bash "${APOLLO_CONF_ROOT}" cyber_launch start "${LAUNCH}" >"${LOG_ROOT}/stack.log" 2>&1 </dev/null &
 STACK_PID=$!
 sleep 12
 kill -0 "${STACK_PID}"
@@ -85,7 +99,7 @@ cleanup
 ended_ns="$(date +%s%N)"
 powered="$(${CAGE_PYTHON} -c 'import sys; print((int(sys.argv[2])-int(sys.argv[1]))/1e9)' "${POWER_STARTED_NS}" "${ended_ns}")"
 set +e
-"${CAGE_PYTHON}" "${REPO_ROOT}/scripts/d0/repair/evaluate_execution_smoke.py" --run-id "${RUN_ID}" --runtime-summary "${SUMMARY}" --stack-log "${LOG_ROOT}/stack.log" --empty-road-stats "${EMPTY_STATS}" --runtime-exit "${RUNTIME_EXIT}" --powered-on-seconds "${powered}" --source-commit "$(git -C "${REPO_ROOT}" rev-parse HEAD)" --output "${RESULT}"
+"${CAGE_PYTHON}" "${REPO_ROOT}/scripts/d0/repair/evaluate_execution_smoke.py" --run-id "${RUN_ID}" --runtime-summary "${SUMMARY}" --stack-log "${LOG_ROOT}/stack.log" --empty-road-stats "${EMPTY_STATS}" --interposer-stats "${INTERPOSER_STATS}" --runtime-exit "${RUNTIME_EXIT}" --powered-on-seconds "${powered}" --source-commit "$(git -C "${REPO_ROOT}" rev-parse HEAD)" --output "${RESULT}"
 EVAL_EXIT=$?
 set -e
 trap - EXIT INT TERM

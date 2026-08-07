@@ -22,6 +22,7 @@ def main() -> None:
     parser.add_argument("--runtime-summary", type=Path, required=True)
     parser.add_argument("--stack-log", type=Path, required=True)
     parser.add_argument("--empty-road-stats", type=Path, required=True)
+    parser.add_argument("--interposer-stats", type=Path, required=True)
     parser.add_argument("--runtime-exit", type=int, required=True)
     parser.add_argument("--powered-on-seconds", type=float, required=True)
     parser.add_argument("--source-commit", required=True)
@@ -29,6 +30,7 @@ def main() -> None:
     args = parser.parse_args()
     summary = json.loads(args.runtime_summary.read_text()) if args.runtime_summary.exists() else None
     heartbeat = json.loads(args.empty_road_stats.read_text()) if args.empty_road_stats.exists() else None
+    interposer = json.loads(args.interposer_stats.read_text()) if args.interposer_stats.exists() else None
     stack_text = args.stack_log.read_text(errors="replace") if args.stack_log.exists() else ""
     missing_lines = sorted(
         {line.strip() for line in stack_text.splitlines() if "lane_follow_stage" in line and "is not found" in line}
@@ -37,6 +39,12 @@ def main() -> None:
         "runtime_exit_zero": args.runtime_exit == 0,
         "summary_present": summary is not None,
         "empty_road_runtime_present": heartbeat is not None,
+        "nominal_identity_interposer_present": bool(
+            interposer
+            and interposer.get("injector_exception") is None
+            and interposer.get("prediction_in", 0) > 0
+            and interposer.get("prediction_in") == interposer.get("prediction_out")
+        ),
         "no_frame_gap": bool(summary and summary["non_unit_frame_gaps"] == 0),
         "duration_complete": bool(summary and summary["sim_duration_s"] >= 19.9),
         "no_npc": bool(summary and summary["npc_vehicle_count"] == 0),
@@ -60,6 +68,7 @@ def main() -> None:
         "source_commit": args.source_commit,
         "runtime_summary": summary,
         "empty_road_stats": heartbeat,
+        "interposer_stats": interposer,
         "lane_follow_config_missing_lines": missing_lines,
     }
     _atomic_json(args.output, result)
