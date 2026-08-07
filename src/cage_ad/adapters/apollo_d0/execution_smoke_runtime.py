@@ -222,10 +222,10 @@ def main() -> None:
             control = ego.get_control()
             apollo = state.snapshot()
             planning = apollo["planning"]
-            planning_fresh = bool(
+            planning_available = bool(planning and planning["valid"])
+            planning_clock_match = bool(
                 planning
-                and planning["valid"]
-                and 0.0 <= snapshot.timestamp.elapsed_seconds - planning["header_time_s"] <= 0.25
+                and abs(snapshot.timestamp.elapsed_seconds - planning["header_time_s"]) <= 0.25
             )
             row = {
                 "frame": snapshot.frame,
@@ -241,7 +241,8 @@ def main() -> None:
                     "hand_brake": control.hand_brake,
                 },
                 "apollo": apollo,
-                "valid_planning_fresh": planning_fresh,
+                "valid_planning_available": planning_available,
+                "planning_header_matches_carla_clock": planning_clock_match,
             }
             stream.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
             rows.append(row)
@@ -266,7 +267,11 @@ def main() -> None:
         "npc_vehicle_count": 0,
         "route": {key: state.snapshot()[key] for key in ("route_count", "route_accepted")},
         "message_counts": {key: state.snapshot()[key] for key in ("planning_count", "valid_planning_count", "chassis_count", "control_count")},
-        "valid_trajectory_frame_coverage": sum(row["valid_planning_fresh"] for row in rows) / len(rows),
+        "valid_trajectory_frame_coverage": sum(row["valid_planning_available"] for row in rows) / len(rows),
+        "planning_header_carla_clock_match_fraction": sum(
+            row["planning_header_matches_carla_clock"] for row in rows
+        )
+        / len(rows),
         "drive_gear_mismatch_frames": sum(_gear_mismatch(row) for row in rows),
         "control_topic": "/apollo/control_guarded",
         "progress_m": progress,

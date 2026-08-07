@@ -122,9 +122,9 @@ Stage B 需 3/3 通过才称“运行链修复成功”。若只有 gear 一致�
 |---|---|---|---|---|---|
 | Stage A CPU/静态 | `231a4a0a27ce9de878d428eb3975adcc34e81a3c`；installed Neo pipeline 由 `PLANNING_PREFLIGHT.json` 记录 | `python -m pytest -q`；`verify_bridge_gear_mapping.py`；`preflight_apollo10_planning.py`；compile/secret/large-file/diff checks | 全量 `148 passed`；真实 bridge 方法映射 drive/reverse/parking=`1/2/3`，转换序列=`[1,2,1,3]`；Apollo 10 task plugin/default config `12/12 PASS`；其余静态审计 PASS | 第一次验证使用的 `cage-ad` Python 未安装 CARLA，第二次使用 `guardian` 又缺 protobuf；最终仅组合服务器已有只读 Python 路径并启用旧 pb2 兼容模式后成功，未安装/下载依赖。另确认 stage-local 文件是可选覆盖，不能按原先猜测复制配置；插件默认配置本身完整 | **Stage A 成功** |
 | Stage B no-NPC #1 | `c2724728e1435123629f8c506667ad8aa94b531e` | `run_execution_smoke_once.sh NO_NPC_01 ...` | **FAIL**；400/400 连续帧、路由成功、NPC=0、gear mismatch=0，但 planning/control 消息均为 0、进度 0 m、轨迹覆盖 0%；powered-on 64.049 s | 烟测封装遗漏 D0 的 nominal identity interposer：真实 stack 输出 `/apollo/planning_raw`、`/apollo/control`，而 gate 读取 `/apollo/planning`、`/apollo/control_guarded`；同时 11 个可选 stage override 缺失仍以 error 打印。因此本次不能检验速度跟踪，但失败记录保留并计入一次 smoke | **失败；停止重复运行，允许一次明确基础设施修复** |
-| Stage B no-NPC #2 | 待填 | 待填 | 待填 | 待填 | 待填 |
-| Stage B no-NPC #3 | 待填 | 待填 | 待填 | 待填 | 待填 |
-| Stage C nominal pilot | 待填 | 待填 | 待填 | 待填 | 待填 |
+| Stage B no-NPC #2 | `aa5c97093803ddfebde422a4ebd0d3bfa214e91e`；protocol bundle `382567248f7cc03bda2c65ac8da90b6e0b2ea7c0ff7aa158e802f1d7390ba1a8` | `run_execution_smoke_once.sh NO_NPC_02 ...` | **FAIL**；400 连续帧、route PASS、NPC=0、gear mismatch=0、配置缺失=0；identity interposer prediction `756/756`、planning `729/729`、control `3103/3103`；20 秒进度 4.421 m，速度中位 0.117、最大 0.784 m/s；最佳 5 秒 tracking ratio `0.356<0.70`；powered-on 69.635 s | 原始 coverage 被 planning 的 wall-clock header 与 CARLA simulation clock 直接比较，错误记成 0；离线按“当前有效轨迹”重算为 `0.94<0.95`，仍不通过。该测量实现已离线修正但未用重算结果覆盖旧 evidence。Apollo 仍有 13 次 planner failure/fallback | **失败；gear/identity/config 子修复成功，但整条运行链修复失败** |
+| Stage B no-NPC #3 | 不运行 | 不运行 | `SKIPPED_FAIL_FAST` | 唯一一次明确基础设施修复已用于 `NO_NPC_01→02`；#2 仍在真实 tracking、进度和 trajectory coverage 上失败，继续跑不能改变结论 | **未运行** |
+| Stage C nominal pilot | 不运行 | 不运行 | `NOT_ADMISSIBLE` | Stage B 要求 3/3；当前 0/2，且 #3 按 fail-fast 取消 | **未运行；数据构建保持暂停** |
 
 最终结论固定使用以下之一：
 
@@ -135,4 +135,32 @@ Stage B 需 3/3 通过才称“运行链修复成功”。若只有 gear 一致�
 
 当前状态：`PRE_REPAIR_PLAN_FROZEN`。
 
-实施进度（追加）：`STAGE_A_PASS_STAGE_B_INFRA_REPAIR_AFTER_NO_NPC_01_FAIL`。这只证明 gear 源码修复和 Apollo 10 安装完整；第一次 Stage B 暴露 smoke 自身缺少 identity interposer，尚未证明车辆能正常跟踪，也尚未允许恢复数据集构建。
+实施进度（追加）：`REPAIR_PARTIAL_RUNTIME_NOT_READY`。Stage A 成功；Stage B 的 gear、identity interposer 和显式 no-op config 子项已修好，但车辆跟踪和规划稳定性没有达到冻结门槛。Stage C 与数据集构建不得启动。
+
+## 六、测试后的最终判断
+
+### 6.1 哪些修复成功了
+
+1. **chassis gear 修复成功**：`NO_NPC_01` 和 `NO_NPC_02` 共 800 个采样帧，control 请求 drive 时 chassis 未出现一次稳定错档；原先 1200/1200 neutral 的确定性缺陷已消失。
+2. **D0 identity/guarded 工具边界恢复成功**：修复后的 prediction、planning、control 全部一进一出，`fault_applications=0`，不是通过绕过 verifier 得到结果。
+3. **Apollo 10 stage 配置语义已澄清**：11 个空 textproto 仅声明“无用户覆盖”，插件默认配置未改变；缺失日志从 22 条降为 0。
+4. **时钟、route、actor identity 成功**：两个运行窗口均为 400 帧、20 Hz、0 frame gap；第二次 route 成功且全程只有一个 ego、没有 NPC。
+
+### 6.2 哪些问题仍未修好
+
+1. **实际速度跟踪失败**：最佳 5 秒窗口实际/目标中位速度比只有 35.6%，小于冻结的 70%；20 秒仅前进 4.421 m，小于 10 m。
+2. **规划仍不稳定**：第二次 run 中 408 条观测到的 planning 里 382 条有效；按逐帧最新有效状态离线重算覆盖率为 94.0%，仍低于 95%，并保留 13 次 planner failure/fallback。
+3. **Apollo 与 CARLA 时钟域不一致**：planning header 是 wall clock，chassis/CARLA 是 simulation clock。第一版 coverage 实现因此错误为 0；此错误已修正源码但没有篡改历史 result。
+4. **控制标定仍不可信**：当前 bridge 把 Apollo 常见 `15.7%` throttle 乘 1.5 后作为 CARLA `0.2355`；installed Apollo calibration table 是通用车辆表，不是这台 CARLA Lincoln 的实测表。在相同油门下速度反复降到接近 0，不能声称 actuator mapping 已校准。
+5. **加速度反馈被配置为恒零**：bridge 的 `localization_accel_alpha=0.0` 使滤波状态从零开始后永远为零；Apollo longitudinal controller 因而看不到 CARLA 实际加速度。这是下一轮新协议必须单独验证的高价值基础设施根因候选，但本轮不得再改参数后重跑。
+
+### 6.3 资源、证据与终态
+
+- 实际 CARLA/Apollo powered-on：`64.049071581 + 69.634910779 = 133.683982360 s`（约 `0.03714 h`）。
+- repair data：`1,721,061 bytes`，远低于 2 GiB 修复预算。
+- `NO_NPC_01 result.json` SHA256：`9ceb06dcbcb1901245afb85680bf5094f4bd721da03736477fd364d9cab1e47e`。
+- `NO_NPC_02 result.json` SHA256：`303819b5a3ed1aa9254c043f587d8bf4bc994df3926b92f35a692e5fb8c48cb7`。
+- 旧 protocol-v1 calibration ledger/YAML/decision/data 未写入；两个 run 均标记 `RUNTIME_REPAIR_SMOKE_NOT_DATASET`，不得开源为数据 episode。
+- 没有启动 nominal TTC pilot，因此本阶段既没有制造新的 TTC 空值，也没有资格声称 TTC 问题已修复。
+
+最终结论：**`REPAIR_PARTIAL_RUNTIME_NOT_READY`**。对应 D0 决策为 **`D0_MODIFY_INFRA`**：修复方向有明确证据，但当前 Apollo 10 + CARLA 运行链仍不能生成满足冻结门槛的有用实验数据。`CALIBRATION_REMAINS_PAUSED`，不得恢复数据集构建。

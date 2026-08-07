@@ -136,3 +136,12 @@ def test_execution_smoke_prepare_materializes_noop_overrides(tmp_path: Path) -> 
     overrides = sorted(stage_root.glob("*.pb.txt"))
     assert len(overrides) == 11
     assert all(path.read_bytes() == b"" for path in overrides)
+
+
+def test_execution_smoke_does_not_compare_wall_header_to_carla_clock_for_coverage() -> None:
+    source = (
+        REPO_ROOT / "src/cage_ad/adapters/apollo_d0/execution_smoke_runtime.py"
+    ).read_text()
+
+    assert '"valid_trajectory_frame_coverage": sum(row["valid_planning_available"]' in source
+    assert '"planning_header_carla_clock_match_fraction"' in source
