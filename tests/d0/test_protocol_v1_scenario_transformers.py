@@ -59,6 +59,7 @@ def test_lead_brake_velocity_and_window_boundaries(protocol):
     assert candidate.velocity(6.0) == (5.0, 0.0)
     assert candidate.velocity(7.0) == (2.0, 0.0)
     assert candidate.velocity(8.0) == (0.0, 0.0)
+    assert candidate.displacement(5.0, 3.0) == pytest.approx((5.0 + 25.0 / 6.0, 0.0))
 
 
 def test_cut_in_velocity_and_window_boundaries(protocol):
@@ -70,6 +71,9 @@ def test_cut_in_velocity_and_window_boundaries(protocol):
     assert candidate.velocity(3.0) == (3.0, 0.0)
     assert candidate.velocity(4.0) == pytest.approx((3.0, 0.6))
     assert candidate.velocity(10.0) == (3.0, 1.5)
+    assert candidate.displacement(2.0, 4.0) == pytest.approx((12.0, 2.625))
+    with pytest.raises(ProtocolValidationError, match="nonnegative"):
+        candidate.displacement(-1.0, 1.0)
 
 
 def test_scenario_lookup_fails_closed(protocol):

@@ -127,18 +127,6 @@ def _waypoint(world_map, location) -> dict[str, Any]:
     }
 
 
-def _integrate_candidate(candidate, start_s: float, duration_s: float, step_s: float = 0.05) -> tuple[float, float]:
-    longitudinal = lateral = 0.0
-    steps = max(1, int(math.ceil(duration_s / step_s)))
-    for index in range(steps):
-        left = index * duration_s / steps
-        right = (index + 1) * duration_s / steps
-        velocity = candidate.velocity(start_s + (left + right) / 2.0)
-        longitudinal += velocity[0] * (right - left)
-        lateral += velocity[1] * (right - left)
-    return longitudinal, lateral
-
-
 class ApolloSamples:
     def __init__(self) -> None:
         self.lock = threading.RLock()
@@ -184,10 +172,16 @@ class ApolloSamples:
             if 0.0 <= point.relative_time <= 3.0
         ]
         target = min(points, key=lambda item: abs(item["relative_time"] - 1.0)) if points else None
+        sampled_points = points[::5]
+        if points and (not sampled_points or sampled_points[-1] is not points[-1]):
+            sampled_points.append(points[-1])
         decision_text = str(message.decision)[:2000]
         with self.lock:
             self.planning = {
-                "points_first_3s": points,
+                "points_first_3s": sampled_points,
+                "points_first_3s_total": len(points),
+                "points_first_3s_sampling": "every_fifth_plus_last",
+                "_full_points_first_3s": points,
                 "target_speed_1s_mps": None if target is None else target["v"],
                 "target_acceleration_1s_mps2": None if target is None else target["a"],
                 "decision_text": decision_text,
@@ -231,6 +225,8 @@ def _apollo_trace(snapshot: Mapping[str, Any]) -> dict[str, Any]:
     result: dict[str, Any] = {}
     for name in ("localization", "chassis", "planning", "control_guarded"):
         value, reason = _missing(snapshot.get(name), f"no {name} message observed yet")
+        if name == "planning" and value is not None:
+            value = {key: item for key, item in value.items() if not key.startswith("_")}
         result[name] = value
         if reason:
             result[f"{name}_missing_reason"] = reason
@@ -250,9 +246,9 @@ def _planned_path_geometry(
         return None, None
     minimum = math.inf
     minimum_time = None
-    for point in planning["points_first_3s"]:
+    for point in planning.get("_full_points_first_3s", planning["points_first_3s"]):
         horizon = max(0.0, float(point["relative_time"]))
-        longitudinal, lateral = _integrate_candidate(candidate, elapsed_s, horizon)
+        longitudinal, lateral = candidate.displacement(elapsed_s, horizon)
         predicted_actor = DiagnosticOBB(
             actor.x + forward[0] * longitudinal + right[0] * lateral,
             actor.y + forward[1] * longitudinal + right[1] * lateral,
