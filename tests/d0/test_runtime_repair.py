@@ -419,3 +419,23 @@ def test_v16_calibration_freezes_three_start_speeds() -> None:
     assert '"CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET"' in source
     assert "manual_gear_shift =" not in source
     assert "apply_physics_control" not in source
+
+
+def test_v16a_full_throttle_audit_is_read_only_and_preregistered() -> None:
+    source = (
+        REPO_ROOT / "scripts/d0/repair/carla_full_throttle_physics_audit.py"
+    ).read_text()
+
+    assert "MEASUREMENT_STEPS = 200" in source
+    assert "REQUESTED_THROTTLE = 1.0" in source
+    assert "HEALTHY_FINAL_SPEED_MPS = 10.0" in source
+    assert "DEFINITELY_WEAK_FINAL_SPEED_MPS = 3.0" in source
+    assert '"use_sweep_wheel_collision"' in source
+    assert '"damping_rate_zero_throttle_clutch_engaged"' in source
+    assert '"requested_control"' in source
+    assert '"actual_control"' in source
+    assert '"CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET"' in source
+    assert "apply_physics_control" not in source
+    assert "set_autopilot" not in source
+    assert "enable_constant_velocity" not in source
+    assert "set_target_velocity" not in source
