@@ -514,6 +514,8 @@ def test_showcase_camera_is_observation_only_and_labeled() -> None:
 
     assert "WIDTH = 1280" in source
     assert "HEIGHT = 720" in source
+    assert "CAPTURE_WIDTH = 640" in source
+    assert "CAPTURE_HEIGHT = 360" in source
     assert "FPS = 20" in source
     assert '"--duration-s", type=float, default=15.0' in source
     assert "演示录像 · 非数据集 · 非安全认证" in source
@@ -522,6 +524,7 @@ def test_showcase_camera_is_observation_only_and_labeled() -> None:
     assert 'encoder_environment.pop("LD_LIBRARY_PATH", None)' in source
     assert '"/usr/bin/ffmpeg"' in source
     assert 'blueprint.set_attribute("sensor_tick", "0.0")' in source
+    assert "candidate_frames[frame] = pixels" in source
     assert "apply_control(" not in source
     assert "apply_physics_control" not in source
     assert "set_autopilot" not in source

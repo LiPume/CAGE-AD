@@ -18,6 +18,8 @@ import carla
 
 WIDTH = 1280
 HEIGHT = 720
+CAPTURE_WIDTH = 640
+CAPTURE_HEIGHT = 360
 FPS = 20
 FONT = (
     "/root/autodl_apollo10_g0_bundle/runtime/carla/0.9.15/Engine/Content/"
@@ -81,8 +83,8 @@ def main() -> None:
     if not world.get_map().name.endswith("/Town01"):
         raise RuntimeError("showcase requires Town01")
     blueprint = world.get_blueprint_library().find("sensor.camera.rgb")
-    blueprint.set_attribute("image_size_x", str(WIDTH))
-    blueprint.set_attribute("image_size_y", str(HEIGHT))
+    blueprint.set_attribute("image_size_x", str(CAPTURE_WIDTH))
+    blueprint.set_attribute("image_size_y", str(CAPTURE_HEIGHT))
     blueprint.set_attribute("fov", "90")
     # Zero means one image per simulator tick. This matches the G0 synchronous
     # sensor gate and avoids float-period scheduling skips at a 0.05 s tick.
@@ -100,6 +102,7 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     temporary = args.output.with_suffix(args.output.suffix + f".tmp.{os.getpid()}")
     overlay = (
+        f"scale={WIDTH}:{HEIGHT}:flags=lanczos,"
         f"drawbox=x=0:y=0:w=iw:h=86:color=black@0.62:t=fill,"
         f"drawtext=fontfile={FONT}:text='CAGE-AD  |  Apollo 10 + CARLA 0.9.15':"
         "fontcolor=white:fontsize=28:x=28:y=14,"
@@ -111,31 +114,22 @@ def main() -> None:
     )
     command = [
         "/usr/bin/ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-        "-f", "rawvideo", "-pix_fmt", "bgra", "-s", f"{WIDTH}x{HEIGHT}",
+        "-f", "rawvideo", "-pix_fmt", "bgra", "-s", f"{CAPTURE_WIDTH}x{CAPTURE_HEIGHT}",
         "-r", str(FPS), "-i", "-", "-an", "-vf", overlay,
         "-c:v", "libx264", "-preset", "ultrafast", "-threads", "2", "-crf", "23",
         "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-f", "mp4", str(temporary),
     ]
-    encoder_environment = os.environ.copy()
-    # Apollo ships FFmpeg libraries for its modules. The host /usr/bin/ffmpeg
-    # must use the matching host libraries instead of Apollo's LD_LIBRARY_PATH.
-    encoder_environment.pop("LD_LIBRARY_PATH", None)
-    encoder = subprocess.Popen(
-        command, stdin=subprocess.PIPE, stderr=subprocess.PIPE, env=encoder_environment
-    )
-    if encoder.stdin is None:
-        raise RuntimeError("ffmpeg stdin is unavailable")
     camera.listen(receive)
     target_frames = int(args.duration_s * FPS)
-    encoded_frames = 0
-    observed_frames: list[int] = []
+    candidate_target = target_frames + 40
+    candidate_frames: dict[int, bytes] = {}
+    callback_count = 0
     start_speed = None
     maximum_speed = 0.0
     recording_started = False
-    failure: BaseException | None = None
     try:
         deadline = time.monotonic() + args.connect_timeout_s
-        while encoded_frames < target_frames:
+        while len(candidate_frames) < candidate_target:
             if time.monotonic() > deadline and not recording_started:
                 raise RuntimeError("ego did not reach the frozen 0.5 m/s recording threshold")
             try:
@@ -148,15 +142,44 @@ def main() -> None:
                     continue
                 recording_started = True
                 start_speed = speed
-            encoder.stdin.write(pixels)
-            encoded_frames += 1
-            observed_frames.append(frame)
+            callback_count += 1
+            candidate_frames[frame] = pixels
             maximum_speed = max(maximum_speed, speed)
-    except BaseException as exc:
-        failure = exc
     finally:
         camera.stop()
         camera.destroy()
+
+    ordered = sorted(candidate_frames)
+    run_start = 0
+    selected_ids: list[int] | None = None
+    for index, frame in enumerate(ordered):
+        if index and frame != ordered[index - 1] + 1:
+            run_start = index
+        if index - run_start + 1 >= target_frames:
+            selected_ids = ordered[run_start : run_start + target_frames]
+            break
+    if selected_ids is None:
+        raise RuntimeError(
+            f"no contiguous {target_frames}-frame camera window in "
+            f"{len(ordered)} unique callbacks"
+        )
+
+    encoder_environment = os.environ.copy()
+    # Apollo ships FFmpeg libraries for its modules. The host /usr/bin/ffmpeg
+    # must use the matching host libraries instead of Apollo's LD_LIBRARY_PATH.
+    encoder_environment.pop("LD_LIBRARY_PATH", None)
+    encoder = subprocess.Popen(
+        command, stdin=subprocess.PIPE, stderr=subprocess.PIPE, env=encoder_environment
+    )
+    if encoder.stdin is None:
+        raise RuntimeError("ffmpeg stdin is unavailable")
+    failure: BaseException | None = None
+    try:
+        for frame in selected_ids:
+            encoder.stdin.write(candidate_frames[frame])
+    except BaseException as exc:
+        failure = exc
+    finally:
         try:
             encoder.stdin.close()
         except BrokenPipeError:
@@ -173,7 +196,8 @@ def main() -> None:
         temporary.unlink(missing_ok=True)
         raise RuntimeError(f"ffmpeg failed ({return_code}): {stderr[-1000:]}")
     os.replace(temporary, args.output)
-    gaps = sum(right - left != 1 for left, right in zip(observed_frames, observed_frames[1:]))
+    encoded_frames = len(selected_ids)
+    gaps = sum(right - left != 1 for left, right in zip(selected_ids, selected_ids[1:]))
     metadata = {
         "schema_version": 1,
         "label": "SHOWCASE_REPLAY_NOT_DATASET_NOT_SAFETY_CERTIFICATION",
@@ -184,6 +208,8 @@ def main() -> None:
         "camera": {
             "width": WIDTH,
             "height": HEIGHT,
+            "capture_width": CAPTURE_WIDTH,
+            "capture_height": CAPTURE_HEIGHT,
             "fps": FPS,
             "sensor_tick_s": 0.0,
             "fov_deg": 90,
@@ -192,9 +218,12 @@ def main() -> None:
         },
         "duration_s": args.duration_s,
         "encoded_frames": encoded_frames,
+        "camera_callback_count": callback_count,
+        "unique_candidate_frames": len(candidate_frames),
+        "duplicate_callback_count": callback_count - len(candidate_frames),
         "non_unit_sensor_frame_gaps": gaps,
-        "first_sensor_frame": observed_frames[0],
-        "last_sensor_frame": observed_frames[-1],
+        "first_sensor_frame": selected_ids[0],
+        "last_sensor_frame": selected_ids[-1],
         "start_speed_mps": start_speed,
         "maximum_speed_mps": maximum_speed,
         "video": str(args.output),
