@@ -208,7 +208,7 @@ def test_v3_brake_response_is_isolated_and_preregistered() -> None:
     source = (REPO_ROOT / "scripts/d0/repair/carla_lincoln_brake_response.py").read_text()
 
     assert '"CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET"' in source
-    assert "for brake in (0.03, 0.05, 0.10, 0.15)" in source
+    assert "for brake in (0.00, 0.03, 0.05, 0.10, 0.15)" in source
     assert "isolated brake response requires zero vehicles" in source
     assert "world.apply_settings(old_settings)" in source
     assert "settings.fixed_delta_seconds = 0.05" in source

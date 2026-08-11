@@ -65,7 +65,7 @@ def main() -> None:
     results = []
     vehicle = None
     try:
-        for brake in (0.03, 0.05, 0.10, 0.15):
+        for brake in (0.00, 0.03, 0.05, 0.10, 0.15):
             vehicle = _spawn(world)
             world.tick()
             for _ in range(20):
