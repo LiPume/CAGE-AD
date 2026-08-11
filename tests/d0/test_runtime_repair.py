@@ -437,6 +437,20 @@ def test_v16a_full_throttle_audit_is_read_only_and_preregistered() -> None:
     assert '"CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET"' in source
     assert "apply_physics_control" not in source
     assert "set_autopilot" not in source
+
+
+def test_offline_showcase_replays_only_a_passed_v17_trace() -> None:
+    source = (REPO_ROOT / "scripts/d0/demo/render_passed_v17_trace_in_carla.py").read_text()
+
+    assert "WIDTH, HEIGHT, FPS, FRAME_COUNT = 1280, 720, 20, 300" in source
+    assert 'if not evaluation.get("passed")' in source
+    assert "V17 成功轨迹 · CARLA 离线回放" in source
+    assert "非实时控制" in source
+    assert "set_simulate_physics(False)" in source
+    assert "set_transform(" in source
+    assert "matching_image(images, frame)" in source
+    assert "apply_control(" not in source
+    assert "set_autopilot" not in source
     assert "enable_constant_velocity" not in source
     assert "set_target_velocity" not in source
 
