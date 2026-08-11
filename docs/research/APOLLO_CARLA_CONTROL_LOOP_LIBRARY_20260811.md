@@ -178,3 +178,11 @@
 - CARLA 地图重载问题：`841cb3937c143094cd93657d74f804052a98c5e855d5b64e241134fea8a9d1cb`
 
 新增关键结论：Unreal 官方明确把启动语法写成“可执行文件、地图等 URL 参数、其他开关”，并说明地图 URL 必须紧跟可执行文件或模式开关。V3 失败实现却把 Town01 放在 `-vulkan` 和图形设置之后，因此 V3 没有真正检验官方规定的参数顺序。这个事实只支持重新做一次严格受限的启动检查，不能把 V3 失败抹掉，也不能直接推断改顺序必然成功。
+
+## v5 补充的无屏幕渲染资料（2026-08-11）
+
+新增本地快照：`web/v5_primary/carla_0.9.12_rendering_options.html`，校验和 `115419e8cf53434b9c2aa78249ea9557111df40454967fe704a5416aa73411c6`。
+
+CARLA 官方说明从 0.9.12 起使用 Unreal 4.26 和 Vulkan，并给出无屏幕启动命令 `./CarlaUE4.sh -RenderOffScreen`。服务器当前没有 `DISPLAY`、`WAYLAND_DISPLAY` 或 `SDL_VIDEODRIVER`。V3/V4 的独立启动器只有 `-vulkan`，`CARLA_RENDER_MODE=offscreen` 只是自定义环境变量，CARLA 官方启动脚本本身不会把它自动转换成 Unreal 开关。
+
+因此目前最强的可证伪假设是：独立启动器在无显示服务器上漏传了 `-RenderOffScreen`。这不同于 V3 的热换图假设和 V4 的地图顺序假设，允许建立一次新的仅服务器启动检查；仍不能预先宣称一定成功。
