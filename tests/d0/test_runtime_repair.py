@@ -450,3 +450,16 @@ def test_v17_candidate_inverts_frozen_multi_speed_responses() -> None:
     assert "def inverse_command(speed: float, acceleration: float) -> float:" in source
     assert '"all_negative_entries_preserved"' in source
     assert '"all_high_speed_entries_preserved"' in source
+
+
+def test_v17_evaluator_uses_frozen_contract_and_is_offline() -> None:
+    source = (REPO_ROOT / "scripts/d0/repair/evaluate_v17_candidate.py").read_text()
+
+    assert '"tracking_ratio_at_least_0_70"' in source
+    assert '"max_lateral_deviation_at_most_0_20_m"' in source
+    assert '"carla_throttle_at_most_0_50"' in source
+    assert '"false_drive_feedback_zero"' in source
+    assert '"candidate_internal_lookup_active"' in source
+    assert '"legacy_only_failed_check"' in source
+    assert "carla.Client(" not in source
+    assert "apply_control(" not in source
