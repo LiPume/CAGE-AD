@@ -271,3 +271,16 @@ def test_v7_patch_changes_only_the_frozen_acceleration_alpha() -> None:
     assert "steering_gain: 0.419643" in patch
     assert "throttle_gain: 1.910828" not in patch
     assert "localization_accel_alpha: 1.0" not in patch
+
+
+def test_v8_throttle_characterization_is_frozen_and_actor_isolated() -> None:
+    source = (
+        REPO_ROOT / "scripts/d0/repair/carla_lincoln_throttle_characterization.py"
+    ).read_text()
+
+    assert "LEVELS = (0.15, 0.20, 0.2355, 0.30, 0.40)" in source
+    assert "for step in range(160)" in source
+    assert "CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET" in source
+    assert "requires zero vehicles" in source
+    assert "world.apply_settings(old_settings)" in source
+    assert "endpoint_speed_strictly_monotonic" in source
