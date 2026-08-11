@@ -21,8 +21,7 @@ is_running() {
   kill -0 "${pid}" 2>/dev/null || return 1
   local cmdline
   cmdline="$(tr '\0' ' ' <"/proc/${pid}/cmdline")" || return 1
-  [[ "${cmdline}" == *"${BUNDLE_ROOT}/runtime/carla/0.9.15/CarlaUE4.sh"* ||
-     "${cmdline}" == *"${BUNDLE_ROOT}/runtime/carla/0.9.15/CarlaUE4/Binaries/Linux/CarlaUE4-Linux-Shipping"* ]]
+  [[ "${cmdline}" == *"${BUNDLE_ROOT}/runtime/carla/0.9.15/CarlaUE4.sh"* ]]
 }
 
 case "${1:-status}" in

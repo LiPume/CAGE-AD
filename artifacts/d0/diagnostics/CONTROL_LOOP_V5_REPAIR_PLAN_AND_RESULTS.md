@@ -1,6 +1,6 @@
 # Apollo—bridge—CARLA 控制闭环 v5 修复计划与结果
 
-状态：**修复前合同已冻结，尚未启动 v5**
+状态：**V5-A 部分成功但未通过，已回滚；终态 D0_MODIFY_INFRA**
 
 分支：`codex/apollo-d0-control-loop-repair-v5`
 
@@ -29,4 +29,10 @@ V5 新增 powered-on 上限 15 分钟，存储上限 512 MiB。
 
 ## 测试后结果
 
-待填写。
+V5-A 只运行了一次。加入 `-RenderOffScreen` 后，CARLA 不再在 2 秒内退出：服务器成功启动，RPC 在 90 秒检查期间持续可读，进程存活约 95 秒，最后能够正常关闭，日志没有 `Signal 11`。这证明 V3/V4 的独立启动崩溃主因确实包含漏传官方无屏幕开关。
+
+但当前地图始终是默认 `Town10HD_Opt`，没有变成 Town01。也就是说，把 Town01 作为打包启动脚本参数没有生效。因为冻结门槛要求地图必须精确为 Town01，V5-A 仍判失败，V5-B 转向闭环没有运行。
+
+真实环境已恢复到 V5 前的 G0 启动方式；CARLA、bridge 和 Apollo 均已关闭。V5 终态为 `D0_MODIFY_INFRA`，但保留一个已经证实的基础设施结论：独立启动必须显式使用 `-RenderOffScreen`。
+
+后续若建立新合同，只能使用 CARLA 0.9.15 官方支持的客户端 `load_world('Town01')`，并且必须在启动 bridge 和 Apollo 之前单独完成、检查和稳定等待；不能再重复命令行预载地图路线。
