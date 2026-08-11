@@ -73,12 +73,27 @@ def main() -> None:
         # An empty textproto is a valid no-op user override. Plugin defaults remain
         # authoritative, while Apollo no longer logs an absent optional path.
         _atomic_text(stage_root / f"{name}.pb.txt", "")
+    calibration_override = os.environ.get("CAGE_APOLLO_CALIBRATION_OVERRIDE")
+    if calibration_override:
+        source = Path(calibration_override).resolve()
+        if not source.is_file():
+            raise SystemExit(f"calibration override is not a file: {source}")
+        _atomic_text(
+            args.run_data
+            / "apollo_conf/modules/control/control_component/conf/calibration_table.pb.txt",
+            source.read_text(),
+        )
+    config_root = args.run_data / "apollo_conf"
     config_manifest = {
         "schema_version": 1,
-        "purpose": "explicit empty Apollo 10 user overrides; plugin defaults unchanged",
+        "purpose": (
+            "v15 reversible calibration candidate plus planning no-op overrides"
+            if calibration_override
+            else "explicit empty Apollo 10 user overrides; plugin defaults unchanged"
+        ),
         "files": {
             str(path.relative_to(args.run_data)): hashlib.sha256(path.read_bytes()).hexdigest()
-            for path in sorted(stage_root.glob("*.pb.txt"))
+            for path in sorted(config_root.rglob("*.pb.txt"))
         },
     }
     _atomic_json(args.run_data / "apollo_conf_manifest.json", config_manifest)

@@ -376,3 +376,18 @@ def test_v14_uses_frozen_ordinary_least_squares_speed_slope() -> None:
     assert "(sample_time - mean_time) * (sample_speed - mean_speed)" in source
     assert '"evaluation_speed_slope_mps2"' in source
     assert '"speed_slope_nondecreasing_with_0_05_tolerance"' in source
+
+
+def test_v15_candidate_is_low_speed_positive_and_reversible() -> None:
+    generator = (
+        REPO_ROOT / "scripts/d0/repair/generate_v15_candidate_table.py"
+    ).read_text()
+    prepare = (REPO_ROOT / "scripts/d0/repair/prepare_execution_smoke.py").read_text()
+
+    assert "LOW_SPEED_MAX_MPS = 1.2" in generator
+    assert "entry[\"speed\"] > LOW_SPEED_MAX_MPS or entry[\"acceleration\"] < 0.0" in generator
+    assert '"all_negative_entries_preserved"' in generator
+    assert '"all_high_speed_entries_preserved"' in generator
+    assert "33.333333333333336" in generator
+    assert "CAGE_APOLLO_CALIBRATION_OVERRIDE" in prepare
+    assert "calibration_table.pb.txt" in prepare
