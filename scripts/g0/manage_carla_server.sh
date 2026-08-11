@@ -32,7 +32,7 @@ case "${1:-status}" in
       exit 0
     fi
     rm -f "${PID_FILE}"
-    setsid "${BUNDLE_ROOT}/scripts/start_carla_offscreen.sh" \
+    setsid "${BUNDLE_ROOT}/scripts/start_carla_offscreen.sh" "${@:2}" \
       >"${LOG_FILE}" 2>&1 </dev/null &
     pid=$!
     printf '%s\n' "${pid}" >"${PID_FILE}"

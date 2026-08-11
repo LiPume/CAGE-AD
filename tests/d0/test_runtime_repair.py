@@ -226,3 +226,18 @@ def test_v3_steering_patch_changes_only_the_frozen_steering_mapping() -> None:
     assert "localization_accel_alpha: 1.0" not in patch
     assert "soft_estop_brake" not in patch
     assert "private_oracle" not in patch
+
+
+def test_v3_runtime_starts_directly_in_town01_without_old_project_launcher() -> None:
+    wrapper = (REPO_ROOT / "scripts/d0/repair/run_execution_smoke_once.sh").read_text()
+    source_launcher = (REPO_ROOT / "scripts/g0/start_carla_offscreen.sh").read_text()
+    live_launcher = Path(
+        "/root/autodl_apollo10_g0_bundle/scripts/start_carla_offscreen.sh"
+    ).read_text()
+
+    assert "start /Game/Carla/Maps/Town01" in wrapper
+    assert "--required-map Town01" in wrapper
+    assert '${CARLA_ROOT}/CarlaUE4.sh' in source_launcher
+    assert '${CARLA_ROOT}/CarlaUE4.sh' in live_launcher
+    assert "Zhijia-Guardian" not in source_launcher
+    assert "Zhijia-Guardian" not in live_launcher
