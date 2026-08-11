@@ -349,3 +349,19 @@ def test_v12_longitudinal_audit_is_read_only_and_checks_frozen_gain() -> None:
     assert '"positive_acceleration_lookup_with_negative_calibration_frames"' in source
     assert "apply_control(" not in source
     assert "carla.Client(" not in source
+
+
+def test_v13_calibration_uses_common_gear_one_precondition() -> None:
+    source = (
+        REPO_ROOT / "scripts/d0/repair/carla_gear_one_conditioned_calibration.py"
+    ).read_text()
+
+    assert "LEVELS = (0.20, 0.2355, 0.2575, 0.30, 0.35, 0.40, 0.50)" in source
+    assert "REPEATS = 3" in source
+    assert "PRECONDITION_THROTTLE = 0.40" in source
+    assert "control.gear == 1 and speed(actor) >= 1.0" in source
+    assert '"all_start_speeds_in_range"' in source
+    assert '"repeat_ranges_at_most_0_20"' in source
+    assert '"CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET"' in source
+    assert "manual_gear_shift =" not in source
+    assert "apply_physics_control" not in source
