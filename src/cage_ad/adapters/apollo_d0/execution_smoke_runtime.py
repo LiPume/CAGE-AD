@@ -206,6 +206,22 @@ def _gear_mismatch(row: dict) -> bool:
     return bool(control and chassis and control["gear_location"] == 1 and chassis["gear_location"] != 1)
 
 
+def _expected_chassis_gear(row: dict) -> int:
+    carla_state = row["carla"]
+    if carla_state["hand_brake"]:
+        return 3
+    if carla_state["reverse"] or carla_state["actual_gear"] < 0:
+        return 2
+    if carla_state["actual_gear"] == 0:
+        return 0
+    return 1
+
+
+def _actual_gear_feedback_mismatch(row: dict) -> bool:
+    chassis = row["apollo"]["chassis"]
+    return bool(chassis and chassis["gear_location"] != _expected_chassis_gear(row))
+
+
 def _tracking_window(rows: list[dict]) -> dict:
     window_frames = 100
     candidates = []
@@ -388,6 +404,9 @@ def main() -> None:
         )
         / len(rows),
         "drive_gear_mismatch_frames": sum(_gear_mismatch(row) for row in rows),
+        "actual_gear_feedback_mismatch_frames": sum(
+            _actual_gear_feedback_mismatch(row) for row in rows
+        ),
         "carla_actual_gear_zero_frames": sum(
             row["carla"]["actual_gear"] == 0 for row in rows
         ),

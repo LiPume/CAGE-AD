@@ -86,17 +86,23 @@ def _published_gear(control: carla.VehicleControl) -> int:
 
 
 def main() -> None:
-    drive = carla.VehicleControl(reverse=False, hand_brake=False)
-    reverse = carla.VehicleControl(reverse=True, hand_brake=False)
-    parking = carla.VehicleControl(reverse=False, hand_brake=True)
+    neutral = carla.VehicleControl(reverse=False, hand_brake=False, gear=0)
+    drive = carla.VehicleControl(reverse=False, hand_brake=False, gear=1)
+    reverse = carla.VehicleControl(reverse=True, hand_brake=False, gear=-1)
+    reverse_by_gear = carla.VehicleControl(reverse=False, hand_brake=False, gear=-1)
+    parking = carla.VehicleControl(reverse=False, hand_brake=True, gear=1)
     observed = {
+        "neutral": _published_gear(neutral),
         "drive": _published_gear(drive),
         "reverse": _published_gear(reverse),
+        "reverse_by_gear": _published_gear(reverse_by_gear),
         "parking": _published_gear(parking),
     }
     expected = {
+        "neutral": int(Chassis.GearPosition.GEAR_NEUTRAL),
         "drive": int(Chassis.GearPosition.GEAR_DRIVE),
         "reverse": int(Chassis.GearPosition.GEAR_REVERSE),
+        "reverse_by_gear": int(Chassis.GearPosition.GEAR_REVERSE),
         "parking": int(Chassis.GearPosition.GEAR_PARKING),
     }
     if observed != expected:
@@ -106,15 +112,17 @@ def main() -> None:
     transition_ego = _ego_with_writer(drive)
     transition_ego.carla_actor = transition_actor
     transition_gears = []
-    for control in (drive, reverse, drive, parking):
+    for control in (neutral, drive, reverse, reverse_by_gear, drive, parking):
         transition_actor.control = control
         EgoVehicle.send_vehicle_msgs(transition_ego, 1.0)
         transition_gears.append(
             int(transition_ego.vehicle_chassis_writer.messages[-1].gear_location)
         )
     expected_transition = [
+        expected["neutral"],
         expected["drive"],
         expected["reverse"],
+        expected["reverse_by_gear"],
         expected["drive"],
         expected["parking"],
     ]

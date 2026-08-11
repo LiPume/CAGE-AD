@@ -300,3 +300,23 @@ def test_v9_actual_gear_observation_is_non_behavioral() -> None:
     assert "vehicle_control.gear =" not in patch
     assert '"carla_actual_gear_zero_frames"' in runtime
     assert '"apollo_drive_but_carla_not_gear_one_frames"' in runtime
+
+
+def test_v10_actual_gear_feedback_patch_changes_feedback_only() -> None:
+    patch = (
+        REPO_ROOT / "third_party/patches/carla_bridge_actual_gear_feedback_v10.patch"
+    ).read_text()
+    verifier = (
+        REPO_ROOT / "scripts/d0/repair/verify_bridge_gear_mapping.py"
+    ).read_text()
+    runtime = (
+        REPO_ROOT / "src/cage_ad/adapters/apollo_d0/execution_smoke_runtime.py"
+    ).read_text()
+
+    assert "carla_control.gear == 0" in patch
+    assert "GEAR_NEUTRAL" in patch
+    assert "carla_control.gear < 0" in patch
+    assert "apply_control" not in patch
+    assert "manual_gear_shift =" not in patch
+    assert '"neutral": _published_gear(neutral)' in verifier
+    assert '"actual_gear_feedback_mismatch_frames"' in runtime
