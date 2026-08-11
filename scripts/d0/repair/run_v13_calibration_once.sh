@@ -7,7 +7,10 @@ DATA_ROOT="${3:?}"
 : "${CAGE_BUNDLE_ROOT:?}"
 : "${CAGE_RUNTIME_ROOT:?}"
 
-[[ "${RUN_ID}" == CARLA_V13_* ]] || { echo "invalid v13 run id" >&2; exit 2; }
+[[ "${RUN_ID}" == CARLA_V13_* || "${RUN_ID}" == CARLA_V14_* ]] || {
+  echo "invalid v13/v14 run id" >&2
+  exit 2
+}
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
 RUN_STATE="${STATE_ROOT}/runs/${RUN_ID}"
 RUN_DATA="${DATA_ROOT}/${RUN_ID}"
