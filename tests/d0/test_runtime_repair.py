@@ -463,3 +463,31 @@ def test_v17_evaluator_uses_frozen_contract_and_is_offline() -> None:
     assert '"legacy_only_failed_check"' in source
     assert "carla.Client(" not in source
     assert "apply_control(" not in source
+
+
+def test_v18_diagnostic_binds_v17_table_without_touching_install_tree() -> None:
+    prepare = (REPO_ROOT / "scripts/d0/diagnostics/prepare_ttc_diagnostic.py").read_text()
+    wrapper = (REPO_ROOT / "scripts/d0/diagnostics/run_ttc_diagnostic_once.sh").read_text()
+
+    assert "--expected-calibration-sha256" in prepare
+    assert "--calibration_table_file=" in prepare
+    assert 'line.lstrip("-").startswith("calibration_table_file=")' in prepare
+    assert "apollo_conf_manifest.json" in prepare
+    assert "--control-flag-file" in wrapper
+    assert "APOLLO_CONF_PATH" in wrapper
+    assert wrapper.index("load_carla_world_once.py") < wrapper.index('manage_carla_bridge.sh" start')
+    assert "CAGE_BRIDGE_CONTROL_TELEMETRY" in wrapper
+
+
+def test_v18_evaluator_freezes_interaction_and_ttc_gates_offline() -> None:
+    source = (
+        REPO_ROOT / "scripts/d0/diagnostics/evaluate_v18_interaction_smoke.py"
+    ).read_text()
+
+    assert '"production_ttc_is_not_all_null"' in source
+    assert '"independent_ttc_is_not_all_null"' in source
+    assert '"production_ttc_enters_2_5_to_6_second_band"' in source
+    assert '"ego_pre_conflict_speed_median_at_least_1_8_mps"' in source
+    assert '"frozen_v17_table_is_bound_to_run"' in source
+    assert "carla.Client(" not in source
+    assert "apply_control(" not in source

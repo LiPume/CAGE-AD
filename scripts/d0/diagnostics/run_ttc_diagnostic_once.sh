@@ -20,6 +20,8 @@ RETAINED_ROOT="${DIAG_DATA_ROOT}/${RUN_ID}/retained"
 LOG_ROOT="${DIAG_DATA_ROOT}/${RUN_ID}/logs"
 TRACE="${RETAINED_ROOT}/trace.jsonl"
 SUMMARY="${RETAINED_ROOT}/summary.json"
+BRIDGE_CONTROL_TELEMETRY="${RETAINED_ROOT}/bridge_control_telemetry.jsonl"
+APOLLO_CONF_ROOT="${DIAG_DATA_ROOT}/${RUN_ID}/apollo_conf"
 SCENARIO_PID=""
 INTERPOSER_PID=""
 STACK_PID=""
@@ -34,7 +36,11 @@ RUNTIME_EXIT=1
 install -d -m 0700 "${PRIVATE_ROOT}" "${RETAINED_ROOT}" "${LOG_ROOT}"
 
 APOLLO_EXTRA="${CAGE_RUNTIME_ROOT}/bridge/python:${CAGE_RUNTIME_ROOT}/bridge/apollo-carla:${REPO_ROOT}/src"
-LAUNCH="$(${CAGE_PYTHON} "${REPO_ROOT}/scripts/d0/render_apollo_runtime.py" --repo-root "${REPO_ROOT}" --state-root "${CAGE_STATE_ROOT}")"
+CONTROL_RENDER_ARGS=()
+if [[ -s "${APOLLO_CONF_ROOT}/modules/control/control_component/conf/control.conf" ]]; then
+  CONTROL_RENDER_ARGS=(--control-flag-file "${APOLLO_CONF_ROOT}/modules/control/control_component/conf/control.conf")
+fi
+LAUNCH="$(${CAGE_PYTHON} "${REPO_ROOT}/scripts/d0/render_apollo_runtime.py" --repo-root "${REPO_ROOT}" --state-root "${CAGE_STATE_ROOT}" "${CONTROL_RENDER_ARGS[@]}")"
 
 stop_group() {
   local pid="$1"
@@ -50,7 +56,7 @@ stop_group() {
 }
 
 cleanup() {
-  APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" cyber_launch stop "${LAUNCH}" >>"${LOG_ROOT}/stack.log" 2>&1 || true
+  APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" bash -c 'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; shift; exec "$@"' bash "${APOLLO_CONF_ROOT}" cyber_launch stop "${LAUNCH}" >>"${LOG_ROOT}/stack.log" 2>&1 || true
   stop_group "${STACK_PID}"
   stop_group "${INTERPOSER_PID}"
   stop_group "${SCENARIO_PID}"
@@ -82,7 +88,10 @@ POWER_STARTED_NS="$(date +%s%N)"
 "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_server.sh" start >>"${LOG_ROOT}/carla.log" 2>&1
 APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" python3 \
   "${REPO_ROOT}/scripts/d0/wait_for_carla.py" --timeout 90 >>"${LOG_ROOT}/carla.log" 2>&1
-CARLA_BRIDGE_CONTROL_TOPIC=/apollo/control_guarded "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_bridge.sh" start >>"${LOG_ROOT}/bridge.log" 2>&1
+APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" python3 \
+  "${REPO_ROOT}/scripts/d0/repair/load_carla_world_once.py" >>"${LOG_ROOT}/carla.log" 2>&1
+CARLA_BRIDGE_CONTROL_TOPIC=/apollo/control_guarded CAGE_BRIDGE_CONTROL_TELEMETRY="${BRIDGE_CONTROL_TELEMETRY}" \
+  "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_bridge.sh" start >>"${LOG_ROOT}/bridge.log" 2>&1
 
 setsid env PYTHONHASHSEED=1101 APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" \
   "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" python3 -m cage_ad.adapters.apollo_d0.scenario_runtime \
@@ -101,7 +110,7 @@ kill -0 "${SCENARIO_PID}"
 kill -0 "${INTERPOSER_PID}"
 
 setsid env APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" \
-  "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" cyber_launch start "${LAUNCH}" \
+  "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" bash -c 'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; shift; exec "$@"' bash "${APOLLO_CONF_ROOT}" cyber_launch start "${LAUNCH}" \
   >"${LOG_ROOT}/stack.log" 2>&1 </dev/null &
 STACK_PID=$!
 sleep 12
