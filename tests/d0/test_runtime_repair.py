@@ -244,3 +244,17 @@ def test_v6_loader_is_one_shot_actor_free_and_offscreen() -> None:
     assert "spawn_actor" not in loader
     assert "try_spawn_actor" not in loader
     assert '"load_world_calls": 1' in loader
+
+
+def test_v6_smoke_loads_town01_before_bridge_and_keeps_steering_only() -> None:
+    wrapper = (REPO_ROOT / "scripts/d0/repair/run_execution_smoke_once.sh").read_text()
+    loader_call = wrapper.index("load_carla_world_once.py")
+    bridge_call = wrapper.index("manage_carla_bridge.sh\" start")
+    patch = (
+        REPO_ROOT / "third_party/patches/carla_apollo_bridge_steering_v3.patch"
+    ).read_text()
+
+    assert loader_call < bridge_call
+    assert "steering_gain: 0.419643" in patch
+    assert "throttle_gain: 1.910828" not in patch
+    assert "localization_accel_alpha: 1.0" not in patch

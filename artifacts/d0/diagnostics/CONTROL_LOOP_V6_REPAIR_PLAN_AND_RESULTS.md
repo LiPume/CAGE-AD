@@ -1,6 +1,6 @@
 # Apollo—bridge—CARLA 控制闭环 v6 修复计划与结果
 
-状态：**修复前合同已冻结，尚未启动 v6**
+状态：**V6-A 已通过，允许进入 V6-B 单变量转向闭环**
 
 分支：`codex/apollo-d0-control-loop-repair-v6`
 
@@ -31,4 +31,10 @@
 
 ## 测试后结果
 
-待填写。
+### V6-A：通过
+
+独立 CARLA 先以 `-RenderOffScreen` 正常启动在 `Town10HD_Opt`，RPC 可读。一次性客户端随后只调用一次 `load_world('Town01')`，约 `4.83 s` 后读到 `Carla/Maps/Town01`，并取得新世界第 72 帧。检查时服务器仍存活，之后正常关闭，日志无 `Signal 11`。
+
+这证明可复现的正确启动顺序是：显式无屏幕启动默认世界 → 等 RPC 就绪 → 客户端一次性切 Town01 → 等新世界 tick → 再启动 bridge。V6-A 没有启动 Apollo、bridge 或任何车辆。
+
+V6-B 依赖已经满足。下一步只接入上述顺序并重新应用冻结的 `steering_gain=0.419643`；油门、刹车、加速度反馈及验收门槛不变。
