@@ -189,3 +189,16 @@ def test_carla_step_response_is_isolated_and_keeps_frozen_reference_command() ->
     assert '"vehicle.lincoln.mkz_2017"' in source
     assert "requires zero existing vehicles" in source
     assert "world.apply_settings(old_settings)" in source
+
+
+def test_lincoln_mapping_v2_values_are_evidence_derived_and_source_only() -> None:
+    patch = (
+        REPO_ROOT / "third_party/patches/carla_apollo_bridge_lincoln_mapping_v2.patch"
+    ).read_text()
+
+    assert "throttle_gain: 1.910828" in patch
+    assert "steering_gain: 0.419643" in patch
+    assert "localization_accel_alpha: 1.0" in patch
+    assert "soft_estop_brake" not in patch
+    assert "runtime_state" not in patch
+    assert "private_oracle" not in patch

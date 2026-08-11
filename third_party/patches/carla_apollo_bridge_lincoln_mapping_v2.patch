@@ -1,0 +1,34 @@
+diff --git a/carla_bridge/actor/ego_vehicle.py b/carla_bridge/actor/ego_vehicle.py
+--- a/carla_bridge/actor/ego_vehicle.py
++++ b/carla_bridge/actor/ego_vehicle.py
+@@ -297,6 +297,7 @@ class EgoVehicle(Vehicle):
+             conversion = self.node.carla_parameters.get("control_conversion", {})
+             throttle_gain = float(conversion.get("throttle_gain", 1.0))
+             brake_gain = float(conversion.get("brake_gain", 1.0))
++            steering_gain = conversion.get("steering_gain")
+             vehicle_control.throttle = min(
+                 1.0, max(0.0, cyber_vehicle_control.throttle * throttle_gain / 100.0)
+             )
+@@ -305,7 +306,9 @@ class EgoVehicle(Vehicle):
+             vehicle_control.brake = min(
+                 1.0, max(0.0, cyber_vehicle_control.brake * brake_gain / 100.0)
+             )
+-            if cyber_vehicle_control.steering_target < 0:
++            if steering_gain is not None:
++                steering_target = cyber_vehicle_control.steering_target * float(steering_gain)
++            elif cyber_vehicle_control.steering_target < 0:
+                 steering_target = (
+                         cyber_vehicle_control.steering_target * self.right_turn_ratio
+                 )
+diff --git a/carla_bridge/config/settings.yaml b/carla_bridge/config/settings.yaml
+--- a/carla_bridge/config/settings.yaml
++++ b/carla_bridge/config/settings.yaml
+@@ -20,6 +20,7 @@ carla:
+     role_name: ["hero", "ego_vehicle"]
+   control_conversion:
+-    throttle_gain: 1.5
++    throttle_gain: 1.910828
+     brake_gain: 1.0
+-    localization_accel_alpha: 0.0
++    steering_gain: 0.419643
++    localization_accel_alpha: 1.0
