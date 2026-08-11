@@ -233,3 +233,14 @@ def test_source_checkpoint_launcher_does_not_depend_on_old_project() -> None:
 
     assert '${CARLA_ROOT}/CarlaUE4.sh' in source_launcher
     assert "Zhijia-Guardian" not in source_launcher
+
+
+def test_v6_loader_is_one_shot_actor_free_and_offscreen() -> None:
+    launcher = (REPO_ROOT / "scripts/g0/start_carla_offscreen.sh").read_text()
+    loader = (REPO_ROOT / "scripts/d0/repair/load_carla_world_once.py").read_text()
+
+    assert "-RenderOffScreen" in launcher
+    assert loader.count('client.load_world("Town01")') == 1
+    assert "spawn_actor" not in loader
+    assert "try_spawn_actor" not in loader
+    assert '"load_world_calls": 1' in loader

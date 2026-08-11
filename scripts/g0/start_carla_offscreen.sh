@@ -30,6 +30,7 @@ exec setpriv --reuid="${CARLA_UID}" --regid="${CARLA_GID}" --clear-groups \
       CARLA_PORT="${CARLA_PORT}" \
       CARLA_RENDER_MODE=offscreen \
   "${CARLA_ROOT}/CarlaUE4.sh" \
+    -RenderOffScreen \
     -vulkan \
     '-ini:[/Script/Engine.RendererSettings]:r.GraphicsAdapter=0' \
     "$@"
