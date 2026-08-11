@@ -337,3 +337,15 @@ def test_v11_paired_gear_telemetry_is_observation_only() -> None:
     assert "manual_gear_shift =" not in patch
     assert '"mapping_mismatch_records"' in summarizer
     assert '"false_drive_feedback_records"' in summarizer
+
+
+def test_v12_longitudinal_audit_is_read_only_and_checks_frozen_gain() -> None:
+    source = (
+        REPO_ROOT / "scripts/d0/repair/analyze_longitudinal_chain.py"
+    ).read_text()
+
+    assert '"OFFLINE_CONTROL_LOOP_AUDIT_NOT_DATASET"' in source
+    assert '"expected_gain": 1.5' in source
+    assert '"positive_acceleration_lookup_with_negative_calibration_frames"' in source
+    assert "apply_control(" not in source
+    assert "carla.Client(" not in source
