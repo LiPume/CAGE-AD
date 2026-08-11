@@ -351,6 +351,8 @@ def main() -> None:
                     "steer": control.steer,
                     "reverse": control.reverse,
                     "hand_brake": control.hand_brake,
+                    "actual_gear": control.gear,
+                    "actual_manual_gear_shift": control.manual_gear_shift,
                 },
                 "apollo": apollo,
                 "valid_planning_available": planning_available,
@@ -386,6 +388,25 @@ def main() -> None:
         )
         / len(rows),
         "drive_gear_mismatch_frames": sum(_gear_mismatch(row) for row in rows),
+        "carla_actual_gear_zero_frames": sum(
+            row["carla"]["actual_gear"] == 0 for row in rows
+        ),
+        "carla_actual_first_gear_one_time_s": next(
+            (
+                row["sim_time_s"]
+                for row in rows
+                if row["carla"]["actual_gear"] == 1
+            ),
+            None,
+        ),
+        "apollo_drive_but_carla_not_gear_one_frames": sum(
+            bool(
+                row["apollo"]["chassis"]
+                and row["apollo"]["chassis"]["gear_location"] == 1
+                and row["carla"]["actual_gear"] != 1
+            )
+            for row in rows
+        ),
         "control_topic": "/apollo/control_guarded",
         "progress_m": progress,
         "speed_median_mps": median(row["carla"]["speed_mps"] for row in rows),

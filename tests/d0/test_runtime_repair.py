@@ -284,3 +284,19 @@ def test_v8_throttle_characterization_is_frozen_and_actor_isolated() -> None:
     assert "requires zero vehicles" in source
     assert "world.apply_settings(old_settings)" in source
     assert "endpoint_speed_strictly_monotonic" in source
+
+
+def test_v9_actual_gear_observation_is_non_behavioral() -> None:
+    patch = (
+        REPO_ROOT / "third_party/patches/carla_bridge_actual_gear_telemetry_v9.patch"
+    ).read_text()
+    runtime = (
+        REPO_ROOT / "src/cage_ad/adapters/apollo_d0/execution_smoke_runtime.py"
+    ).read_text()
+
+    assert "actual_gear" in patch
+    assert "actual_manual_gear_shift" in patch
+    assert "manual_gear_shift =" not in patch
+    assert "vehicle_control.gear =" not in patch
+    assert '"carla_actual_gear_zero_frames"' in runtime
+    assert '"apollo_drive_but_carla_not_gear_one_frames"' in runtime
