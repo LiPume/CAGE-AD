@@ -27,3 +27,12 @@
 只允许一次录制基础设施修复：把 H.264 preset 从 `medium` 降为 `ultrafast`，固定只用 2 个编码线程，并在
 失败时完整报告 ffmpeg 退出码和错误文本。此改动只降低录制负载，不改变相机位姿、分辨率、帧率、编码格式、
 车辆、Apollo、控制表、路线、运行时长或任何闭环门槛。重录使用新 ID `NO_NPC_SHOWCASE_V17_RETRY1`。
+
+第二次运行的闭环再次正常完成，但视频仍在第一帧前退出。这次完整错误为：Apollo 环境中的 `LD_LIBRARY_PATH`
+使 `/usr/bin/ffmpeg` 错误加载了 Apollo 自带的另一版 `libavutil`，出现
+`undefined symbol: av_opt_child_class_iterate`，退出码 127。离线对照已经证明：同一 Apollo shell 中直接运行
+ffmpeg 必然复现 127；只对 ffmpeg 子进程移除 `LD_LIBRARY_PATH` 后，系统 ffmpeg 正常返回 0。
+
+因此登记最后一次环境隔离重放 `NO_NPC_SHOWCASE_V17_RETRY2`：录相 Python 仍在 Apollo/CARLA 客户端环境中，
+只有它创建的 `/usr/bin/ffmpeg` 子进程去掉 `LD_LIBRARY_PATH`。不改变车辆、场景或视频内容。前两次失败日志和
+闭环结果继续保留；若本次仍失败，不再实时重录。

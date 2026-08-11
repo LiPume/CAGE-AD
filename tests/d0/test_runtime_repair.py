@@ -519,6 +519,8 @@ def test_showcase_camera_is_observation_only_and_labeled() -> None:
     assert "演示录像 · 非数据集 · 非安全认证" in source
     assert "SHOWCASE_REPLAY_NOT_DATASET_NOT_SAFETY_CERTIFICATION" in source
     assert "none_observation_only_camera" in source
+    assert 'encoder_environment.pop("LD_LIBRARY_PATH", None)' in source
+    assert '"/usr/bin/ffmpeg"' in source
     assert "apply_control(" not in source
     assert "apply_physics_control" not in source
     assert "set_autopilot" not in source

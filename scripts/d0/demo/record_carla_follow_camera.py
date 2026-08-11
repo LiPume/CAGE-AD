@@ -108,13 +108,19 @@ def main() -> None:
         "fontcolor=yellow:fontsize=22:x=(w-text_w)/2:y=h-38"
     )
     command = [
-        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+        "/usr/bin/ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
         "-f", "rawvideo", "-pix_fmt", "bgra", "-s", f"{WIDTH}x{HEIGHT}",
         "-r", str(FPS), "-i", "-", "-an", "-vf", overlay,
         "-c:v", "libx264", "-preset", "ultrafast", "-threads", "2", "-crf", "23",
         "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-f", "mp4", str(temporary),
     ]
-    encoder = subprocess.Popen(command, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    encoder_environment = os.environ.copy()
+    # Apollo ships FFmpeg libraries for its modules. The host /usr/bin/ffmpeg
+    # must use the matching host libraries instead of Apollo's LD_LIBRARY_PATH.
+    encoder_environment.pop("LD_LIBRARY_PATH", None)
+    encoder = subprocess.Popen(
+        command, stdin=subprocess.PIPE, stderr=subprocess.PIPE, env=encoder_environment
+    )
     if encoder.stdin is None:
         raise RuntimeError("ffmpeg stdin is unavailable")
     camera.listen(receive)
