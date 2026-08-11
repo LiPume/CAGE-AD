@@ -507,3 +507,18 @@ def test_v19_micro_brake_grid_is_frozen_and_non_behavioral() -> None:
     assert "world.apply_settings(old_settings)" in source
     assert "apply_physics_control" not in source
     assert "manual_gear_shift =" not in source
+
+
+def test_showcase_camera_is_observation_only_and_labeled() -> None:
+    source = (REPO_ROOT / "scripts/d0/demo/record_carla_follow_camera.py").read_text()
+
+    assert "WIDTH = 1280" in source
+    assert "HEIGHT = 720" in source
+    assert "FPS = 20" in source
+    assert '"--duration-s", type=float, default=15.0' in source
+    assert "演示录像 · 非数据集 · 非安全认证" in source
+    assert "SHOWCASE_REPLAY_NOT_DATASET_NOT_SAFETY_CERTIFICATION" in source
+    assert "none_observation_only_camera" in source
+    assert "apply_control(" not in source
+    assert "apply_physics_control" not in source
+    assert "set_autopilot" not in source
