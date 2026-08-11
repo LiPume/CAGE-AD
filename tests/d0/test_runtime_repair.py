@@ -492,3 +492,18 @@ def test_v18_evaluator_freezes_interaction_and_ttc_gates_offline() -> None:
     assert '"apollo_conf/modules/control/control_component/conf/calibration_table.pb.txt"' in source
     assert "carla.Client(" not in source
     assert "apply_control(" not in source
+
+
+def test_v19_micro_brake_grid_is_frozen_and_non_behavioral() -> None:
+    source = (REPO_ROOT / "scripts/d0/repair/carla_low_speed_micro_brake.py").read_text()
+
+    assert "LEVELS = (0.0, 0.001, 0.003, 0.005, 0.01, 0.02, 0.03)" in source
+    assert "REPEATS = 3" in source
+    assert "TARGET_SPEED_MPS = 2.0" in source
+    assert '"PASS_RESOLVABLE_GRADUAL_REGION"' in source
+    assert '"NO_RESOLVABLE_GRADUAL_REGION"' in source
+    assert '"CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET"' in source
+    assert "requires zero existing vehicles" in source
+    assert "world.apply_settings(old_settings)" in source
+    assert "apply_physics_control" not in source
+    assert "manual_gear_shift =" not in source
