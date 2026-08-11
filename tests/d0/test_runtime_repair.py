@@ -439,3 +439,14 @@ def test_v16a_full_throttle_audit_is_read_only_and_preregistered() -> None:
     assert "set_autopilot" not in source
     assert "enable_constant_velocity" not in source
     assert "set_target_velocity" not in source
+
+
+def test_v17_candidate_inverts_frozen_multi_speed_responses() -> None:
+    source = (REPO_ROOT / "scripts/d0/repair/generate_v17_candidate_table.py").read_text()
+
+    assert "SPEED_MAX_MPS = 2.0" in source
+    assert "SPEED_ANCHORS = (1.0, 1.5, 2.0)" in source
+    assert "CARLA_THROTTLES = (0.30, 0.35, 0.40, 0.45, 0.50)" in source
+    assert "def inverse_command(speed: float, acceleration: float) -> float:" in source
+    assert '"all_negative_entries_preserved"' in source
+    assert '"all_high_speed_entries_preserved"' in source
