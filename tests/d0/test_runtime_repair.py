@@ -233,3 +233,17 @@ def test_source_checkpoint_launcher_does_not_depend_on_old_project() -> None:
 
     assert '${CARLA_ROOT}/CarlaUE4.sh' in source_launcher
     assert "Zhijia-Guardian" not in source_launcher
+
+
+def test_v4_town_map_precedes_unreal_switches() -> None:
+    source_launcher = (REPO_ROOT / "scripts/g0/start_carla_offscreen.sh").read_text()
+    live_launcher = Path(
+        "/root/autodl_apollo10_g0_bundle/scripts/start_carla_offscreen.sh"
+    ).read_text()
+
+    for launcher in (source_launcher, live_launcher):
+        map_position = launcher.index('CARLA_ARGS+=("${CARLA_START_MAP}")')
+        switch_position = launcher.index("CARLA_ARGS+=(\n  -vulkan")
+        assert map_position < switch_position
+        assert '"${CARLA_ROOT}/CarlaUE4.sh" "${CARLA_ARGS[@]}"' in launcher
+        assert "Zhijia-Guardian" not in launcher
