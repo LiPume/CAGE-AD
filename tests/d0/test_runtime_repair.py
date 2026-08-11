@@ -213,3 +213,16 @@ def test_v3_brake_response_is_isolated_and_preregistered() -> None:
     assert "world.apply_settings(old_settings)" in source
     assert "settings.fixed_delta_seconds = 0.05" in source
     assert "max_substep_delta_time" in source
+
+
+def test_v3_steering_patch_changes_only_the_frozen_steering_mapping() -> None:
+    patch = (
+        REPO_ROOT / "third_party/patches/carla_apollo_bridge_steering_v3.patch"
+    ).read_text()
+
+    assert "steering_gain: 0.419643" in patch
+    assert 'steering_gain = conversion.get("steering_gain")' in patch
+    assert "throttle_gain: 1.910828" not in patch
+    assert "localization_accel_alpha: 1.0" not in patch
+    assert "soft_estop_brake" not in patch
+    assert "private_oracle" not in patch
