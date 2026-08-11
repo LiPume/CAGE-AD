@@ -49,6 +49,17 @@ def atomic_json(path: Path, value: dict) -> None:
     os.replace(temporary, path)
 
 
+def speed_slope(rows: list[dict]) -> float:
+    times = [row["measurement_time_s"] for row in rows]
+    speeds = [row["speed_mps"] for row in rows]
+    mean_time = sum(times) / len(times)
+    mean_speed = sum(speeds) / len(speeds)
+    return sum(
+        (sample_time - mean_time) * (sample_speed - mean_speed)
+        for sample_time, sample_speed in zip(times, speeds)
+    ) / sum((sample_time - mean_time) ** 2 for sample_time in times)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--trace", type=Path, required=True)
@@ -146,6 +157,9 @@ def main() -> None:
                         median(row["longitudinal_acceleration_mps2"] for row in evaluation)
                         if evaluation else None
                     ),
+                    "evaluation_speed_slope_mps2": (
+                        speed_slope(evaluation) if evaluation else None
+                    ),
                     "evaluation_median_speed_mps": (
                         median(row["speed_mps"] for row in evaluation) if evaluation else None
                     ),
@@ -188,25 +202,37 @@ def main() -> None:
     profiles = []
     for throttle in LEVELS:
         group = [sample for sample in samples if sample["throttle"] == throttle]
-        values = [
+        instantaneous_values = [
             sample["evaluation_median_acceleration_mps2"]
             for sample in group
             if sample["evaluation_median_acceleration_mps2"] is not None
         ]
+        slope_values = [
+            sample["evaluation_speed_slope_mps2"]
+            for sample in group
+            if sample["evaluation_speed_slope_mps2"] is not None
+        ]
         profiles.append({
             "throttle": throttle,
             "repeat_count": len(group),
-            "median_acceleration_mps2": median(values) if len(values) == REPEATS else None,
-            "repeat_acceleration_range_mps2": (
-                max(values) - min(values) if len(values) == REPEATS else None
+            "median_instantaneous_acceleration_mps2": (
+                median(instantaneous_values)
+                if len(instantaneous_values) == REPEATS else None
+            ),
+            "median_speed_slope_mps2": (
+                median(slope_values) if len(slope_values) == REPEATS else None
+            ),
+            "repeat_speed_slope_range_mps2": (
+                max(slope_values) - min(slope_values)
+                if len(slope_values) == REPEATS else None
             ),
             "samples": group,
         })
 
-    profile_accelerations = [
-        profile["median_acceleration_mps2"]
+    profile_slopes = [
+        profile["median_speed_slope_mps2"]
         for profile in profiles
-        if profile["median_acceleration_mps2"] is not None
+        if profile["median_speed_slope_mps2"] is not None
     ]
     checks = {
         "all_21_samples_present": len(samples) == len(LEVELS) * REPEATS,
@@ -215,17 +241,17 @@ def main() -> None:
         "all_start_speeds_in_range": all(1.0 <= sample["start_speed_mps"] <= 1.15 for sample in samples),
         "all_samples_complete": all(sample["sample_count"] == MEASUREMENT_STEPS for sample in samples),
         "all_readbacks_valid": all(sample["readback_valid"] for sample in samples),
-        "repeat_ranges_at_most_0_20": all(
-            profile["repeat_acceleration_range_mps2"] is not None
-            and profile["repeat_acceleration_range_mps2"] <= 0.20
+        "repeat_speed_slope_ranges_at_most_0_20": all(
+            profile["repeat_speed_slope_range_mps2"] is not None
+            and profile["repeat_speed_slope_range_mps2"] <= 0.20
             for profile in profiles
         ),
-        "response_nondecreasing_with_0_05_tolerance": len(profile_accelerations) == len(LEVELS) and all(
+        "speed_slope_nondecreasing_with_0_05_tolerance": len(profile_slopes) == len(LEVELS) and all(
             later + 0.05 >= earlier
-            for earlier, later in zip(profile_accelerations, profile_accelerations[1:])
+            for earlier, later in zip(profile_slopes, profile_slopes[1:])
         ),
-        "response_spans_near_zero": bool(profile_accelerations) and min(profile_accelerations) <= 0.10,
-        "response_spans_at_least_0_35": bool(profile_accelerations) and max(profile_accelerations) >= 0.35,
+        "speed_slope_spans_near_zero": bool(profile_slopes) and min(profile_slopes) <= 0.10,
+        "speed_slope_spans_at_least_0_35": bool(profile_slopes) and max(profile_slopes) >= 0.35,
     }
     summary = {
         "schema_version": 1,

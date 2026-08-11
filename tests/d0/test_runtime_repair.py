@@ -361,7 +361,18 @@ def test_v13_calibration_uses_common_gear_one_precondition() -> None:
     assert "PRECONDITION_THROTTLE = 0.40" in source
     assert "control.gear == 1 and speed(actor) >= 1.0" in source
     assert '"all_start_speeds_in_range"' in source
-    assert '"repeat_ranges_at_most_0_20"' in source
+    assert '"repeat_speed_slope_ranges_at_most_0_20"' in source
     assert '"CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET"' in source
     assert "manual_gear_shift =" not in source
     assert "apply_physics_control" not in source
+
+
+def test_v14_uses_frozen_ordinary_least_squares_speed_slope() -> None:
+    source = (
+        REPO_ROOT / "scripts/d0/repair/carla_gear_one_conditioned_calibration.py"
+    ).read_text()
+
+    assert "def speed_slope(rows: list[dict]) -> float:" in source
+    assert "(sample_time - mean_time) * (sample_speed - mean_speed)" in source
+    assert '"evaluation_speed_slope_mps2"' in source
+    assert '"speed_slope_nondecreasing_with_0_05_tolerance"' in source
