@@ -21,6 +21,7 @@ EMPTY_STATS="${RUN_DATA}/empty_road_stats.json"
 INTERPOSER_STATS="${RUN_DATA}/private/interposer_stats.json"
 INTERPOSER_CAPTURE="${RUN_DATA}/private/interposer_capture.json"
 INTERPOSER_CONFIG="${RUN_DATA}/private/interposer.json"
+BRIDGE_CONTROL_TELEMETRY="${RUN_DATA}/bridge_control_telemetry.jsonl"
 APOLLO_CONF_ROOT="${RUN_DATA}/apollo_conf"
 LAUNCH="$(${CAGE_PYTHON} "${REPO_ROOT}/scripts/d0/render_apollo_runtime.py" --repo-root "${REPO_ROOT}" --state-root "${CAGE_STATE_ROOT}")"
 APOLLO_EXTRA="${CAGE_RUNTIME_ROOT}/bridge/python:${CAGE_RUNTIME_ROOT}/bridge/apollo-carla:${REPO_ROOT}/src"
@@ -72,7 +73,9 @@ trap on_exit EXIT INT TERM
 POWER_STARTED_NS="$(date +%s%N)"
 "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_server.sh" start >>"${LOG_ROOT}/carla.log" 2>&1
 APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" python3 "${REPO_ROOT}/scripts/d0/wait_for_carla.py" --timeout 90 >>"${LOG_ROOT}/carla.log" 2>&1
-CARLA_BRIDGE_CONTROL_TOPIC=/apollo/control_guarded "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_bridge.sh" start >>"${LOG_ROOT}/bridge.log" 2>&1
+CARLA_BRIDGE_CONTROL_TOPIC=/apollo/control_guarded \
+  CAGE_BRIDGE_CONTROL_TELEMETRY="${BRIDGE_CONTROL_TELEMETRY}" \
+  "${CAGE_BUNDLE_ROOT}/scripts/manage_carla_bridge.sh" start >>"${LOG_ROOT}/bridge.log" 2>&1
 
 setsid env APOLLO_EXTRA_PYTHONPATH="${APOLLO_EXTRA}" "${CAGE_BUNDLE_ROOT}/scripts/apollo_host_exec.sh" python3 -m cage_ad.adapters.apollo_d0.empty_road_runtime --run-id "${RUN_ID}" --stats "${EMPTY_STATS}" >"${LOG_ROOT}/empty_road.log" 2>&1 </dev/null &
 EMPTY_PID=$!

@@ -17,6 +17,7 @@ import carla
 from cyber.python.cyber_py3 import cyber
 from modules.common_msgs.chassis_msgs.chassis_pb2 import Chassis
 from modules.common_msgs.control_msgs.control_cmd_pb2 import ControlCommand
+from modules.common_msgs.localization_msgs.localization_pb2 import LocalizationEstimate
 from modules.common_msgs.planning_msgs.planning_pb2 import ADCTrajectory
 from modules.common_msgs.routing_msgs.routing_pb2 import RoutingRequest, RoutingResponse
 
@@ -37,9 +38,11 @@ class ApolloState:
         self.valid_planning_count = 0
         self.chassis_count = 0
         self.control_count = 0
+        self.localization_count = 0
         self.planning = None
         self.chassis = None
         self.control = None
+        self.localization = None
 
     def on_route(self, message: RoutingResponse) -> None:
         with self.lock:
@@ -57,6 +60,7 @@ class ApolloState:
             self.valid_planning_count += int(valid)
             self.planning = {
                 "header_time_s": message.header.timestamp_sec,
+                "header_sequence_num": message.header.sequence_num,
                 "valid": valid,
                 "point_count_first_3s": len(points),
                 "target_speed_1s_mps": None if target is None else target.v,
@@ -64,6 +68,8 @@ class ApolloState:
                 "estop": bool(message.estop.is_estop),
                 "gear": int(message.gear),
                 "replan_reason": message.replan_reason,
+                "is_replan": bool(message.is_replan),
+                "trajectory_type": int(message.trajectory_type),
             }
 
     def on_chassis(self, message: Chassis) -> None:
@@ -78,15 +84,64 @@ class ApolloState:
             }
 
     def on_control(self, message: ControlCommand) -> None:
+        debug = message.debug.simple_lon_debug
         with self.lock:
             self.control_count += 1
             self.control = {
                 "header_time_s": message.header.timestamp_sec,
+                "header_sequence_num": message.header.sequence_num,
                 "speed_mps": message.speed,
                 "acceleration_mps2": message.acceleration,
                 "gear_location": int(message.gear_location),
                 "throttle_percentage": message.throttle,
                 "brake_percentage": message.brake,
+                "simple_lon_debug": {
+                    key: getattr(debug, key)
+                    for key in (
+                        "speed_reference",
+                        "speed_error",
+                        "preview_speed_reference",
+                        "preview_speed_error",
+                        "preview_acceleration_reference",
+                        "acceleration_cmd_closeloop",
+                        "acceleration_cmd",
+                        "acceleration_lookup",
+                        "speed_lookup",
+                        "calibration_value",
+                        "throttle_cmd",
+                        "brake_cmd",
+                        "is_full_stop",
+                        "is_full_stop_soft",
+                        "path_remain",
+                        "current_speed",
+                        "acceleration_reference",
+                        "current_acceleration",
+                        "acceleration_error",
+                        "current_steer_interval",
+                        "is_wait_steer",
+                        "is_stop_reason_by_destination",
+                        "is_stop_reason_by_prdestrian",
+                    )
+                },
+            }
+
+    def on_localization(self, message: LocalizationEstimate) -> None:
+        pose = message.pose
+        with self.lock:
+            self.localization_count += 1
+            self.localization = {
+                "header_time_s": message.header.timestamp_sec,
+                "header_sequence_num": message.header.sequence_num,
+                "linear_velocity": {
+                    axis: getattr(pose.linear_velocity, axis) for axis in ("x", "y", "z")
+                },
+                "linear_acceleration": {
+                    axis: getattr(pose.linear_acceleration, axis) for axis in ("x", "y", "z")
+                },
+                "linear_acceleration_vrf": {
+                    axis: getattr(pose.linear_acceleration_vrf, axis) for axis in ("x", "y", "z")
+                },
+                "heading_rad": pose.heading,
             }
 
     def snapshot(self) -> dict:
@@ -98,10 +153,51 @@ class ApolloState:
                 "valid_planning_count": self.valid_planning_count,
                 "chassis_count": self.chassis_count,
                 "control_count": self.control_count,
+                "localization_count": self.localization_count,
                 "planning": None if self.planning is None else dict(self.planning),
                 "chassis": None if self.chassis is None else dict(self.chassis),
                 "control_guarded": None if self.control is None else dict(self.control),
+                "localization": None if self.localization is None else dict(self.localization),
             }
+
+
+def _vehicle_physics(vehicle: carla.Vehicle) -> dict:
+    physics = vehicle.get_physics_control()
+    return {
+        "type_id": vehicle.type_id,
+        "attributes": dict(vehicle.attributes),
+        "mass_kg": physics.mass,
+        "drag_coefficient": physics.drag_coefficient,
+        "max_rpm": physics.max_rpm,
+        "moi": physics.moi,
+        "damping_rate_full_throttle": physics.damping_rate_full_throttle,
+        "damping_rate_zero_throttle_clutch_engaged": physics.damping_rate_zero_throttle_clutch_engaged,
+        "damping_rate_zero_throttle_clutch_disengaged": physics.damping_rate_zero_throttle_clutch_disengaged,
+        "use_gear_autobox": physics.use_gear_autobox,
+        "gear_switch_time_s": physics.gear_switch_time,
+        "clutch_strength": physics.clutch_strength,
+        "final_ratio": physics.final_ratio,
+        "torque_curve": [{"rpm": point.x, "torque_nm": point.y} for point in physics.torque_curve],
+        "forward_gears": [
+            {
+                "ratio": gear.ratio,
+                "down_ratio": gear.down_ratio,
+                "up_ratio": gear.up_ratio,
+            }
+            for gear in physics.forward_gears
+        ],
+        "wheels": [
+            {
+                "tire_friction": wheel.tire_friction,
+                "damping_rate": wheel.damping_rate,
+                "max_steer_angle": wheel.max_steer_angle,
+                "radius_cm": wheel.radius,
+                "max_brake_torque": wheel.max_brake_torque,
+                "max_handbrake_torque": wheel.max_handbrake_torque,
+            }
+            for wheel in physics.wheels
+        ],
+    }
 
 
 def _gear_mismatch(row: dict) -> bool:
@@ -158,6 +254,7 @@ def main() -> None:
         node.create_reader("/apollo/planning", ADCTrajectory, state.on_planning),
         node.create_reader("/apollo/canbus/chassis", Chassis, state.on_chassis),
         node.create_reader("/apollo/control_guarded", ControlCommand, state.on_control),
+        node.create_reader("/apollo/localization/pose", LocalizationEstimate, state.on_localization),
     ]
     route_writer = node.create_writer("/apollo/routing_request", RoutingRequest, 10)
 
@@ -179,6 +276,7 @@ def main() -> None:
         world.wait_for_tick(1)
     if ego is None:
         raise RuntimeError("execution smoke requires exactly one ego and zero NPC vehicles")
+    vehicle_physics = _vehicle_physics(ego)
 
     request = RoutingRequest()
     request.header.module_name = "cage_d0_execution_smoke"
@@ -219,7 +317,11 @@ def main() -> None:
             ego = egos[0]
             transform = ego.get_transform()
             velocity = ego.get_velocity()
+            acceleration = ego.get_acceleration()
             control = ego.get_control()
+            forward = transform.get_forward_vector()
+            longitudinal_speed = velocity.x * forward.x + velocity.y * forward.y
+            longitudinal_acceleration = acceleration.x * forward.x + acceleration.y * forward.y
             apollo = state.snapshot()
             planning = apollo["planning"]
             planning_available = bool(planning and planning["valid"])
@@ -234,6 +336,16 @@ def main() -> None:
                     "x": transform.location.x,
                     "y": transform.location.y,
                     "speed_mps": math.hypot(velocity.x, velocity.y),
+                    "longitudinal_speed_mps": longitudinal_speed,
+                    "acceleration": {
+                        "x": acceleration.x,
+                        "y": acceleration.y,
+                        "z": acceleration.z,
+                        "magnitude_mps2": math.sqrt(
+                            acceleration.x ** 2 + acceleration.y ** 2 + acceleration.z ** 2
+                        ),
+                        "longitudinal_mps2": longitudinal_acceleration,
+                    },
                     "throttle": control.throttle,
                     "brake": control.brake,
                     "steer": control.steer,
@@ -266,7 +378,8 @@ def main() -> None:
         "non_unit_frame_gaps": sum(right - left != 1 for left, right in zip(frames, frames[1:])),
         "npc_vehicle_count": 0,
         "route": {key: state.snapshot()[key] for key in ("route_count", "route_accepted")},
-        "message_counts": {key: state.snapshot()[key] for key in ("planning_count", "valid_planning_count", "chassis_count", "control_count")},
+        "message_counts": {key: state.snapshot()[key] for key in ("planning_count", "valid_planning_count", "chassis_count", "control_count", "localization_count")},
+        "vehicle_physics": vehicle_physics,
         "valid_trajectory_frame_coverage": sum(row["valid_planning_available"] for row in rows) / len(rows),
         "planning_header_carla_clock_match_fraction": sum(
             row["planning_header_matches_carla_clock"] for row in rows

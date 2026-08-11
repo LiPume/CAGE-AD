@@ -145,3 +145,47 @@ def test_execution_smoke_does_not_compare_wall_header_to_carla_clock_for_coverag
 
     assert '"valid_trajectory_frame_coverage": sum(row["valid_planning_available"]' in source
     assert '"planning_header_carla_clock_match_fraction"' in source
+
+
+def test_control_loop_instrumentation_captures_all_eight_signal_groups() -> None:
+    source = (
+        REPO_ROOT / "src/cage_ad/adapters/apollo_d0/execution_smoke_runtime.py"
+    ).read_text()
+
+    for required in (
+        '"target_speed_1s_mps"',
+        '"target_acceleration_1s_mps2"',
+        '"throttle_percentage"',
+        '"brake_percentage"',
+        '"gear_location"',
+        '"simple_lon_debug"',
+        '"longitudinal_mps2"',
+        '"linear_acceleration_vrf"',
+        '"vehicle_physics"',
+    ):
+        assert required in source
+
+
+def test_bridge_control_telemetry_is_opt_in_and_source_only() -> None:
+    bridge = Path(
+        "/root/autodl_apollo10_g0_bundle/runtime/bridge/apollo-carla/"
+        "carla_bridge/actor/ego_vehicle.py"
+    ).read_text()
+    launcher = (REPO_ROOT / "scripts/g0/manage_carla_bridge.sh").read_text()
+    wrapper = (REPO_ROOT / "scripts/d0/repair/run_execution_smoke_once.sh").read_text()
+
+    assert 'os.environ.get("CAGE_BRIDGE_CONTROL_TELEMETRY", "")' in bridge
+    assert '"apollo_header_sequence_num"' in bridge
+    assert '"carla_applied"' in bridge
+    assert "CAGE_BRIDGE_CONTROL_TELEMETRY" in launcher
+    assert "BRIDGE_CONTROL_TELEMETRY" in wrapper
+
+
+def test_carla_step_response_is_isolated_and_keeps_frozen_reference_command() -> None:
+    source = (REPO_ROOT / "scripts/d0/repair/carla_lincoln_step_response.py").read_text()
+
+    assert '"CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET"' in source
+    assert '"throttle": 0.2355' in source
+    assert '"vehicle.lincoln.mkz_2017"' in source
+    assert "requires zero existing vehicles" in source
+    assert "world.apply_settings(old_settings)" in source

@@ -1,0 +1,54 @@
+diff --git a/carla_bridge/actor/ego_vehicle.py b/carla_bridge/actor/ego_vehicle.py
+--- a/carla_bridge/actor/ego_vehicle.py
++++ b/carla_bridge/actor/ego_vehicle.py
+@@ -12,2 +12,4 @@
+-import math
++import json
++import math
+ import os
++import time
+@@ -57,1 +59,7 @@
+         self.filtered_linear_acceleration = np.zeros(3)
++        self.control_apply_index = 0
++        telemetry_path = os.environ.get("CAGE_BRIDGE_CONTROL_TELEMETRY", "")
++        self.control_telemetry = None
++        if telemetry_path:
++            os.makedirs(os.path.dirname(telemetry_path), exist_ok=True)
++            self.control_telemetry = open(telemetry_path, "a", buffering=1)
+@@ -258,1 +266,6 @@
++        if self.control_telemetry is not None:
++            self.control_telemetry.flush()
++            os.fsync(self.control_telemetry.fileno())
++            self.control_telemetry.close()
++            self.control_telemetry = None
+         super(EgoVehicle, self).destroy()
+@@ -303,1 +316,29 @@
+             self.carla_actor.apply_control(vehicle_control)
++            if self.control_telemetry is not None:
++                snapshot = self.world.get_snapshot()
++                self.control_apply_index += 1
++                record = {
++                    "apply_index": self.control_apply_index,
++                    "wall_time_s": time.time(),
++                    "carla_frame": snapshot.frame,
++                    "carla_elapsed_s": snapshot.timestamp.elapsed_seconds,
++                    "apollo_header_time_s": cyber_vehicle_control.header.timestamp_sec,
++                    "apollo_header_sequence_num": cyber_vehicle_control.header.sequence_num,
++                    "apollo": {
++                        "throttle_percentage": cyber_vehicle_control.throttle,
++                        "brake_percentage": cyber_vehicle_control.brake,
++                        "steering_target_percentage": cyber_vehicle_control.steering_target,
++                        "gear_location": int(cyber_vehicle_control.gear_location),
++                        "parking_brake": bool(cyber_vehicle_control.parking_brake),
++                    },
++                    "carla_applied": {
++                        "throttle": vehicle_control.throttle,
++                        "brake": vehicle_control.brake,
++                        "steer": vehicle_control.steer,
++                        "reverse": vehicle_control.reverse,
++                        "hand_brake": vehicle_control.hand_brake,
++                    },
++                }
++                self.control_telemetry.write(
++                    json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
++                )
