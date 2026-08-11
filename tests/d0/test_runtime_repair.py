@@ -489,5 +489,6 @@ def test_v18_evaluator_freezes_interaction_and_ttc_gates_offline() -> None:
     assert '"production_ttc_enters_2_5_to_6_second_band"' in source
     assert '"ego_pre_conflict_speed_median_at_least_1_8_mps"' in source
     assert '"frozen_v17_table_is_bound_to_run"' in source
+    assert '"apollo_conf/modules/control/control_component/conf/calibration_table.pb.txt"' in source
     assert "carla.Client(" not in source
     assert "apply_control(" not in source

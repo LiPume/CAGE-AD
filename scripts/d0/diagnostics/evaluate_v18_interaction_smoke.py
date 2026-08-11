@@ -51,7 +51,7 @@ def main() -> None:
         float(row["geometry"]["production_ttc_s"])
         for row in rows if row["geometry"]["production_ttc_s"] is not None
     ]
-    interaction_table_relpath = "modules/control/control_component/conf/calibration_table.pb.txt"
+    interaction_table_relpath = "apollo_conf/modules/control/control_component/conf/calibration_table.pb.txt"
     checks = {
         "run_completed_without_runtime_error": finished.get("status") == "COMPLETED" and finished.get("runtime_exit") == 0,
         "identity_is_exactly_one_ego_and_one_actor": len(summary.get("unique_ego_actor_ids", [])) == 1 and len(summary.get("unique_interaction_actor_ids", [])) == 1,
