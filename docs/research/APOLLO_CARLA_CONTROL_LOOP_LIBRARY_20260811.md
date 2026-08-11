@@ -143,3 +143,22 @@
 - 不开始 Agent、Multi-Agent 或 Autoware；
 - 不把第三方论文和网页提交到 Git。
 
+## v3 补充的官方源码与网页（2026-08-11）
+
+本轮新增文件位于持久资料库的 `web/v3_primary/`：
+
+- `apollo10_piecewise_jerk_speed_optimizer.cc`：Apollo 10 官方标签 `r10.0.0` 的速度优化源码；确认规划初始加速度来自当前起点，并受车辆最大减速/加速边界约束。
+- `apollo10_trajectory_stitcher.cc`：确认车辆状态中的真实加速度会写入新规划起点。
+- `apollo10_vehicle_state_provider.cc`：确认 Apollo 在统一地图坐标模式下读取 `linear_acceleration_vrf.y` 作为车辆前向加速度。
+- `apollo10_digital_filter_coefficients.cc`：Apollo 官方数字低通滤波系数实现。
+- `carla_0.9.15_python_api.html`：CARLA 0.9.15 Python API 快照。
+- `carla_current_physics_substepping.html`：CARLA 官方同步、固定步长和物理子步说明。
+
+关键校验和：
+
+- Apollo 速度优化源码：`be813648e4b73e1d72b608f338cbef747a81ea230d7090045b5fc1bd89ef9210`
+- Apollo 轨迹拼接源码：`ee690d38d324d5df5453f43fd64cdbae0abb5c3f4fc11d480ebe9a34da81c0c6`
+- Apollo 车辆状态源码：`aac7b987444d39b1864a0b5ad55f150aeae89069539ba18db1eca844302cba33`
+- Apollo 滤波源码：`26a18cbbe7b21f275ccffeb835474b6c704386aa7f44e02f7b6b3aa414b0b939`
+
+这些资料把 v2 的退化解释从“可能是加速度尖峰”提升为源码可复核的链条：CARLA 原始加速度 → bridge 定位反馈 → Apollo 车辆状态 → 规划起点加速度 → 速度优化边界。v3 因此必须逐项验证，不能再次同时修改三个控制量。
