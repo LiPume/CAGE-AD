@@ -234,6 +234,7 @@ def test_v3_runtime_starts_directly_in_town01_without_old_project_launcher() -> 
     live_launcher = Path(
         "/root/autodl_apollo10_g0_bundle/scripts/start_carla_offscreen.sh"
     ).read_text()
+    source_manager = (REPO_ROOT / "scripts/g0/manage_carla_server.sh").read_text()
 
     assert "start /Game/Carla/Maps/Town01" in wrapper
     assert "--required-map Town01" in wrapper
@@ -241,3 +242,4 @@ def test_v3_runtime_starts_directly_in_town01_without_old_project_launcher() -> 
     assert '${CARLA_ROOT}/CarlaUE4.sh' in live_launcher
     assert "Zhijia-Guardian" not in source_launcher
     assert "Zhijia-Guardian" not in live_launcher
+    assert "CarlaUE4-Linux-Shipping" in source_manager
