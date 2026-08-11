@@ -111,7 +111,7 @@ def main() -> None:
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
         "-f", "rawvideo", "-pix_fmt", "bgra", "-s", f"{WIDTH}x{HEIGHT}",
         "-r", str(FPS), "-i", "-", "-an", "-vf", overlay,
-        "-c:v", "libx264", "-preset", "medium", "-crf", "23",
+        "-c:v", "libx264", "-preset", "ultrafast", "-threads", "2", "-crf", "23",
         "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-f", "mp4", str(temporary),
     ]
     encoder = subprocess.Popen(command, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -157,7 +157,10 @@ def main() -> None:
     return_code = encoder.wait()
     if failure is not None:
         temporary.unlink(missing_ok=True)
-        raise failure
+        raise RuntimeError(
+            f"camera encode failed; ffmpeg_return_code={return_code}; "
+            f"ffmpeg_stderr={stderr[-1000:]!r}"
+        ) from failure
     if return_code != 0:
         temporary.unlink(missing_ok=True)
         raise RuntimeError(f"ffmpeg failed ({return_code}): {stderr[-1000:]}")
