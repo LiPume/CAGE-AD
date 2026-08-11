@@ -12,7 +12,6 @@ import carla
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--timeout", type=float, default=90)
-    parser.add_argument("--required-map")
     args = parser.parse_args()
     deadline = time.monotonic() + args.timeout
     last_error = None
@@ -21,14 +20,7 @@ def main() -> None:
             client = carla.Client("127.0.0.1", 2000)
             client.set_timeout(3)
             world = client.get_world()
-            map_name = world.get_map().name
-            if args.required_map and not map_name.endswith("/" + args.required_map):
-                last_error = RuntimeError(
-                    f"CARLA map is {map_name}, waiting for {args.required_map}"
-                )
-                time.sleep(2)
-                continue
-            print(f"carla_rpc=READY map={map_name}")
+            print(f"carla_rpc=READY map={world.get_map().name}")
             return
         except RuntimeError as exc:
             last_error = exc
