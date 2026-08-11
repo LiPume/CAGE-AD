@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import sys
 import types
+import io
+import json
 
 import carla
 from modules.common_msgs.chassis_msgs.chassis_pb2 import Chassis
@@ -52,6 +54,13 @@ class _World:
     def get_spectator(self) -> _Spectator:
         return _Spectator()
 
+    @staticmethod
+    def get_snapshot():
+        return types.SimpleNamespace(
+            frame=17,
+            timestamp=types.SimpleNamespace(elapsed_seconds=2.5),
+        )
+
 
 class _Actor:
     def __init__(self, control: carla.VehicleControl) -> None:
@@ -75,6 +84,7 @@ def _ego_with_writer(control: carla.VehicleControl) -> EgoVehicle:
     ego.tf_writer = _Writer()
     ego.get_tf_msg = lambda _timestamp: TransformStamped()
     ego.write_localization = lambda _timestamp: None
+    ego.control_telemetry = None
     return ego
 
 
@@ -83,6 +93,13 @@ def _published_gear(control: carla.VehicleControl) -> int:
     EgoVehicle.send_vehicle_msgs(ego, 1.0)
     assert len(ego.vehicle_chassis_writer.messages) == 1
     return int(ego.vehicle_chassis_writer.messages[0].gear_location)
+
+
+def _paired_record(control: carla.VehicleControl) -> dict:
+    ego = _ego_with_writer(control)
+    ego.control_telemetry = io.StringIO()
+    EgoVehicle.send_vehicle_msgs(ego, 2.5)
+    return json.loads(ego.control_telemetry.getvalue())
 
 
 def main() -> None:
@@ -107,6 +124,22 @@ def main() -> None:
     }
     if observed != expected:
         raise SystemExit(f"bridge gear mapping mismatch observed={observed} expected={expected}")
+
+    paired = {name: _paired_record(control) for name, control in (
+        ("neutral", neutral),
+        ("drive", drive),
+        ("reverse", reverse),
+        ("parking", parking),
+    )}
+    for name, record in paired.items():
+        if record["record_type"] != "chassis_feedback":
+            raise SystemExit(f"missing paired chassis record for {name}: {record}")
+        if record["carla_actual"]["gear"] != {
+            "neutral": 0, "drive": 1, "reverse": -1, "parking": 1
+        }[name]:
+            raise SystemExit(f"wrong paired actual gear for {name}: {record}")
+        if record["apollo_published"]["gear_location"] != expected[name]:
+            raise SystemExit(f"wrong paired published gear for {name}: {record}")
 
     transition_actor = _Actor(drive)
     transition_ego = _ego_with_writer(drive)
@@ -133,7 +166,7 @@ def main() -> None:
         )
     print(
         "bridge_gear_mapping=PASS "
-        f"observed={observed} transition={transition_gears}"
+        f"observed={observed} transition={transition_gears} paired=PASS"
     )
 
 

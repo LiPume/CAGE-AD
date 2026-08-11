@@ -1,0 +1,33 @@
+diff --git a/carla_bridge/actor/ego_vehicle.py b/carla_bridge/actor/ego_vehicle.py
+--- a/carla_bridge/actor/ego_vehicle.py
++++ b/carla_bridge/actor/ego_vehicle.py
+@@ -126,6 +126,28 @@ class EgoVehicle(Vehicle):
+         else:
+             vehicle_chassis.gear_location = Chassis.GearPosition.GEAR_DRIVE
++        if self.control_telemetry is not None:
++            snapshot = self.world.get_snapshot()
++            record = {
++                "record_type": "chassis_feedback",
++                "wall_time_s": time.time(),
++                "carla_frame": snapshot.frame,
++                "carla_elapsed_s": snapshot.timestamp.elapsed_seconds,
++                "chassis_header_time_s": timestamp,
++                "carla_actual": {
++                    "gear": carla_control.gear,
++                    "manual_gear_shift": carla_control.manual_gear_shift,
++                    "reverse": carla_control.reverse,
++                    "hand_brake": carla_control.hand_brake,
++                },
++                "apollo_published": {
++                    "gear_location": int(vehicle_chassis.gear_location),
++                },
++            }
++            self.control_telemetry.write(
++                json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
++            )
+         vehicle_chassis.driving_mode = Chassis.DrivingMode.COMPLETE_AUTO_DRIVE
+@@ -352,6 +374,7 @@ class EgoVehicle(Vehicle):
+                 self.control_apply_index += 1
+                 record = {
++                    "record_type": "control_apply",
+                     "apply_index": self.control_apply_index,

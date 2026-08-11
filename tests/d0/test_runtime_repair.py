@@ -320,3 +320,20 @@ def test_v10_actual_gear_feedback_patch_changes_feedback_only() -> None:
     assert "manual_gear_shift =" not in patch
     assert '"neutral": _published_gear(neutral)' in verifier
     assert '"actual_gear_feedback_mismatch_frames"' in runtime
+
+
+def test_v11_paired_gear_telemetry_is_observation_only() -> None:
+    patch = (
+        REPO_ROOT / "third_party/patches/carla_bridge_paired_gear_telemetry_v11.patch"
+    ).read_text()
+    summarizer = (
+        REPO_ROOT / "scripts/d0/repair/summarize_paired_gear_feedback.py"
+    ).read_text()
+
+    assert '"record_type": "chassis_feedback"' in patch
+    assert '"carla_actual"' in patch
+    assert '"apollo_published"' in patch
+    assert "apply_control(" not in patch
+    assert "manual_gear_shift =" not in patch
+    assert '"mapping_mismatch_records"' in summarizer
+    assert '"false_drive_feedback_records"' in summarizer
