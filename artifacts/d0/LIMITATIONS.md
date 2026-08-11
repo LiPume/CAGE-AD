@@ -12,3 +12,7 @@
 - 因主 benchmark 失败，没有统计显著性、bootstrap interval、AURC、Brier、ECE、prediction-set 或 matched-risk cost 结果。
 - 仿真数据不能证明真实车辆安全，也不能支持真实车辆自动修复或干预。
 - 公开数据集仍需要明确代码/数据许可证、第三方再分发审查、归档 ID、维护者联系方式和发布时校验审计。
+- V17 只修复了 0～2 m/s 的正加速度查表；没有修改负加速度表或 CARLA 车辆物理。
+- V18 虽然恢复了 TTC，但 nominal 最小 TTC 为 7.30 秒，未满足 protocol v1 要求的 `(2.5, 6.0]` 秒敏感区。
+- 当前 Lincoln 的低速正刹车响应近似不连续：零刹车与任意微小正刹车差异很大，0.1%～2% 之间却几乎不可分辨。
+- `root_cause_classification` 的旧挡位分类仍会把自动挡起步期请求/反馈差异记成执行问题；V17/V18 保留原字段，另用实际 CARLA 挡位证据解释，未删除旧结果。

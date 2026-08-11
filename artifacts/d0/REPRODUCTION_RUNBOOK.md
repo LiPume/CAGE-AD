@@ -110,3 +110,28 @@ cd "$CAGE_REPO"
 ## 7. 隔离要求
 
 诊断进程只能读取每个 episode 的 `visible/` 子目录。绝不能向诊断进程开放 `CAGE_PRIVATE_ORACLE_ROOT`、evaluation JSON、语义标签或 run linkage。CPU 测试和离线评估期间应确认 Apollo/CARLA 已停止，private oracle 权限应保持 `0700`。
+
+## 8. 复核 2026-08-11 控制闭环证据（不重跑仿真）
+
+V18 与 V19 都是诊断记录，不是数据集。直接核对校验和与摘要：
+
+```bash
+sha256sum \
+  "$CAGE_RUNTIME_ROOT/d0_control_loop_v18_20260811/V18_LBC0_SEED1101_32S/retained/summary.json" \
+  "$CAGE_RUNTIME_ROOT/d0_control_loop_v18_20260811/V18_LBC0_SEED1101_32S/retained/trace.jsonl" \
+  "$CAGE_RUNTIME_ROOT/d0_control_loop_v19_20260811/CARLA_V19_MICRO_BRAKE_01/summary.json" \
+  "$CAGE_RUNTIME_ROOT/d0_control_loop_v19_20260811/CARLA_V19_MICRO_BRAKE_01/trace.jsonl"
+```
+
+预期依次为：
+
+```text
+6d1c70a8d45a3c21b15ffcdab70704cc4f7d8de431873c94134e7ae1d39620c3
+bcfcad0a82db6b45694bfc2fedd5c6d4bfc55237ef0a07382b9c954d8eca73c7
+f8fd986b5ea3ed7e18e423c953fbccd45b89705f8105906b1b5220ab2d87ee4b
+fa9de5a8722e930dce019c2b0334ff4ecab6da4ee3ee5a4becbe8e2bb90ab361
+```
+
+对应中文报告是 `artifacts/d0/diagnostics/CONTROL_LOOP_V18_LBC0_INTERACTION_SMOKE.md` 和
+`artifacts/d0/diagnostics/CONTROL_LOOP_V19_LOW_SPEED_MICRO_BRAKE.md`。当前终态禁止重复 V18 来挑 seed，
+也禁止把 V19 的诊断轨迹加入数据集。继续实验必须创建新的、预登记的 physics-layer 基础设施版本。
