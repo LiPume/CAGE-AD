@@ -521,6 +521,7 @@ def test_showcase_camera_is_observation_only_and_labeled() -> None:
     assert "none_observation_only_camera" in source
     assert 'encoder_environment.pop("LD_LIBRARY_PATH", None)' in source
     assert '"/usr/bin/ffmpeg"' in source
+    assert 'blueprint.set_attribute("sensor_tick", "0.0")' in source
     assert "apply_control(" not in source
     assert "apply_physics_control" not in source
     assert "set_autopilot" not in source

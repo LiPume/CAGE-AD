@@ -84,7 +84,9 @@ def main() -> None:
     blueprint.set_attribute("image_size_x", str(WIDTH))
     blueprint.set_attribute("image_size_y", str(HEIGHT))
     blueprint.set_attribute("fov", "90")
-    blueprint.set_attribute("sensor_tick", str(1.0 / FPS))
+    # Zero means one image per simulator tick. This matches the G0 synchronous
+    # sensor gate and avoids float-period scheduling skips at a 0.05 s tick.
+    blueprint.set_attribute("sensor_tick", "0.0")
     transform = carla.Transform(
         carla.Location(x=-7.5, z=3.4),
         carla.Rotation(pitch=-12.0),
@@ -183,6 +185,7 @@ def main() -> None:
             "width": WIDTH,
             "height": HEIGHT,
             "fps": FPS,
+            "sensor_tick_s": 0.0,
             "fov_deg": 90,
             "relative_location_m": {"x": -7.5, "y": 0.0, "z": 3.4},
             "relative_pitch_deg": -12.0,
@@ -190,6 +193,8 @@ def main() -> None:
         "duration_s": args.duration_s,
         "encoded_frames": encoded_frames,
         "non_unit_sensor_frame_gaps": gaps,
+        "first_sensor_frame": observed_frames[0],
+        "last_sensor_frame": observed_frames[-1],
         "start_speed_mps": start_speed,
         "maximum_speed_mps": maximum_speed,
         "video": str(args.output),
