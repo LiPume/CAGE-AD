@@ -1,6 +1,6 @@
 # Apollo—bridge—CARLA 真实挡位时间线 v9 审计
 
-状态：**审计前合同已冻结，尚未运行**
+状态：**审计完成；确认旧挡位回报不真实**
 
 分支：`codex/apollo-d0-control-loop-repair-v9`
 
@@ -35,4 +35,18 @@ V9 预算 10 分钟、256 MiB。
 
 ## 审计结果
 
-待填写。
+`NO_NPC_V9_GEAR_01` 完成完整 400 帧、20 秒闭环，新增挡位字段 100% 可用。结果：
+
+- Apollo 控制命令：400/400 帧为前进挡；
+- bridge 向 Apollo 发布的底盘挡位：400/400 帧为前进挡；
+- CARLA 真实挡位：前 41 帧为 0，后 359 帧为 1；
+- 油门首次非零：`0.40 s`，当时真实 gear=0；
+- 真实 gear 首次为 1：`2.10 s`；
+- 从首次油门到真实挂入 1 挡延迟约 `1.70 s`；
+- 共有 41 帧 Apollo 收到前进挡，但 CARLA 实际不是 1 挡。
+
+bridge 高频命令记录给出相同结论：3130 条控制回读中，实际 gear=0 有 1320 条、gear=1 有 1810 条；Apollo 命令 3130 条全部为前进挡，`manual_gear_shift` 始终为 false。
+
+因此旧的 `drive_gear_mismatch_frames=0` 只能说明 Apollo 命令和 bridge 人工构造的底盘消息一致，不能证明真实车辆挡位一致。以后报告必须同时给出 `apollo_drive_but_carla_not_gear_one_frames`。
+
+这解释了约 1.70 秒的起步损失，但车辆在挂入 1 挡后仍长期达不到计划速度，所以它不是全部慢车根因。下一阶段应先把 bridge 底盘挡位改为基于 CARLA 实际 gear 的真实反馈，再重新评估；油门映射仍不允许修改。
