@@ -1,0 +1,9 @@
+diff --git a/carla_bridge/config/settings.yaml b/carla_bridge/config/settings.yaml
+--- a/carla_bridge/config/settings.yaml
++++ b/carla_bridge/config/settings.yaml
+@@ -15,4 +15,4 @@ carla:
+     throttle_gain: 1.5
+     brake_gain: 1.0
+     steering_gain: 0.419643
+-    localization_accel_alpha: 0.0
++    localization_accel_alpha: 0.15
