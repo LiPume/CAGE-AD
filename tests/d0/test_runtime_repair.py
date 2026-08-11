@@ -391,3 +391,17 @@ def test_v15_candidate_is_low_speed_positive_and_reversible() -> None:
     assert "33.333333333333336" in generator
     assert "CAGE_APOLLO_CALIBRATION_OVERRIDE" in prepare
     assert "calibration_table.pb.txt" in prepare
+
+
+def test_v15_loader_uses_run_specific_control_flag_and_dag() -> None:
+    prepare = (REPO_ROOT / "scripts/d0/repair/prepare_execution_smoke.py").read_text()
+    renderer = (REPO_ROOT / "scripts/d0/render_apollo_runtime.py").read_text()
+    wrapper = (REPO_ROOT / "scripts/d0/repair/run_execution_smoke_once.sh").read_text()
+    template = (REPO_ROOT / "deploy/autodl_apollo10/d0_pnc.launch.in").read_text()
+
+    assert "--calibration_table_file=" in prepare
+    assert 'line.lstrip("-").startswith("calibration_table_file=")' in prepare
+    assert "--control-flag-file" in renderer
+    assert 'flag_file_path: "{control_flag_file}"' in renderer
+    assert "__CAGE_CONTROL_DAG__" in template
+    assert "CONTROL_RENDER_ARGS" in wrapper

@@ -78,10 +78,28 @@ def main() -> None:
         source = Path(calibration_override).resolve()
         if not source.is_file():
             raise SystemExit(f"calibration override is not a file: {source}")
-        _atomic_text(
+        calibration_destination = (
             args.run_data
-            / "apollo_conf/modules/control/control_component/conf/calibration_table.pb.txt",
-            source.read_text(),
+            / "apollo_conf/modules/control/control_component/conf/calibration_table.pb.txt"
+        )
+        _atomic_text(calibration_destination, source.read_text())
+        runtime_root = Path(os.environ["CAGE_RUNTIME_ROOT"]).resolve()
+        base_control_flags = (
+            runtime_root
+            / "apollo/application-pnc/.aem/envroot/opt/apollo/neo/share/modules/control/control_component/conf/control.conf"
+        )
+        if not base_control_flags.is_file():
+            raise SystemExit(f"base control flag file is missing: {base_control_flags}")
+        retained_flags = [
+            line for line in base_control_flags.read_text().splitlines()
+            if not line.lstrip("-").startswith("calibration_table_file=")
+        ]
+        retained_flags.append(
+            f"--calibration_table_file={calibration_destination.resolve()}"
+        )
+        _atomic_text(
+            args.run_data / "apollo_conf/modules/control/control_component/conf/control.conf",
+            "\n".join(retained_flags) + "\n",
         )
     config_root = args.run_data / "apollo_conf"
     config_manifest = {

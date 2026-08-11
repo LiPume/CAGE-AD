@@ -23,7 +23,7 @@ INTERPOSER_CAPTURE="${RUN_DATA}/private/interposer_capture.json"
 INTERPOSER_CONFIG="${RUN_DATA}/private/interposer.json"
 BRIDGE_CONTROL_TELEMETRY="${RUN_DATA}/bridge_control_telemetry.jsonl"
 APOLLO_CONF_ROOT="${RUN_DATA}/apollo_conf"
-LAUNCH="$(${CAGE_PYTHON} "${REPO_ROOT}/scripts/d0/render_apollo_runtime.py" --repo-root "${REPO_ROOT}" --state-root "${CAGE_STATE_ROOT}")"
+LAUNCH=""
 APOLLO_EXTRA="${CAGE_RUNTIME_ROOT}/bridge/python:${CAGE_RUNTIME_ROOT}/bridge/apollo-carla:${REPO_ROOT}/src"
 EMPTY_PID=""
 INTERPOSER_PID=""
@@ -34,6 +34,14 @@ RUNTIME_EXIT=1
 [[ ! -e "${RESULT}" ]] || { echo "execution smoke already finished" >&2; exit 2; }
 install -d -m 0700 "${RUN_STATE}" "${RUN_DATA}" "${LOG_ROOT}"
 "${CAGE_PYTHON}" "${REPO_ROOT}/scripts/d0/repair/prepare_execution_smoke.py" --repo-root "${REPO_ROOT}" --run-id "${RUN_ID}" --run-state "${RUN_STATE}" --run-data "${RUN_DATA}" >"${LOG_ROOT}/prepare.log"
+CONTROL_RENDER_ARGS=()
+if [[ -n "${CAGE_APOLLO_CALIBRATION_OVERRIDE:-}" ]]; then
+  CONTROL_RENDER_ARGS=(
+    --control-flag-file
+    "${APOLLO_CONF_ROOT}/modules/control/control_component/conf/control.conf"
+  )
+fi
+LAUNCH="$(${CAGE_PYTHON} "${REPO_ROOT}/scripts/d0/render_apollo_runtime.py" --repo-root "${REPO_ROOT}" --state-root "${CAGE_STATE_ROOT}" "${CONTROL_RENDER_ARGS[@]}")"
 
 stop_group() {
   local pid="$1"
