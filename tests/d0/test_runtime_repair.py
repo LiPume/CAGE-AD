@@ -405,3 +405,17 @@ def test_v15_loader_uses_run_specific_control_flag_and_dag() -> None:
     assert 'flag_file_path: "{control_flag_file}"' in renderer
     assert "__CAGE_CONTROL_DAG__" in template
     assert "CONTROL_RENDER_ARGS" in wrapper
+
+
+def test_v16_calibration_freezes_three_start_speeds() -> None:
+    source = (REPO_ROOT / "scripts/d0/repair/carla_multi_speed_calibration.py").read_text()
+
+    assert "TARGET_SPEEDS = (1.0, 1.5, 2.0)" in source
+    assert "LEVELS = (0.30, 0.35, 0.40, 0.45, 0.50)" in source
+    assert "REPEATS = 3" in source
+    assert "PRECONDITION_THROTTLE = 0.50" in source
+    assert "def speed_slope(rows: list[dict]) -> float:" in source
+    assert '"all_45_samples_present"' in source
+    assert '"CONTROL_LOOP_DIAGNOSTIC_NOT_DATASET"' in source
+    assert "manual_gear_shift =" not in source
+    assert "apply_physics_control" not in source
