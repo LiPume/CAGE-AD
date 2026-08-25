@@ -1,0 +1,36 @@
+protocol_version: cage-ad-hint-gold-v1
+candidate_id: HGV1-P01-LBC0
+stack: apollo_10
+simulator: carla_0_9_15
+scene:
+  scenario_id: lead_brake_close
+  candidate_id: LBC0
+  seed: 1101
+  repeat_order: [0, 1, 2]
+  source: benchmarks/apollo_d0/protocol_v1/scenario_recipes.yaml
+fault:
+  responsibility_domain: motion_planning
+  mechanism_family: incorrect_threshold_value
+  native_component: speed_decider
+  semantic_source_config: modules/planning/tasks/speed_decider/conf/default_conf.pb.txt
+  runtime_overlay_config: modules/planning/scenarios/lane_follow/conf/lane_follow_stage/speed_decider.pb.txt
+  field: follow_min_time_sec
+  reference_value: 2.0
+  faulty_value: 0.1
+  mutation_scope: run_scoped_APOLLO_CONF_PATH_overlay
+  forbidden_changes:
+    - stop_follow_distance
+    - follow_distance_scheduler
+    - scenario_parameters
+    - bridge_calibration
+    - failure_oracle
+oracles:
+  reference: infrastructure_valid_and_no_collision_and_no_ttc_below_2_5s
+  faulty: collision_or_ttc_below_2_5s
+  max_activation_to_failure_seconds: 5.0
+admission:
+  reference_repeats: 3
+  faulty_repeats: 3
+  required_votes_each: 3
+  probes_used: false
+  agents_used: false
