@@ -93,3 +93,11 @@ def test_invalid_evidence_hash_fails_closed():
     value["reference_runs"][0]["evidence_sha256"] = "not-a-sha"
     with pytest.raises(AdmissionError, match="evidence_sha256"):
         evaluate_candidate(value)
+
+
+def test_explicitly_missing_failure_timestamp_rejects_without_fabrication():
+    value = candidate()
+    value["faulty_runs"][0]["failure_onset_s"] = None
+    result = evaluate_candidate(value)
+    assert result["benchmark_admission"] == "REJECTED_CANDIDATE"
+    assert "activation_precedes_failure" in result["failed_gates"]

@@ -283,8 +283,17 @@ def main() -> None:
     parser.add_argument("--repo-root", type=Path, required=True)
     args = parser.parse_args()
     config = json.loads(args.config.read_text())
-    if config.get("diagnostic_only_not_dataset") is not True or int(config.get("seed", -1)) != 1101:
-        raise ProtocolValidationError("runtime requires DIAGNOSTIC_ONLY_NOT_DATASET seed 1101 config")
+    if config.get("diagnostic_only_not_dataset") is True:
+        capture_label = "DIAGNOSTIC_ONLY_NOT_DATASET"
+    elif (
+        config.get("capture_purpose") == "benchmark_construction"
+        and config.get("benchmark_construction_candidate") is True
+    ):
+        capture_label = "BENCHMARK_CONSTRUCTION_CANDIDATE"
+    else:
+        raise ProtocolValidationError("unsupported TTC capture purpose")
+    if int(config.get("seed", -1)) != 1101:
+        raise ProtocolValidationError("TTC capture requires frozen seed 1101")
     bundle = load_protocol(args.repo_root, validate_json_schema=False)
     if config.get("protocol_bundle_sha256") != bundle.bundle_sha256:
         raise ProtocolValidationError("diagnostic protocol bundle hash mismatch")
@@ -516,7 +525,7 @@ def main() -> None:
     ]
     summary = {
         "schema_version": 1,
-        "label": "DIAGNOSTIC_ONLY_NOT_DATASET",
+        "label": capture_label,
         "run_id": config["run_id"],
         "scenario_id": config["scenario_id"],
         "candidate_id": config["candidate_id"],

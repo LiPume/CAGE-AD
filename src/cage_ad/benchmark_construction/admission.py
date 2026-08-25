@@ -40,10 +40,12 @@ def _boolean(mapping: Mapping[str, Any], key: str, context: str) -> bool:
     return value
 
 
-def _number(mapping: Mapping[str, Any], key: str, context: str) -> float:
+def _nullable_number(mapping: Mapping[str, Any], key: str, context: str) -> float | None:
     value = _required(mapping, key, context)
+    if value is None:
+        return None
     if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise AdmissionError(f"{context}.{key} must be numeric")
+        raise AdmissionError(f"{context}.{key} must be numeric or null")
     return float(value)
 
 
@@ -103,8 +105,8 @@ def evaluate_candidate(
     faulty_checks = []
     for index, run in enumerate(faulty):
         context = f"candidate.faulty_runs[{index}]"
-        activation = _number(run, "mechanism_activated_at_s", context)
-        failure = _number(run, "failure_onset_s", context)
+        activation = _nullable_number(run, "mechanism_activated_at_s", context)
+        failure = _nullable_number(run, "failure_onset_s", context)
         faulty_checks.append(
             {
                 "run_id": _run_id(run, context),
@@ -113,7 +115,9 @@ def evaluate_candidate(
                 "mechanism_confirmed": _boolean(run, "mechanism_confirmed", context),
                 "mechanism_activated_at_s": activation,
                 "failure_onset_s": failure,
-                "activation_to_failure_s": failure - activation,
+                "activation_to_failure_s": (
+                    None if activation is None or failure is None else failure - activation
+                ),
                 "oracle_hidden_from_diagnosis": _boolean(
                     run, "oracle_hidden_from_diagnosis", context
                 ),
@@ -137,7 +141,8 @@ def evaluate_candidate(
         ),
         "mechanism_confirmed": all(row["mechanism_confirmed"] for row in faulty_checks),
         "activation_precedes_failure": all(
-            0.0 <= row["activation_to_failure_s"]
+            row["activation_to_failure_s"] is not None
+            and 0.0 <= row["activation_to_failure_s"]
             <= policy.max_activation_to_failure_seconds
             for row in faulty_checks
         ),
