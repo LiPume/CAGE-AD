@@ -1,0 +1,40 @@
+protocol_version: cage-ad-hint-gold-v1
+candidate_id: HGV1-P03-LBC1
+stack: apollo_10
+simulator: carla_0_9_15
+scene:
+  scenario_id: lead_brake_close
+  candidate_id: LBC1
+  seed: 1101
+  repeat_order: [0, 1, 2]
+  source: benchmarks/apollo_d0/protocol_v1/scenario_recipes.yaml
+fault:
+  responsibility_domain: motion_planning
+  mechanism_family: braking_constraint_omission
+  native_component: planning_trajectory_output
+  protocol_fault_id: planning_constraint_omitted
+  dose: {braking_attenuation: 1.0}
+  operation: remove_only_nominal_negative_acceleration_suffix_and_reintegrate_speed_and_path_s
+  runtime_binding: semantic_interposer_on_planning_raw_to_planning
+  activation_metric: integrated_removed_braking_mps
+  activation_operator: greater_than
+  activation_threshold: 0.5
+  maximum_speed_residual_mps: 0.1
+  maximum_position_residual_m: 0.25
+  forbidden_changes:
+    - positive_acceleration_points
+    - pre_trigger_trajectory
+    - scenario_parameters
+    - bridge_calibration
+    - failure_oracle
+oracles:
+  reference: infrastructure_valid_and_no_collision_and_no_ttc_below_2_5s
+  faulty: collision_or_ttc_below_2_5s
+  max_activation_to_failure_seconds: 5.0
+admission:
+  screening_order: one_reference_then_one_faulty
+  full_reference_repeats: 3
+  full_faulty_repeats: 3
+  required_votes_each: 3
+  probes_used: false
+  agents_used: false

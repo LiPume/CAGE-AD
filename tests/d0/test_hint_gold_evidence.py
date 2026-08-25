@@ -23,10 +23,11 @@ def test_semantic_time_compression_activation_is_confirmed():
                     "transform_residual": 0.0,
                 }
             ],
-        }
+        },
+        "HGV1-P02-CIE0",
     )
     assert activation == 2.1
-    assert detail["observed_time_scale"] == 0.6000000001
+    assert detail["activation_metric_value"] == 0.6000000001
 
 
 def test_semantic_activation_fails_closed_on_injector_exception():
@@ -37,7 +38,28 @@ def test_semantic_activation_fails_closed_on_injector_exception():
             "activation_observations": [
                 {"simulator_time_s": 2.1, "metric_value": 0.6, "transform_residual": 0.0}
             ],
-        }
+        },
+        "HGV1-P02-CIE0",
     )
     assert activation is None
     assert detail is None
+
+
+def test_braking_omission_activation_requires_valid_reintegration():
+    activation, detail = MODULE._semantic_mechanism_activation(
+        {
+            "injector_exception": None,
+            "fault_applications": 9,
+            "activation_observations": [
+                {
+                    "simulator_time_s": 5.2,
+                    "metric_value": 0.8,
+                    "transform_residual": 0.05,
+                    "position_residual_m": 0.12,
+                }
+            ],
+        },
+        "HGV1-P03-LBC1",
+    )
+    assert activation == 5.2
+    assert detail["activation_metric_value"] == 0.8

@@ -79,7 +79,7 @@ def _overlay_mechanism_activation(rows: list[dict]) -> tuple[float | None, dict 
 
 
 def _semantic_mechanism_activation(
-    interposer_stats: dict,
+    interposer_stats: dict, candidate_id: str,
 ) -> tuple[float | None, dict | None]:
     if interposer_stats.get("injector_exception") is not None:
         return None, None
@@ -88,14 +88,24 @@ def _semantic_mechanism_activation(
     for observation in interposer_stats.get("activation_observations", []):
         metric = observation.get("metric_value")
         residual = observation.get("transform_residual")
-        if (
-            metric is not None
+        time_compression = (
+            candidate_id == "HGV1-P02-CIE0"
+            and metric is not None
             and abs(float(metric) - 0.6) <= 0.02
             and residual is not None
             and abs(float(residual)) <= 1e-9
-        ):
+        )
+        braking_omission = (
+            candidate_id == "HGV1-P03-LBC1"
+            and metric is not None
+            and float(metric) > 0.5
+            and residual is not None
+            and abs(float(residual)) <= 0.1
+            and abs(float(observation.get("position_residual_m", math.inf))) <= 0.25
+        )
+        if time_compression or braking_omission:
             return float(observation["simulator_time_s"]), {
-                "observed_time_scale": float(metric),
+                "activation_metric_value": float(metric),
                 "transform_residual": float(residual),
                 "fault_applications": int(interposer_stats["fault_applications"]),
             }
@@ -147,7 +157,9 @@ def main() -> None:
     parser.add_argument("--admission-output", type=Path, required=True)
     args = parser.parse_args()
     schedule = json.loads(args.schedule.read_text())
-    if schedule.get("candidate_id") not in {"HGV1-P01-LBC0", "HGV1-P02-CIE0"} or len(schedule.get("runs", [])) != 6:
+    if schedule.get("candidate_id") not in {
+        "HGV1-P01-LBC0", "HGV1-P02-CIE0", "HGV1-P03-LBC1"
+    } or len(schedule.get("runs", [])) != 6:
         raise SystemExit("invalid frozen six-run schedule")
 
     reference_runs = []
@@ -170,11 +182,21 @@ def main() -> None:
         infrastructure = _infrastructure_checks(finished, summary, rows)
         failure_onset, failure_rule = _failure_onset(rows)
         if planned["fault_binding"] == "semantic_interposer":
-            activation, activation_detail = _semantic_mechanism_activation(interposer_stats)
+            activation, activation_detail = _semantic_mechanism_activation(
+                interposer_stats, schedule["candidate_id"]
+            )
             private_config = json.loads((raw / "private/interposer.json").read_text())
+            expected_binding = {
+                "HGV1-P02-CIE0": (
+                    "planning_unsafe_cost_or_speed_bias", {"time_scale": 0.6}
+                ),
+                "HGV1-P03-LBC1": (
+                    "planning_constraint_omitted", {"braking_attenuation": 1.0}
+                ),
+            }[schedule["candidate_id"]]
             binding_confirmed = (
-                private_config.get("fault_id") == "planning_unsafe_cost_or_speed_bias"
-                and private_config.get("dose") == {"time_scale": 0.6}
+                private_config.get("fault_id") == expected_binding[0]
+                and private_config.get("dose") == expected_binding[1]
             )
         else:
             activation, activation_detail = _overlay_mechanism_activation(rows)

@@ -113,6 +113,18 @@ def main() -> None:
             "activation_target": 0.6,
             "activation_absolute_tolerance": 0.02,
         }
+    elif contract_id == "HGV1-P03-LBC1":
+        scenario_id, scenario_candidate_id, fault_binding = (
+            "lead_brake_close", "LBC1", "semantic_interposer"
+        )
+        expected_fault_keys = {
+            "mechanism_family": "braking_constraint_omission",
+            "protocol_fault_id": "planning_constraint_omitted",
+            "dose": {"braking_attenuation": 1.0},
+            "activation_threshold": 0.5,
+            "maximum_speed_residual_mps": 0.1,
+            "maximum_position_residual_m": 0.25,
+        }
     else:
         raise SystemExit("unsupported gold candidate contract")
     expected_scene = {

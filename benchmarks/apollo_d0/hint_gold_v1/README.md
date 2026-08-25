@@ -20,3 +20,8 @@ Candidate 01 is a Planning threshold mutation in a lead-vehicle braking scene.
 Candidate 02 is a separately frozen cut-in case using the protocol-v1 semantic
 Planning time-compression transform.  They are distinct candidates; candidate
 02 is not a post-result dose change to candidate 01.
+
+Candidate 03 pairs the frame-stable LBC1 lead-braking scene with protocol-v1's
+braking-constraint omission transform.  It is selected because the mutation
+acts specifically on a nominal negative-acceleration suffix; its screening and
+admission rules remain identical.
