@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare one private, immutable companion run for the first gold candidate."""
+"""Prepare one private, immutable companion run for a frozen gold candidate."""
 
 from __future__ import annotations
 
@@ -33,6 +33,10 @@ def _sha_bytes(value: bytes) -> str:
 
 def _sha(path: Path) -> str:
     return _sha_bytes(path.read_bytes())
+
+
+def _canonical(value: object) -> bytes:
+    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
 
 
 def _inside(path: Path, parent: Path) -> bool:
@@ -86,37 +90,45 @@ def main() -> None:
     ).stdout.strip()
 
     contract = yaml.safe_load(args.candidate_contract.read_text())
-    if contract["candidate_id"] != "HGV1-P01-LBC0":
+    contract_id = contract["candidate_id"]
+    fault = contract["fault"]
+    if contract_id == "HGV1-P01-LBC0":
+        scenario_id, scenario_candidate_id, fault_binding = (
+            "lead_brake_close", "LBC0", "apollo_conf_overlay"
+        )
+        expected_fault_keys = {
+            "mechanism_family": "incorrect_threshold_value",
+            "field": "follow_min_time_sec",
+            "reference_value": 2.0,
+            "faulty_value": 0.1,
+        }
+    elif contract_id == "HGV1-P02-CIE0":
+        scenario_id, scenario_candidate_id, fault_binding = (
+            "cut_in_early", "CIE0", "semantic_interposer"
+        )
+        expected_fault_keys = {
+            "mechanism_family": "trajectory_time_compression",
+            "protocol_fault_id": "planning_unsafe_cost_or_speed_bias",
+            "dose": {"time_scale": 0.6},
+            "activation_target": 0.6,
+            "activation_absolute_tolerance": 0.02,
+        }
+    else:
         raise SystemExit("unsupported gold candidate contract")
-    if contract["scene"] != {
-        "scenario_id": "lead_brake_close",
-        "candidate_id": "LBC0",
+    expected_scene = {
+        "scenario_id": scenario_id,
+        "candidate_id": scenario_candidate_id,
         "seed": 1101,
         "repeat_order": [0, 1, 2],
         "source": "benchmarks/apollo_d0/protocol_v1/scenario_recipes.yaml",
-    }:
-        raise SystemExit("scene contract changed after pre-registration")
-    fault = contract["fault"]
-    expected_fault = {
-        "responsibility_domain": "motion_planning",
-        "mechanism_family": "incorrect_threshold_value",
-        "native_component": "speed_decider",
-        "semantic_source_config": "modules/planning/tasks/speed_decider/conf/default_conf.pb.txt",
-        "runtime_overlay_config": "modules/planning/scenarios/lane_follow/conf/lane_follow_stage/speed_decider.pb.txt",
-        "field": "follow_min_time_sec",
-        "reference_value": 2.0,
-        "faulty_value": 0.1,
-        "mutation_scope": "run_scoped_APOLLO_CONF_PATH_overlay",
-        "forbidden_changes": [
-            "stop_follow_distance", "follow_distance_scheduler", "scenario_parameters",
-            "bridge_calibration", "failure_oracle",
-        ],
     }
-    if fault != expected_fault:
+    if contract["scene"] != expected_scene:
+        raise SystemExit("scene contract changed after pre-registration")
+    if any(fault.get(key) != value for key, value in expected_fault_keys.items()):
         raise SystemExit("fault contract changed after pre-registration")
 
     bundle = load_protocol(args.repo_root)
-    candidate = scenario_candidate_by_id(bundle, "lead_brake_close", "LBC0")
+    candidate = scenario_candidate_by_id(bundle, scenario_id, scenario_candidate_id)
     calibration = args.calibration_table.resolve()
     if _sha(calibration) != CALIBRATION_SHA256:
         raise SystemExit("frozen V17 control calibration SHA256 mismatch")
@@ -125,7 +137,9 @@ def main() -> None:
         "modules/planning/tasks/speed_decider/conf/default_conf.pb.txt"
     )
     vendor_text = vendor_default.read_text()
-    if not re.search(r"(?m)^follow_min_time_sec:\s*2(?:\.0+)?\s*$", vendor_text):
+    if fault_binding == "apollo_conf_overlay" and not re.search(
+        r"(?m)^follow_min_time_sec:\s*2(?:\.0+)?\s*$", vendor_text
+    ):
         raise SystemExit("Apollo vendor follow_min_time_sec default is not 2.0")
 
     run_state = args.state_root / "runs" / args.run_id
@@ -139,14 +153,22 @@ def main() -> None:
     scenario = {
         "protocol_version": bundle.episodes["protocol_version"],
         "protocol_bundle_sha256": bundle.bundle_sha256,
-        "scenario_id": "lead_brake_close",
-        "candidate_id": "LBC0",
+        "scenario_id": scenario_id,
+        "candidate_id": scenario_candidate_id,
         "seed": 1101,
     }
     interposer = {
         **scenario,
-        "fault_id": None,
-        "dose": None,
+        "fault_id": (
+            fault["protocol_fault_id"]
+            if fault_binding == "semantic_interposer" and args.variant == "faulty"
+            else None
+        ),
+        "dose": (
+            fault["dose"]
+            if fault_binding == "semantic_interposer" and args.variant == "faulty"
+            else None
+        ),
         "probe_domain": None,
         "trigger_window": list(candidate.trigger_window),
     }
@@ -162,7 +184,13 @@ def main() -> None:
 
     stage_root = apollo_conf / "modules/planning/scenarios/lane_follow/conf/lane_follow_stage"
     for name in STAGE_OVERRIDE_NAMES:
-        content = FAULT_OVERLAY if name == "speed_decider" and args.variant == "faulty" else ""
+        content = (
+            FAULT_OVERLAY
+            if fault_binding == "apollo_conf_overlay"
+            and name == "speed_decider"
+            and args.variant == "faulty"
+            else ""
+        )
         _atomic_text(stage_root / f"{name}.pb.txt", content)
     destination = apollo_conf / "modules/control/control_component/conf/calibration_table.pb.txt"
     _atomic_text(destination, calibration.read_text())
@@ -180,8 +208,19 @@ def main() -> None:
         "\n".join(filtered_flags) + "\n",
     )
 
-    fault_sha = _sha_bytes(FAULT_OVERLAY.encode())
+    if fault_binding == "apollo_conf_overlay":
+        fault_sha = _sha_bytes(FAULT_OVERLAY.encode())
+    else:
+        implementation = args.repo_root / "src/cage_ad/adapters/apollo_d0/interposer_runtime.py"
+        fault_sha = _sha_bytes(
+            implementation.read_bytes()
+            + b"\0"
+            + _canonical({"fault_id": fault["protocol_fault_id"], "dose": fault["dose"]})
+        )
     applied_overlay = stage_root / "speed_decider.pb.txt"
+    applied_fault_config_sha = _sha_bytes(
+        _canonical({"fault_id": interposer["fault_id"], "dose": interposer["dose"]})
+    )
     planned = {
         "schema_version": 1,
         "status": "PLANNED",
@@ -196,8 +235,10 @@ def main() -> None:
         "protocol_bundle_sha256": bundle.bundle_sha256,
         "calibration_table_sha256": CALIBRATION_SHA256,
         "vendor_default_sha256": _sha(vendor_default),
+        "fault_binding": fault_binding,
         "fault_implementation_sha256": fault_sha,
         "applied_overlay_sha256": _sha(applied_overlay),
+        "applied_fault_config_sha256": applied_fault_config_sha,
         "raw_run_root": str(raw_run),
     }
     planned_path = run_state / "planned.json"
@@ -207,13 +248,14 @@ def main() -> None:
     _atomic_json(private / "scenario.json", scenario)
     _atomic_json(private / "interposer.json", interposer)
     _atomic_json(private / "capture.json", capture_config)
-    _atomic_json(private / "mutation_manifest.json", {
-        "candidate_id": contract["candidate_id"],
+    _atomic_json(private / "fault_manifest.json", {
+        "candidate_id": contract_id,
         "variant": args.variant,
-        "field": fault["field"],
-        "reference_value": fault["reference_value"],
-        "faulty_value": fault["faulty_value"],
+        "fault_binding": fault_binding,
+        "protocol_fault_id": interposer["fault_id"],
+        "dose": interposer["dose"],
         "fault_implementation_sha256": fault_sha,
+        "applied_fault_config_sha256": applied_fault_config_sha,
         "applied_overlay_sha256": _sha(applied_overlay),
         "vendor_default_sha256": _sha(vendor_default),
     })

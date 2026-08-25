@@ -56,7 +56,7 @@ def _failure_onset(rows: list[dict]) -> tuple[float | None, str | None]:
     return None, None
 
 
-def _mechanism_activation(rows: list[dict]) -> tuple[float | None, dict | None]:
+def _overlay_mechanism_activation(rows: list[dict]) -> tuple[float | None, dict | None]:
     for row in rows:
         planning = row.get("apollo", {}).get("planning") or {}
         if not planning.get("decision_mentions_obstacle_1001"):
@@ -74,6 +74,30 @@ def _mechanism_activation(rows: list[dict]) -> tuple[float | None, dict | None]:
                 "ego_speed_mps": ego_speed,
                 "observed_follow_distance_m": follow_distance,
                 "decision_mentions_obstacle_1001": True,
+            }
+    return None, None
+
+
+def _semantic_mechanism_activation(
+    interposer_stats: dict,
+) -> tuple[float | None, dict | None]:
+    if interposer_stats.get("injector_exception") is not None:
+        return None, None
+    if int(interposer_stats.get("fault_applications", 0)) < 1:
+        return None, None
+    for observation in interposer_stats.get("activation_observations", []):
+        metric = observation.get("metric_value")
+        residual = observation.get("transform_residual")
+        if (
+            metric is not None
+            and abs(float(metric) - 0.6) <= 0.02
+            and residual is not None
+            and abs(float(residual)) <= 1e-9
+        ):
+            return float(observation["simulator_time_s"]), {
+                "observed_time_scale": float(metric),
+                "transform_residual": float(residual),
+                "fault_applications": int(interposer_stats["fault_applications"]),
             }
     return None, None
 
@@ -123,7 +147,7 @@ def main() -> None:
     parser.add_argument("--admission-output", type=Path, required=True)
     args = parser.parse_args()
     schedule = json.loads(args.schedule.read_text())
-    if schedule.get("candidate_id") != "HGV1-P01-LBC0" or len(schedule.get("runs", [])) != 6:
+    if schedule.get("candidate_id") not in {"HGV1-P01-LBC0", "HGV1-P02-CIE0"} or len(schedule.get("runs", [])) != 6:
         raise SystemExit("invalid frozen six-run schedule")
 
     reference_runs = []
@@ -137,16 +161,30 @@ def main() -> None:
         raw = args.raw_root / run_id
         summary = json.loads((raw / "capture/summary.json").read_text())
         rows = _read_trace(raw / "capture/trace.jsonl")
+        json.loads((raw / "private/semantic_evidence.json").read_text())
+        interposer_stats = json.loads((raw / "private/interposer_stats.json").read_text())
         if planned["variant"] != scheduled["variant"] or planned["repeat_index"] != scheduled["repeat_index"]:
             raise SystemExit(f"schedule/plan mismatch for {run_id}")
         source_commits.add(planned["source_commit"])
         implementation_hashes.add(planned["fault_implementation_sha256"])
         infrastructure = _infrastructure_checks(finished, summary, rows)
         failure_onset, failure_rule = _failure_onset(rows)
-        activation, activation_detail = _mechanism_activation(rows)
+        if planned["fault_binding"] == "semantic_interposer":
+            activation, activation_detail = _semantic_mechanism_activation(interposer_stats)
+            private_config = json.loads((raw / "private/interposer.json").read_text())
+            binding_confirmed = (
+                private_config.get("fault_id") == "planning_unsafe_cost_or_speed_bias"
+                and private_config.get("dose") == {"time_scale": 0.6}
+            )
+        else:
+            activation, activation_detail = _overlay_mechanism_activation(rows)
+            binding_confirmed = (
+                planned["applied_overlay_sha256"]
+                == planned["fault_implementation_sha256"]
+            )
         mechanism_confirmed = (
             scheduled["variant"] == "faulty"
-            and planned["applied_overlay_sha256"] == planned["fault_implementation_sha256"]
+            and binding_confirmed
             and activation is not None
         )
         private_evidence = {
@@ -171,7 +209,9 @@ def main() -> None:
                 float(row["geometry"]["current_obb_separation_m"]) for row in rows
             ),
             "source_commit": planned["source_commit"],
+            "fault_binding": planned["fault_binding"],
             "applied_overlay_sha256": planned["applied_overlay_sha256"],
+            "applied_fault_config_sha256": planned["applied_fault_config_sha256"],
         }
         private_path = args.state_root / "evidence/runs" / f"{run_id}.json"
         _atomic(private_path, private_evidence)

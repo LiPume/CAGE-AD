@@ -10,6 +10,13 @@ all faulty runs are valid failures, the semantic mutation is confirmed in every
 faulty run, activation precedes failure by at most five seconds, and the visible
 tree passes oracle-leakage audit.
 
-The initial candidate is a planning threshold mutation in a lead-vehicle braking
-scene.  If it does not pass unchanged, reject this scene/fault pair and choose a
-new functional scene; do not strengthen the dose after seeing results.
+Use one matched reference/faulty pair as an early screen before spending the
+remaining four repeats.  If either mechanism activation or behavioral
+degradation is absent, preserve and reject that candidate unchanged, then freeze
+a new functional scene/fault pair.  Only a positive screen proceeds to the full
+three-plus-three admission run.
+
+Candidate 01 is a Planning threshold mutation in a lead-vehicle braking scene.
+Candidate 02 is a separately frozen cut-in case using the protocol-v1 semantic
+Planning time-compression transform.  They are distinct candidates; candidate
+02 is not a post-result dose change to candidate 01.
