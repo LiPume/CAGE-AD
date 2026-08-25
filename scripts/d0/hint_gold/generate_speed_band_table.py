@@ -155,6 +155,26 @@ def command_at(entries: list[dict], speed: float, acceleration: float) -> float:
     raise AssertionError("unreachable command interpolation")
 
 
+def replacement_command(
+    original: list[dict],
+    responses: dict[float, tuple[float, ...]],
+    speed: float,
+    acceleration: float,
+) -> float:
+    if speed <= 3.0:
+        ratio = (speed - SPEED_MIN_EXCLUSIVE_MPS) / (
+            3.0 - SPEED_MIN_EXCLUSIVE_MPS
+        )
+        existing_boundary = command_at(
+            original, SPEED_MIN_EXCLUSIVE_MPS, acceleration
+        )
+        measured_three_mps = inverse_command(responses, 3.0, acceleration)
+        return existing_boundary + ratio * (
+            measured_three_mps - existing_boundary
+        )
+    return inverse_command(responses, speed, acceleration)
+
+
 def atomic_text(path: Path, value: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + f".tmp.{os.getpid()}")
@@ -207,7 +227,9 @@ def main() -> None:
         {
             "speed": speed,
             "acceleration": acceleration,
-            "command": inverse_command(responses, speed, acceleration),
+            "command": replacement_command(
+                original, responses, speed, acceleration
+            ),
         }
         for speed in replacement_speeds
         for acceleration in ACCELERATION_GRID
@@ -280,6 +302,10 @@ def main() -> None:
             "speed_min_exclusive_mps": SPEED_MIN_EXCLUSIVE_MPS,
             "speed_max_inclusive_mps": SPEED_MAX_INCLUSIVE_MPS,
             "nonnegative_acceleration_only": True,
+        },
+        "transition_rule": {
+            "speed_2_to_3_mps": "linear command interpolation from the preserved V17 2.0 m/s row to the measured inverse response at 3.0 m/s",
+            "speed_3_to_4_mps": "linear response interpolation between measured 3.0 and 4.0 m/s anchors followed by response inversion",
         },
         "speed_anchors_mps": list(EXPECTED_SPEED_ANCHORS),
         "carla_throttles": list(EXPECTED_CARLA_THROTTLES),
