@@ -13,8 +13,8 @@ from statistics import median
 import carla
 
 
-TARGET_SPEEDS = (2.0, 3.0, 4.0, 5.0)
-THROTTLE_LEVELS = (0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70)
+TARGET_SPEEDS = (2.0, 3.0, 4.0)
+THROTTLE_LEVELS = (0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60)
 REPEATS = 3
 DT = 0.05
 PRECONDITION_THROTTLE = 0.50
