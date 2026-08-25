@@ -89,7 +89,7 @@ def _semantic_mechanism_activation(
         metric = observation.get("metric_value")
         residual = observation.get("transform_residual")
         time_compression = (
-            candidate_id == "HGV1-P02-CIE0"
+            candidate_id in {"HGV1-P02-CIE0", "HGV1-P04-LBC1"}
             and metric is not None
             and abs(float(metric) - 0.6) <= 0.02
             and residual is not None
@@ -158,7 +158,7 @@ def main() -> None:
     args = parser.parse_args()
     schedule = json.loads(args.schedule.read_text())
     if schedule.get("candidate_id") not in {
-        "HGV1-P01-LBC0", "HGV1-P02-CIE0", "HGV1-P03-LBC1"
+        "HGV1-P01-LBC0", "HGV1-P02-CIE0", "HGV1-P03-LBC1", "HGV1-P04-LBC1"
     } or len(schedule.get("runs", [])) != 6:
         raise SystemExit("invalid frozen six-run schedule")
 
@@ -188,6 +188,9 @@ def main() -> None:
             private_config = json.loads((raw / "private/interposer.json").read_text())
             expected_binding = {
                 "HGV1-P02-CIE0": (
+                    "planning_unsafe_cost_or_speed_bias", {"time_scale": 0.6}
+                ),
+                "HGV1-P04-LBC1": (
                     "planning_unsafe_cost_or_speed_bias", {"time_scale": 0.6}
                 ),
                 "HGV1-P03-LBC1": (

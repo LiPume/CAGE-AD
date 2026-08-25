@@ -25,3 +25,7 @@ Candidate 03 pairs the frame-stable LBC1 lead-braking scene with protocol-v1's
 braking-constraint omission transform.  It is selected because the mutation
 acts specifically on a nominal negative-acceleration suffix; its screening and
 admission rules remain identical.
+
+Candidate 04 keeps frame-stable LBC1 but uses candidate 02's already declared
+time-compression mechanism.  This tests a distinct scene/fault pairing after
+candidate 03 established that LBC1 had no meaningful braking suffix to omit.

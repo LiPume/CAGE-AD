@@ -102,9 +102,13 @@ def main() -> None:
             "reference_value": 2.0,
             "faulty_value": 0.1,
         }
-    elif contract_id == "HGV1-P02-CIE0":
+    elif contract_id in {"HGV1-P02-CIE0", "HGV1-P04-LBC1"}:
+        if contract_id == "HGV1-P02-CIE0":
+            scenario_id, scenario_candidate_id = "cut_in_early", "CIE0"
+        else:
+            scenario_id, scenario_candidate_id = "lead_brake_close", "LBC1"
         scenario_id, scenario_candidate_id, fault_binding = (
-            "cut_in_early", "CIE0", "semantic_interposer"
+            scenario_id, scenario_candidate_id, "semantic_interposer"
         )
         expected_fault_keys = {
             "mechanism_family": "trajectory_time_compression",
