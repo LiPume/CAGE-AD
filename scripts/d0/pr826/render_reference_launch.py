@@ -207,6 +207,41 @@ def main() -> None:
             f"\n--static_obstacle_speed_threshold={threshold:.6f}\n",
         )
     prediction_flags = custom_flags("modules/prediction/conf/prediction.conf", "prediction.conf")
+    prediction_library = "modules/prediction/libprediction_component.so"
+    private_prediction = manifest.get("private_prediction_runtime")
+    if private_prediction is not None:
+        required = {
+            "component_library", "component_sha256", "behavior_library",
+            "behavior_sha256", "library_dir", "domain_active", "trace_active",
+        }
+        if set(private_prediction) != required:
+            raise SystemExit(
+                "private Prediction runtime keys mismatch: "
+                f"{sorted(set(private_prediction) ^ required)}"
+            )
+        component = Path(private_prediction["component_library"]).resolve()
+        behavior = Path(private_prediction["behavior_library"]).resolve()
+        library_dir = Path(private_prediction["library_dir"]).resolve()
+        if component.parent != library_dir or behavior.parent != library_dir:
+            raise SystemExit("private Prediction libraries must share the frozen library directory")
+        for path, expected in (
+            (component, private_prediction["component_sha256"]),
+            (behavior, private_prediction["behavior_sha256"]),
+        ):
+            actual = hashlib.sha256(path.read_bytes()).hexdigest()
+            if actual != expected:
+                raise SystemExit(f"private Prediction binary checksum mismatch: {path}: {actual}")
+        prediction_library = str(component)
+        prediction_text = prediction_flags.read_text().rstrip()
+        prediction_text += "\n--s3_domain_v1={}\n--s3_trace_v1={}\n".format(
+            "true" if private_prediction["domain_active"] else "false",
+            "true" if private_prediction["trace_active"] else "false",
+        )
+        atomic_text(prediction_flags, prediction_text)
+        atomic_text(
+            output / "private_prediction_provenance.json",
+            json.dumps(private_prediction, indent=2, sort_keys=True) + "\n",
+        )
 
     routing_dag = output / "routing.dag"
     atomic_text(routing_dag, component_dag(
@@ -231,7 +266,7 @@ def main() -> None:
     ))
     prediction_dag = output / "prediction.dag"
     atomic_text(prediction_dag, component_dag(
-        "modules/prediction/libprediction_component.so", "PredictionComponent", "prediction",
+        prediction_library, "PredictionComponent", "prediction",
         "modules/prediction/conf/prediction_conf.pb.txt", prediction_flags,
         '''      readers: [{
         channel: "/apollo/perception/obstacles"

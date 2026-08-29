@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -40,6 +41,17 @@ def main() -> None:
     parser.add_argument("--duration", type=float, default=8.0)
     parser.add_argument("--rate-hz", type=float, default=20.0)
     parser.add_argument("--stack-log", type=Path, required=True)
+    parser.add_argument(
+        "--message-count",
+        type=int,
+        default=0,
+        help="publish exactly this many sequence-derived frames when positive",
+    )
+    parser.add_argument(
+        "--semantic-capture",
+        type=Path,
+        help="private full target-output capture for P3 identity checks",
+    )
     args = parser.parse_args()
     if args.duration <= 0 or args.rate_hz <= 0:
         raise ValueError("duration and rate must be positive")
@@ -47,6 +59,7 @@ def main() -> None:
     target_id = 1001
     lock = threading.RLock()
     slots: list[dict] = []
+    semantic_frames: list[dict] = []
     output_timestamps: list[float] = []
     input_timestamps: list[float] = []
     target_source_timestamps: list[float] = []
@@ -83,6 +96,16 @@ def main() -> None:
                     probabilities_in_range = probabilities_in_range and 0.0 <= probability <= 1.0
             if len(slots) < 3:
                 slots.append(slot)
+            if args.semantic_capture is not None:
+                for actor in slot["actors"]:
+                    if actor["is_target"]:
+                        semantic_frames.append(
+                            {
+                                "source_timestamp_sec": actor["source_timestamp_sec"],
+                                "is_static": actor["is_static"],
+                                "trajectories": actor["trajectories"],
+                            }
+                        )
 
     reader = node.create_reader("/apollo/prediction", PredictionObstacles, on_prediction)
     interval = 1.0 / args.rate_hz
@@ -90,12 +113,16 @@ def main() -> None:
     next_tick = started
     sequence = 0
     sim_origin = 1000.0
-    while time.monotonic() - started < args.duration:
+    while (
+        sequence < args.message_count
+        if args.message_count > 0
+        else time.monotonic() - started < args.duration
+    ):
         now = time.monotonic()
         if now < next_tick:
             time.sleep(min(next_tick - now, 0.01))
             continue
-        elapsed = now - started
+        elapsed = sequence * interval if args.message_count > 0 else now - started
         timestamp = sim_origin + elapsed
         input_timestamps.append(timestamp)
 
@@ -206,6 +233,22 @@ def main() -> None:
         result["visible_leakage_scan_passed"] = not contains_forbidden_visible_term(result)
         result["passed"] = result["passed"] and result["visible_leakage_scan_passed"]
     atomic_json(args.output, result)
+    if args.semantic_capture is not None:
+        canonical_frames = sorted(
+            semantic_frames, key=lambda item: item["source_timestamp_sec"]
+        )
+        payload = {
+            "schema_version": 1,
+            "target_obstacle_id": target_id,
+            "input_count": sequence,
+            "frame_count": len(canonical_frames),
+            "frames": canonical_frames,
+        }
+        canonical = json.dumps(
+            canonical_frames, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ).encode()
+        payload["frames_sha256"] = hashlib.sha256(canonical).hexdigest()
+        atomic_json(args.semantic_capture, payload)
     del reader
     cyber.shutdown()
     print(json.dumps({key: result[key] for key in ("passed", "input_count", "output_count", "target_trajectory_count")}, sort_keys=True))

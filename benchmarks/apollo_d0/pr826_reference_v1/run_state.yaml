@@ -1,9 +1,9 @@
 schema_version: 1
 protocol_version: cage-ad-pr826-greybox-demo-v1
-status: STABLE_REFERENCE_ADMITTED
-current_gate: P2_REFERENCE_COMPLETE
+status: IN_PROGRESS
+current_gate: P2B_P4B_SCENE_FAULT_MATCHING
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-29T11:10:00Z"
+last_updated_at: "2026-08-29T12:11:00Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -15,8 +15,8 @@ gates:
   p0_plan_and_research: PASS_USER_APPROVED
   p1_prediction_bringup: PASS
   p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
-  p3_semantic_port_fixture: NOT_RUN_CASE_NOT_ADMITTED
-  p4_matched_gold_case: NOT_RUN_CASE_NOT_ADMITTED
+  p3_semantic_port_fixture: PASS_P3_SEMANTIC_FIXTURE
+  p4_matched_gold_case: CURRENT_SCENE_REJECT_FAULT_NOT_ACTIVATED_P2B_IN_PROGRESS
   p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
   p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
   p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
@@ -61,6 +61,9 @@ tests:
   workspace_secret_scan: PASS
   git_diff_check: PASS
   prediction_semantic_slot_tests: 3_PASS
+  p3_semantic_fixture_tests: 1_PASS
+  p3_runtime_identity: PASS_160_OF_160_EXACT
+  p3_optimized_prediction_build: PASS
   stock_prediction_smoke: PASS
   p2_state_yaml_jsonl_validation: PASS
   p2_screening_ledger_planned_result_pairs: 6_PASS
@@ -113,8 +116,44 @@ reference_scene_result:
   p2d_first_physical_divergence: CONTROL_AUTOBOX_STARTUP_PHASE_2_TO_4_CARLA_FRAMES
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
-terminal_reason: SUCCESS_STABLE_REFERENCE_ADMITTED
-next_action: No further action inside the authorized normal-reference scope; fault injection, diagnosis Agent and animation remain explicitly unstarted.
+terminal_reason: null
+next_action: Freeze and execute the final 6.5 m normal-only fixed gap bracket; if it fails, stop gap sweeping and redesign the route from topology evidence before any active run.
+p3_semantic_port:
+  started_at: "2026-08-29T11:20:00Z"
+  pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
+  pinned_sequence_predictor_sha256: 8c8ad816ac7aff8caefcd873f8f7c07378e1a678817854fb4d9bd1af14ec4bb5
+  historical_pr: https://github.com/ApolloAuto/apollo/pull/826
+  historical_fix_commit: 92b7434c4656555d8350fc051e5d1d5c32897db6
+  fault_patch_frozen: true
+  fixture_status: P3_SEMANTIC_FIXTURE_PASS
+  semantic_patch_sha256: f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6
+  build_compat_patch_sha256: 54b7aed35992e9781669bcb654ac410ba04b1b973b9fa7ab708c9392e81609fe
+  optimized_behavior_library_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
+  optimized_component_library_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
+  runtime_identity_common_frames: 160
+  runtime_identity_mismatch_count: 0
+  p4_authorized: true
+p4_screening:
+  experiment_id: SB4_PAIR_01_SCREEN
+  scene_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
+  status: REJECT_FAULT_NOT_ACTIVATED
+  active_only_eligibility_events: 1609
+  active_only_overlap_distance_range_m: [26.717, 28.327]
+  active_only_nearby_disable_events: 0
+  prediction_changed: false
+  planning_changed: false
+  system_failure: false
+  fault_patch_changed_after_result: false
+p2b_scene_fault_matching:
+  active_fault_runs_on_close_gap_geometry: 0
+  fixed_screens:
+    - run_id: SB4B_N01_A
+      gap_m: 7.0
+      status: REJECT_SUCCESS_REGION_NOT_REACHED
+    - run_id: SB4B_N02_A
+      gap_m: 7.5
+      status: REJECT_SUCCESS_REGION_NOT_REACHED
+  current_hypothesis: FINAL_6_5_M_FIXED_ONLY_BRACKET_THEN_TOPOLOGY_REDESIGN
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
   classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE

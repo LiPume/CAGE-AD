@@ -566,13 +566,35 @@ class ReferenceScreen:
             if obstacle.perception_obstacle.id != self.target_id:
                 continue
             target = obstacle
+            trajectory_records = []
+            for trajectory in obstacle.trajectory:
+                points = trajectory.trajectory_point
+                trajectory_records.append({
+                    "probability": float(trajectory.probability),
+                    "point_count": len(points),
+                    "sha256": proto_sha256(trajectory),
+                    "first_point": None if not points else {
+                        "relative_time": float(points[0].relative_time),
+                        "x": float(points[0].path_point.x),
+                        "y": float(points[0].path_point.y),
+                        "v": float(points[0].v),
+                    },
+                    "last_point": None if not points else {
+                        "relative_time": float(points[-1].relative_time),
+                        "x": float(points[-1].path_point.x),
+                        "y": float(points[-1].path_point.y),
+                        "v": float(points[-1].v),
+                    },
+                })
             target_record = {
                 "is_static": bool(obstacle.is_static),
+                "source_timestamp_sec": float(obstacle.timestamp),
                 "trajectory_count": len(obstacle.trajectory),
                 "trajectory_point_count": sum(
                     len(trajectory.trajectory_point) for trajectory in obstacle.trajectory
                 ),
                 "probabilities": [float(value.probability) for value in obstacle.trajectory],
+                "trajectories": trajectory_records,
                 "perception_speed_mps": math.hypot(
                     obstacle.perception_obstacle.velocity.x,
                     obstacle.perception_obstacle.velocity.y,

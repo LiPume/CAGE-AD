@@ -1,0 +1,134 @@
+schema_version: 1
+contract_version: p4-private-screening-v1
+status: FROZEN_BEFORE_SCREENING_RESULTS
+frozen_at: "2026-08-29T11:30:00Z"
+research_scope: P4_ONE_FAULT_ACTIVE_SCREENING
+candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
+reference_classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE
+screening_pair:
+  pair_id: SB4_PAIR_01
+  fixed_id: SB4_S01_A
+  active_id: SB4_S01_B
+  execution_policy: ACTIVE_ARM_ONLY_FOR_FIRST_SCREENING
+semantic_fixture:
+  status: P3_SEMANTIC_FIXTURE_PASS
+  semantic_patch_sha256: f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6
+  behavior_switch_default: false
+  fixed_domain: [LEFT, RIGHT, ONTO_LANE]
+  active_domain: [LEFT, RIGHT, ONTO_LANE, STRAIGHT]
+  existing_guards_retained:
+    - non_parking
+    - adc_trajectory_overlap
+    - signed_distance_strictly_greater_than_0
+    - signed_distance_strictly_less_than_10_m
+    - obstacle_polygon_in_own_lane
+prediction_runtime:
+  library_dir: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction
+  component_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libprediction_component.so
+  component_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
+  behavior_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libapollo_prediction.so
+  behavior_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
+  trace_enabled_in_both_arms: true
+only_allowed_behavioral_manifest_difference:
+  path: private_prediction_runtime.domain_active
+  fixed_value: false
+  active_value: true
+allowed_metadata_differences:
+  - screening_id
+  - arm
+frozen_hashes:
+  registry_sha256: 0f30e8034e3297d2829c4dd6a442c8d7c202d34e54634537f21cdc52eea5e701
+  candidate_canonical_sha256: 756aa657d74638b40c23036affb7db616064e756a63f0ed4dab50609b578a4a4
+  fixed_environment_canonical_sha256: 5b7845d336079dd6b38d99ab56f8d5beb9ce55a2a6af51b79c2c9355c017b6d2
+  p2_ordered_manifest_sha256: c7c7d8dd90861e994dd5565007b8433a45670f09b1129da5ad6f6a041af3c8de
+  p2_repeat_contract_sha256: 163f523d2d552cc5627efcce67df01d074db7ea6d52d28c6ea99831f1946dfe2
+  configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+  control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+  prepare_pair_sha256: 172cf3dcbca1544a64012e6a04ff99dfc6f8e787494b4a2c748526d44f76fda5
+  pair_checker_sha256: 679f6b95bb7b857956b1c3b924272daa45721f8378d2514c468dd6ac7fb1d6d0
+  renderer_sha256: 2d59c717a0266f6fb5cf5c03a5b91e4e840da92c78db00ffc22e42a883a8c4a3
+  runner_sha256: f8b13be2f116e38226601938b68e69846ce00ca0ec760e51179a68ba380b1d00
+  runtime_adapter_sha256: 2c42a7e5dc3212423daf58841fa8f6307a201bade5f2f960cd574242e042958d
+  native_log_indexer_sha256: de27bfe322fbbe34a0224a2fc3cc12e517aa1eab34d4f4f76ec5dc19423a00a5
+infrastructure_gate:
+  infrastructure_valid_required: true
+  route_accepted_required: true
+  collision_count_max: 0
+  illegal_lane_invasion_count_max: 0
+  target_npc_present_required: true
+  minimum_target_prediction_messages: 20
+  minimum_target_prediction_trajectory_coverage: 0.90
+  minimum_planning_channel_coverage: 0.95
+  minimum_control_channel_coverage: 0.95
+  minimum_planning_valid_ratio: 0.90
+  bridge_or_runtime_exception_allowed: false
+mechanism_gate:
+  target_obstacle_id: 1001
+  eligibility_activation_required: true
+  activation_signature:
+    type: STRAIGHT
+    fixed_eligible: false
+    active_eligible: true
+  existing_guard_decision_required:
+    adc_overlap: true
+    signed_distance_range_m: [0.0, 10.0]
+    interval: OPEN
+    polygon_in_own_lane: true
+    enabled_after: false
+  published_prediction_semantic_delta_required: true
+  planning_exact_prediction_header_consumption_required: true
+failure_oracle:
+  name: FAILED_OVERTAKE
+  observation_deadline_s: 80.0
+  maximum_pass_margin_m_must_be_below: 6.0
+  success_region_reached_must_be: false
+  collision_count_must_be: 0
+  route_accepted_must_be: true
+  infrastructure_valid_must_be: true
+  planning_crash_allowed: false
+  bridge_drop_allowed: false
+  control_disconnect_allowed: false
+  latency_only_is_failure: false
+  alternative_if_pass_or_success:
+    classification: BEHAVIORAL_DEGRADATION_OR_SCENE_FAULT_PAIR_NOT_ADMITTED
+causal_order_gate:
+  required_order: [t0_mechanism_activation, t1_published_prediction_delta, t2_planning_consumption, t3_planning_or_vehicle_behavior_change, t4_failure_deadline]
+  maximum_activation_to_published_output_s: 0.25
+  maximum_output_to_planning_consumption_s: 0.50
+  maximum_planning_consumption_to_observable_behavior_change_s: 5.0
+  failure_declaration_time_s: 80.0
+  rationale: >-
+    Prediction and Planning operate per-cycle, so t0-t2 use subsecond bounds. System-level
+    task incompletion is only declared at the frozen 80 s deadline. The 5 s t2-t3 bound concerns
+    the first observable Planning/trajectory or lane-entry divergence, not final failure.
+reference_behavior_envelope_frozen_before_screening:
+  lane_minus_1_first_entry_s: [18.750000279396772, 25.600000381469727]
+  lateral_excursion_2m_first_s: [20.85000031068921, 27.35000040754676]
+  pass_margin_6m_first_s: [38.750000577419996, 44.450000662356615]
+  success_region_first_s: [67.30000100284815, 70.55000105127692]
+  screening_divergence_deadlines_s:
+    lane_entry: 30.600000381469727
+    pass: 49.450000662356615
+    success_region: 75.55000105127692
+baseline_incidental_anomalies:
+  piecewise_jerk_speed_optimizer_failure_counts: [144, 126, 124]
+  fallback_path_failure_counts: [0, 0, 22]
+  speed_fallback_counts: [133, 125, 165]
+  policy: >-
+    These are baseline anomalies and cannot be source-fault evidence without temporal linkage and
+    a distributional change attributable to the Prediction semantic event.
+screening_classification_order:
+  - INFRA_INVALID
+  - FAULT_NOT_ACTIVATED
+  - SEMANTIC_EFFECT_NOT_PROPAGATED
+  - PLANNING_INSENSITIVE_TO_FAULT
+  - ROUTE_DOMINATED_RESPONSE
+  - SCENE_FAULT_PAIR_NOT_ADMITTED
+  - FAILED_OVERTAKE_SCREENING_PASS
+forbidden:
+  - modify_fault_semantics_after_result
+  - modify_failure_oracle_after_result
+  - external_ego_control
+  - future_ground_truth_to_planning
+  - fault_answer_in_agent_visible_artifacts
+  - run_more_than_one_faulty_screen_before_classification

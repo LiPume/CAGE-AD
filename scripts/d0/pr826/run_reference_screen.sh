@@ -30,6 +30,9 @@ CYBER_ROOT="${GENERATED}/cyber"
 LAUNCH=""
 STACK_PID=""
 RUN_STARTED_NS="$(date +%s%N)"
+CUSTOM_LIBRARY_DIR="$("${BUNDLE_ROOT}/runtime/envs/cage-ad-py310/bin/python" -c \
+  'import json,sys; print(json.load(open(sys.argv[1])).get("private_prediction_runtime", {}).get("library_dir", ""))' \
+  "${MANIFEST}")"
 
 [[ "${RUN_DIR}" == "${BUNDLE_ROOT}/runtime/runs/pr826_greybox_demo_v1/"* ]] || {
   echo "run directory is outside the canonical PR826 runtime" >&2
@@ -42,8 +45,8 @@ install -d "${GENERATED}"
 stop_stack() {
   if [[ -n "${LAUNCH}" ]]; then
     timeout 10 "${BUNDLE_ROOT}/scripts/apollo_host_exec.sh" bash -c \
-      'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; export CYBER_PATH="$2"; shift 2; exec "$@"' bash \
-      "${APOLLO_CONF_ROOT}" "${CYBER_ROOT}" cyber_launch stop "${LAUNCH}" \
+      'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; export CYBER_PATH="$2"; if [[ -n "$3" ]]; then export LD_LIBRARY_PATH="$3:${LD_LIBRARY_PATH:-}"; fi; shift 3; exec "$@"' bash \
+      "${APOLLO_CONF_ROOT}" "${CYBER_ROOT}" "${CUSTOM_LIBRARY_DIR}" cyber_launch stop "${LAUNCH}" \
       >>"${RUN_DIR}/stack.log" 2>&1 || true
   fi
   if [[ -n "${STACK_PID}" ]] && kill -0 "${STACK_PID}" 2>/dev/null; then
@@ -92,8 +95,8 @@ CARLA_BRIDGE_OBJECTS_FILE="${GENERATED}/bridge_objects.json" \
 sleep 4
 
 setsid "${BUNDLE_ROOT}/scripts/apollo_host_exec.sh" bash -c \
-  'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; export CYBER_PATH="$2"; shift 2; exec "$@"' bash \
-  "${APOLLO_CONF_ROOT}" "${CYBER_ROOT}" cyber_launch start "${LAUNCH}" \
+  'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; export CYBER_PATH="$2"; if [[ -n "$3" ]]; then export LD_LIBRARY_PATH="$3:${LD_LIBRARY_PATH:-}"; fi; shift 3; exec "$@"' bash \
+  "${APOLLO_CONF_ROOT}" "${CYBER_ROOT}" "${CUSTOM_LIBRARY_DIR}" cyber_launch start "${LAUNCH}" \
   >"${RUN_DIR}/stack.log" 2>&1 </dev/null &
 STACK_PID=$!
 # Prediction's stock Torch evaluators take roughly 35 seconds to initialize in host mode.
