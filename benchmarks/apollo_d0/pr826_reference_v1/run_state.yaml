@@ -1,9 +1,9 @@
 schema_version: 1
 protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
-current_gate: P2B_P4B_SCENE_FAULT_MATCHING
+current_gate: P2D_P4C_LATERAL_SEPARATION_SCENE_FAULT_MATCHING
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-29T12:11:00Z"
+last_updated_at: "2026-08-29T13:20:00Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -16,7 +16,7 @@ gates:
   p1_prediction_bringup: PASS
   p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_port_fixture: PASS_P3_SEMANTIC_FIXTURE
-  p4_matched_gold_case: CURRENT_SCENE_REJECT_FAULT_NOT_ACTIVATED_P2B_IN_PROGRESS
+  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2D_NORMAL_ONLY_IN_PROGRESS
   p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
   p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
   p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
@@ -117,7 +117,7 @@ reference_scene_result:
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
 terminal_reason: null
-next_action: Freeze and execute the final 6.5 m normal-only fixed gap bracket; if it fails, stop gap sweeping and redesign the route from topology evidence before any active run.
+next_action: Freeze one mechanism-derived lateral-separation normal-only candidate; require fixed screening and 3/3 admission before any P4C active run.
 p3_semantic_port:
   started_at: "2026-08-29T11:20:00Z"
   pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
@@ -145,7 +145,7 @@ p4_screening:
   system_failure: false
   fault_patch_changed_after_result: false
 p2b_scene_fault_matching:
-  active_fault_runs_on_close_gap_geometry: 0
+  active_fault_runs_on_close_gap_geometry: 1
   fixed_screens:
     - run_id: SB4B_N01_A
       gap_m: 7.0
@@ -153,7 +153,39 @@ p2b_scene_fault_matching:
     - run_id: SB4B_N02_A
       gap_m: 7.5
       status: REJECT_SUCCESS_REGION_NOT_REACHED
-  current_hypothesis: FINAL_6_5_M_FIXED_ONLY_BRACKET_THEN_TOPOLOGY_REDESIGN
+    - run_id: SB4B_N03_A
+      gap_m: 6.5
+      status: REJECT_SUCCESS_REGION_NOT_REACHED
+    - run_id: SB4B_N04_A
+      gap_m: 7.0
+      status: REJECT_REFERENCE_INFRASTRUCTURE_INVALID
+    - run_id: SB4B_N05_A
+      gap_m: 7.0
+      status: SCREENING_PASS
+  fixed_formal_repeats: [SB4B_F01_A, SB4B_F02_A, SB4B_F03_A]
+  fixed_formal_status: PASS_3_OF_3
+  p4b_active_run: SB4B_S01_B
+  p4b_status: REJECT_ROUTE_DOMINATED_RESPONSE
+  current_hypothesis: INCREASE_FIXED_STRAIGHT_LATERAL_SEPARATION_BEFORE_NEW_ACTIVE_RUN
+p2c_lane_borrow_screen:
+  run_id: SC_N01_A
+  status: REJECT_LONG_TERM_BLOCKING_GATE_NOT_REACHED
+  prediction_trajectory_coverage: 0.9870049504950495
+  dynamic_trajectory_frames: 1586
+  blocking_decision_frames: 10
+  max_consecutive_blocking_decision_frames: 1
+  required_long_term_cycles: 3
+  active_fault_runs: 0
+  family_disposition: CLOSED_MECHANISM_INCOMPATIBLE
+p4b_screening:
+  experiment_id: SB4B_PAIR_01_SCREEN
+  status: REJECT_ROUTE_DOMINATED_RESPONSE
+  mechanism_activated: true
+  prediction_changed: true
+  planning_changed: false
+  system_failure: false
+  changed_prediction_headers_consumed_by_planning: 34
+  first_consumption_age_s: 0.0397
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
   classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE

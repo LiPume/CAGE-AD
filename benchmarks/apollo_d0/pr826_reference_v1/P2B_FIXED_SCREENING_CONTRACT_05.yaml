@@ -1,0 +1,40 @@
+schema_version: 1
+contract_version: p2b-topology-normal-screen-v2
+status: FROZEN_BEFORE_SCREENING_RESULT
+frozen_at: "2026-08-29T12:30:00Z"
+research_scope: P2B_TOPOLOGY_DRIVEN_NORMAL_ONLY_SCENE
+screening_id: SB4B_N05_A
+candidate_id: RF04_P2B_ROUTE1072Y70_GAP700_LANE_TANGENT_80S_MAP_WIDTH_V1_CTRL_V17
+design_contract:
+  active_fault_results_on_this_geometry: 0
+  active_fault_run_authorized: false
+  changed_scene_variable_from_n04: route_goal_and_success_center_longitudinal_position
+  n04_center_y_m: 90.050056
+  candidate_center_y_m: 70.038346
+  success_radius_m_unchanged: 15.0
+  observation_window_s_unchanged: 80.0
+  planning_valid_gate_unchanged: 0.90
+  pass_must_precede_success_region: true
+  rationale: >-
+    N04 proved pass then topology-matched destination but reached the goal at 57.95 s, leaving a
+    long parking interval and 0.89569 valid ratio. Moving only the same-road endpoint 20 m later
+    places completion near the original 68--70 s envelope without changing any quality gate.
+  authorization_condition: SCREEN_PASS_THEN_SEPARATELY_FROZEN_3_OF_3_FIXED_PASS
+prediction_runtime:
+  library_dir: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction
+  component_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libprediction_component.so
+  component_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
+  behavior_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libapollo_prediction.so
+  behavior_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
+  domain_active: false
+  trace_active: true
+frozen_hashes:
+  registry_sha256: 906206161abf856cbc45e4552161f5b7160d8e16701cc584e2d525030e7a775e
+  candidate_canonical_sha256: a0f4263ccc298021ae68b74d65dfd30fa6c710ee63d74ff397a4c8fa818054de
+  fixed_environment_canonical_sha256: 5b7845d336079dd6b38d99ab56f8d5beb9ce55a2a6af51b79c2c9355c017b6d2
+  component_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
+  behavior_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
+  prepare_screen_sha256: 37a9ab1a21565a99302747e4097170b51ea8a712c70f8479ba7804eeee84dc84
+fixed_screening_gate: {observation_deadline_s: 80.0, infrastructure_valid_required: true, route_accepted_required: true, collision_count_max: 0, illegal_lane_invasion_count_max: 0, target_npc_present_required: true, minimum_target_prediction_messages: 20, minimum_target_prediction_trajectory_coverage: 0.90, minimum_planning_channel_coverage: 0.95, minimum_control_channel_coverage: 0.95, minimum_planning_valid_ratio: 0.90, minimum_pass_margin_m: 6.0, minimum_lateral_excursion_m: 2.0, success_region_reached_required: true, bridge_or_runtime_exception_allowed: false}
+formal_repeat_policy: {screening_passes_are_not_admission_evidence: true, required_fixed_repeats_after_screen_pass: 3, repeat_contract_must_be_frozen_before_first_repeat: true, no_active_fault_run_before_fixed_admission: true}
+forbidden: [modify_success_oracle_after_result, modify_fault_semantics, run_active_fault_before_fixed_admission, external_ego_control, future_ground_truth_to_planning]

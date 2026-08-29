@@ -941,3 +941,226 @@ candidates:
       the active-only straight-overlap distance should remain inside the frozen (0,10) m guard,
       while giving stock Planning slightly more initial interaction room. This is normal-only;
       it must screen and pass 3/3 before any active run.
+  - candidate_id: RF04_P2B_GAP650_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_P2B_SCENE_FAULT_MATCHING_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.323314
+      y: 179.951333
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 6.5
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures:
+      - Broken|White|Both
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    fixed_future_faulty_arm_constraint: >-
+      This candidate changes only the initial target center gap from the admitted P2 scene. The
+      map, V17 table, 80 s window, route, target speed/policy, actor physics, startup order,
+      success oracle and final fixed/faulty binary must remain matched; only the already-frozen
+      Prediction semantic switch may differ after a new 3/3 fixed admission.
+    selection_basis: >-
+      Selected after both 7.0 m and 7.5 m fixed-only results and before any close-gap active run.
+      The 7.0 m run entered lane -1 10.95 s earlier and passed 9.20 s earlier than 7.5 m, but
+      stopped just before the unchanged road-47 transition. Reducing only the center gap by 0.5 m
+      is the final preregistered bracket intended to test whether that earlier normal behavior has
+      enough completion margin. Initial geometric body clearance remains about 1.96 m before
+      dynamics, and the candidate must satisfy the unchanged collision/clearance/route gates. If
+      rejected, gap sweeping stops and the route is redesigned from topology evidence.
+  - candidate_id: RF04_P2B_ROUTE1072_GAP700_LANE_TANGENT_80S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_P2B_TOPOLOGY_MATCHED_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.194954, -90.050056]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.194954, -90.050056]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 9.320791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla:
+      center_xy: [5.194954, 90.050056]
+      radius_m: 15.0
+      road_id: 1072
+      lane_id: -1
+    route_length_m: 96.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical 7.0 m geometry, road-1072 route, destination, map, V17 table, 80 s window,
+      target policy, actor physics, startup order and success oracle must be used in future arms;
+      only the already-frozen Prediction semantic switch may differ after 3/3 fixed admission.
+    selection_basis: >-
+      Selected after all preregistered 6.5/7.0/7.5 m gap-only fixed screens were rejected and
+      before any close-gap active run. Their shared cause was not failure to overtake: all safely
+      passed with real Prediction trajectories, then decelerated on road 1072 just before the old
+      road-47 endpoint. This candidate restores the safer 7.0 m clearance and changes the route as
+      a new scene, ending on an observed unambiguous road-1072/lane--1 point at y=90.05 m. In the
+      prior 7.0 m fixed trace, the 6 m pass occurred near y=119 m, so the 15 m destination region
+      centered at y=90.05 m is reached only after the pass rather than serving as a relaxed pass
+      threshold. The new route and oracle are frozen before its first result.
+  - candidate_id: RF04_P2B_ROUTE1072Y70_GAP700_LANE_TANGENT_80S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_P2B_TOPOLOGY_MATCHED_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 9.320791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical 7.0 m geometry, road-1072 route, destination, map, V17 table, 80 s window,
+      target policy, actor physics, startup order and success oracle must be used in future arms;
+      only the frozen Prediction semantic switch may differ after 3/3 fixed admission.
+    selection_basis: >-
+      Selected after the first road-1072 fixed-only screen and before any close-gap active result.
+      That screen proved the topology/task ordering: pass at 53.85 s and destination at 57.95 s,
+      but the long post-goal parking interval reduced Planning valid ratio to 0.89569. This new
+      normal task moves only the road-1072 endpoint 20 m downstream to an observed lane--1 point,
+      so destination entry is expected nearer the admitted reference's 68--70 s completion band.
+      The 80 s window, 0.90 Planning gate, 15 m radius and pass oracle are not changed.
+  - candidate_id: RF04_P2C_LANEBORROW_ROUTE1072Y70_GAP2500_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_CONTROL_AND_PLANNING_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    planning_overrides: {static_obstacle_speed_threshold: 1.2}
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [8.768, -70.0]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [8.768, -70.0]
+    route_waypoint_lane_intent: [-2, -2]
+    npc_spawn_carla: {x: 9.229, y: 161.274, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [8.768, 70.0], radius_m: 15.0, road_id: 1072, lane_id: -2}
+    route_length_m: 116.45
+    execution_allowed: true
+    p2c_normal_only_before_new_active_run: true
+    configured_reference_reason: >-
+      Pinned Apollo 10 Prediction declares still_obstacle_speed_threshold=0.99 m/s while Planning
+      declares static_obstacle_speed_threshold=0.5 m/s. The 1.10 m/s target therefore has real
+      lane-sequence trajectories but is excluded from stock static-obstacle path-bound logic. A
+      frozen 1.2 m/s Planning threshold bridges only that semantic gap and is identical in future
+      fixed/faulty arms; Prediction remains stock/default-off in the reference.
+    fixed_future_faulty_arm_constraint: >-
+      The identical same-lane route, 25 m gap, 1.10 m/s target, Planning threshold 1.2 m/s, map,
+      Control, timing, target policy and oracle must be used in future arms; only the frozen
+      Prediction semantic switch may differ after a separate 3/3 fixed admission.
+    selection_basis: >-
+      Selected after P4B proved that a route-commanded lane change consumes the faulty Prediction
+      but remains behaviorally route-dominated, and before any active result for this scene. The
+      route now remains lane -2; any lane -1 entry/pass must come from obstacle interaction. The
+      25 m gap restores the admitted reference's clearance and permits ego to approach the target
+      naturally. Official Planning code uses predicted trajectories for lane-change direction and
+      ST boundaries, so a later nearby candidate change is mechanistically relevant. This is a
+      normal-only configured-reference test, not a strengthened Prediction fault.

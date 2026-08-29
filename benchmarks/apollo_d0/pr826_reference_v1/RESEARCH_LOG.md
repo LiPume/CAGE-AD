@@ -2153,3 +2153,104 @@ a topology-driven route redesign rather than continued outcome-driven gap tuning
 
 Freeze the 6.5 m fixed screening contract before its result, execute one normal-only screen, and
 retain the unchanged oracle.
+
+## Issue P2B-002 — topology-matched close-gap reference admitted, but active response is route-dominated
+
+Timestamp: 2026-08-29T13:00:00Z
+
+现象：
+
+The 6.5 m bracket again passed but missed the old destination. Topology-matched road-1072 designs
+then produced one rejected early-goal screen, one admitted 3/3 fixed reference, and a fault-active
+run whose Prediction changed without a categorical Planning or system outcome change.
+
+证据：
+
+- `SB4B_N03_A`: margin 29.339 m and coverage 0.991337, rejected because the old success region was
+  not reached.
+- `SB4B_N04_A`: pass/destination succeeded but Planning-valid 0.895690 < frozen 0.90.
+- `SB4B_N05_A`: screen PASS; coverage 0.991342, Planning-valid 0.904642, margin 15.368 m.
+- `SB4B_F01_A/F02_A/F03_A`: 3/3 PASS; Planning-valid 0.908525/0.915370/0.903023,
+  margins 18.970/20.664/20.533 m, zero collisions and illegal invasions.
+- `SB4B_S01_B`: 35 active-only STRAIGHT candidates were disabled; target output changed from a
+  straight trajectory (probability about 0.829, terminal x about 9.28 m) to a lane-change trajectory
+  (probability about 0.024, terminal x about 5.78 m). Planning consumed 34 changed headers, yet ego
+  passed at 53.90 s and reached success at 69.40 s.
+
+联网检索：
+
+- Query: `Apollo Prediction predictor lane sequence architecture`; URL:
+  https://github.com/ApolloAuto/apollo/blob/master/docs/07_Prediction/prediction_predictor.md;
+  Source: official documentation; Access time: 2026-08-29; conclusion: predictor publishes
+  trajectories from evaluated lane sequences; applicability: architectural, pinned source controls.
+- Query: `Apollo Planning lane change obstacle predicted trajectory ST boundary`; URL:
+  https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/lane_change_path/lane_change_path.cc;
+  Source: official source; Access time: 2026-08-29; conclusion: route lane-change path selection and
+  downstream dynamic/ST response are distinct; applicability: direct after pinned comparison.
+- Query: `Apollo Planning ST obstacles predicted trajectory speed bounds`; URL:
+  https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/st_bounds_decider/st_obstacles_processor.h;
+  Source: official source; Access time: 2026-08-29; conclusion: a changed published trajectory alone
+  does not prove a changed final path/speed decision; applicability: direct after pinned comparison.
+
+运行结果：
+
+P2B fixed reference PASS 3/3. P4B pairing REJECT `ROUTE_DOMINATED_RESPONSE` /
+`SCENE_FAULT_PAIR_NOT_ADMITTED`. Patch SHA remained `f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6`.
+
+结论：
+
+Mechanism activation and Prediction propagation were proven, but the required Planning behavioral
+change and system failure were absent. The route-driven scene is not a golden pairing.
+
+下一步：
+
+Verify a same-lane LaneBorrow design against Apollo 10's actual static/dynamic gate before any
+active run.
+
+## Issue P2C-001 — dynamic Prediction target cannot accumulate Apollo LaneBorrow's static blocker gate
+
+Timestamp: 2026-08-29T13:20:00Z
+
+现象：
+
+The same-lane, 1.10 m/s fixed-only target with Planning
+`static_obstacle_speed_threshold=1.2` never entered LaneBorrow or overtook. Source analysis showed
+that the numeric flag does not override `PredictionObstacle.is_static`.
+
+证据：
+
+- `SC_N01_A`: coverage 0.987005, Planning coverage 0.996289, Control 1.0, zero collision/illegal
+  invasion, but Planning-valid 0.878336, lateral excursion 0.533 m and margin -15.063 m.
+- Audit: 1613 target frames, 1586 dynamic trajectory frames, 10 PathDecider blocker frames,
+  maximum consecutive blockers 1 versus required 3. Timeline SHA256
+  `39ea37a431900385e2fe8a9bb938477002ea688ccf4d042c5a3be0ed00f740b2`.
+- Pinned Prediction sets `is_static` from `Obstacle::IsStill()` and pinned Planning copies that field
+  into `Obstacle::is_static_`; the Planning speed flag is only an additional condition.
+
+联网检索：
+
+- Query: `Apollo planning obstacle is_static PredictionObstacles lane borrow`; URL:
+  https://github.com/ApolloAuto/apollo/blob/master/modules/planning/planning_base/common/obstacle.cc;
+  Source: official source; Access time: 2026-08-29; conclusion: Planning consumes Prediction
+  `is_static`; applicability: direct and pinned-source verified.
+- Query: `Apollo lane borrow long term blocking obstacle cycle threshold`; URL:
+  https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/lane_borrow_path/lane_borrow_path.cc;
+  Source: official source; Access time: 2026-08-29; conclusion: LaneBorrow requires the long-term
+  static-blocker counter; applicability: direct, pinned default threshold is 3.
+- Query: `Apollo planning static obstacle ahead SimControl lane borrow issue`; URL:
+  https://github.com/ApolloAuto/apollo/issues/5915; Source: official issue; Access time: 2026-08-29;
+  conclusion: static-obstacle outcomes depend on full Planning state; applicability: contextual.
+
+修改：
+
+Added a read-only LaneBorrow gate analyzer and machine audit. No Prediction, fault patch, Planning
+source, ego control or oracle changed.
+
+运行结果：
+
+REJECT — `REFERENCE_INFRASTRUCTURE_INVALID` and `LONG_TERM_BLOCKING_GATE_NOT_REACHED`; no active arm.
+
+结论：
+
+Close this P2C family. Making the moving target static to Planning would discard the trajectory
+semantics under study. Next use mechanism-driven lateral separation, with normal-only freeze first.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare an append-only P2B normal-only screening with the port disabled."""
+"""Prepare one hash-locked P2B fixed formal repeat with the P3 port inactive."""
 
 from __future__ import annotations
 
@@ -12,14 +12,13 @@ from pathlib import Path
 import yaml
 
 
-def canonical_sha(value: object) -> str:
-    return hashlib.sha256(
-        (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
-    ).hexdigest()
-
-
 def file_sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def canonical_sha(value: object) -> str:
+    payload = json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n"
+    return hashlib.sha256(payload.encode()).hexdigest()
 
 
 def atomic_json(path: Path, value: dict) -> None:
@@ -41,37 +40,26 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--contract", type=Path, required=True)
     parser.add_argument("--registry", type=Path, required=True)
-    parser.add_argument("--candidate-id", required=True)
-    parser.add_argument("--screening-id", required=True)
+    parser.add_argument("--repeat-id", required=True)
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--ledger", type=Path, required=True)
     parser.add_argument("--timestamp", required=True)
     args = parser.parse_args()
+
     contract_bytes = args.contract.read_bytes()
     contract = yaml.safe_load(contract_bytes)
-    if contract.get("status") != "FROZEN_BEFORE_SCREENING_RESULT":
-        raise SystemExit("P2B contract is not frozen")
-    if contract.get("screening_id") != args.screening_id:
-        raise SystemExit("screening id is not preregistered")
+    if contract.get("status") != "FROZEN_BEFORE_FORMAL_RESULTS":
+        raise SystemExit("P2B fixed repeat contract is not frozen")
+    if args.repeat_id not in contract.get("required_repeat_ids", []):
+        raise SystemExit("repeat id is not preregistered")
     registry = yaml.safe_load(args.registry.read_bytes())
     candidates = [
-        candidate
-        for candidate in registry["candidates"]
-        if candidate["candidate_id"] == args.candidate_id
+        value for value in registry["candidates"]
+        if value["candidate_id"] == contract["candidate_id"]
     ]
     if len(candidates) != 1:
         raise SystemExit("candidate must exist exactly once")
     candidate = candidates[0]
-    normal_only_phase = (
-        "P2C_NORMAL_ONLY_SCREENING"
-        if candidate.get("p2c_normal_only_before_new_active_run")
-        else "P2B_NORMAL_ONLY_SCREENING"
-    )
-    if not (
-        candidate.get("p2b_normal_only_before_new_active_run")
-        or candidate.get("p2c_normal_only_before_new_active_run")
-    ):
-        raise SystemExit("candidate is not marked P2B/P2C normal-only")
     hashes = contract["frozen_hashes"]
     checks = {
         "registry": file_sha(args.registry) == hashes["registry_sha256"],
@@ -84,26 +72,38 @@ def main() -> None:
         checks[name] = file_sha(Path(runtime[f"{name}_library"])) == runtime[
             f"{name}_sha256"
         ]
+    for artifact in contract.get("frozen_artifacts", []):
+        checks[f"artifact:{artifact['path']}"] = (
+            file_sha(Path(artifact["path"])) == artifact["sha256"]
+        )
     if not all(checks.values()):
-        raise SystemExit(f"P2B preflight failed: {checks}")
+        raise SystemExit(f"P2B formal preflight failed: {checks}")
 
+    existing = [
+        json.loads(line) for line in args.ledger.read_text().splitlines() if line.strip()
+    ] if args.ledger.exists() else []
+    manifest_path = args.run_dir / "manifest.json"
+    if manifest_path.exists() or any(row.get("repeat_id") == args.repeat_id for row in existing):
+        raise SystemExit("append-only policy forbids replacing this repeat")
     manifest = {
         "schema_version": 1,
         "protocol_version": registry["protocol_version"],
-        "screening_id": args.screening_id,
-        "phase": normal_only_phase,
+        "screening_id": args.repeat_id,
+        "repeat_id": args.repeat_id,
+        "phase": "P2B_FIXED_FORMAL_REPEAT",
         "arm": "A",
-        "admission_evidence": False,
+        "admission_evidence": True,
         "fault_patch_exists": True,
         "fault_result_seen_for_this_geometry": False,
         "candidate": candidate,
         "fixed_environment": registry["fixed_environment"],
         "registry_path": str(args.registry.resolve()),
         "registry_sha256": file_sha(args.registry),
-        "p2b_contract": {
+        "formal_contract": {
             "path": str(args.contract.resolve()),
             "sha256": hashlib.sha256(contract_bytes).hexdigest(),
             "contract_version": contract["contract_version"],
+            "required_repeat_ids": contract["required_repeat_ids"],
         },
         "private_prediction_runtime": {
             "component_library": runtime["component_library"],
@@ -116,29 +116,17 @@ def main() -> None:
         },
         "created_at": args.timestamp,
     }
-    manifest_path = args.run_dir / "manifest.json"
-    existing = [
-        json.loads(line) for line in args.ledger.read_text().splitlines() if line.strip()
-    ] if args.ledger.exists() else []
-    if manifest_path.exists() or any(
-        row.get("screening_id") == args.screening_id for row in existing
-    ):
-        raise SystemExit("append-only policy forbids replacing this screening")
     atomic_json(manifest_path, manifest)
-    append_jsonl(
-        args.ledger,
-        {
-            "event": "PLANNED",
-            "timestamp": args.timestamp,
-            "screening_id": args.screening_id,
-            "candidate_id": args.candidate_id,
-            "manifest_path": str(manifest_path),
-            "manifest_sha256": file_sha(manifest_path),
-            "domain_active": False,
-            "fault_result_seen_for_this_geometry": False,
-            "status": "INCONCLUSIVE",
-        },
-    )
+    append_jsonl(args.ledger, {
+        "event": "PLANNED",
+        "timestamp": args.timestamp,
+        "repeat_id": args.repeat_id,
+        "candidate_id": candidate["candidate_id"],
+        "manifest_path": str(manifest_path),
+        "manifest_sha256": file_sha(manifest_path),
+        "domain_active": False,
+        "status": "INCONCLUSIVE",
+    })
     print(manifest_path)
 
 

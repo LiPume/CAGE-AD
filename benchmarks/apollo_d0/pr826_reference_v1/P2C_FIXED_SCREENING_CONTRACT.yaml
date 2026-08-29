@@ -1,0 +1,43 @@
+schema_version: 1
+contract_version: p2c-laneborrow-normal-screen-v1
+status: FROZEN_BEFORE_SCREENING_RESULT
+frozen_at: "2026-08-29T13:05:00Z"
+research_scope: P2C_PREDICTION_AWARE_LANEBORROW_NORMAL_ONLY
+screening_id: SC_N01_A
+candidate_id: RF04_P2C_LANEBORROW_ROUTE1072Y70_GAP2500_SLOW110_80S_V1
+design_contract:
+  active_fault_results_on_this_scene: 0
+  active_fault_run_authorized: false
+  route_lane_intent: [-2, -2]
+  required_overtake_lane: -1
+  planning_static_obstacle_speed_threshold_mps: 1.2
+  pinned_planning_default_mps: 0.5
+  pinned_prediction_still_threshold_mps: 0.99
+  target_speed_mps: 1.1
+  rationale: >-
+    The target remains moving for Prediction but becomes eligible for Planning's static-obstacle
+    path-bound/LaneBorrow logic. Route intent no longer commands lane change. The configuration is
+    frozen identically for future arms and does not alter Prediction semantics.
+  authorization_condition: SCREEN_PASS_THEN_SEPARATELY_FROZEN_3_OF_3_FIXED_PASS
+prediction_runtime:
+  library_dir: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction
+  component_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libprediction_component.so
+  component_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
+  behavior_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libapollo_prediction.so
+  behavior_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
+  domain_active: false
+  trace_active: true
+frozen_hashes:
+  registry_sha256: 0b4bd65e5581074cb3c39e64ee718fec5156b50ed3060da09f2ad495e3df9824
+  candidate_canonical_sha256: 23a8a13182f39cca53d05b8af62b7cce1fe715676c38c453995b89bc3f762458
+  fixed_environment_canonical_sha256: 5b7845d336079dd6b38d99ab56f8d5beb9ce55a2a6af51b79c2c9355c017b6d2
+  prepare_screen_sha256: d9ee6e376e79f0d09b37c0d323324a9925fef631bcd4ead545d7ebe8c927f8a3
+fixed_screening_gate: {observation_deadline_s: 80.0, infrastructure_valid_required: true, route_accepted_required: true, collision_count_max: 0, illegal_lane_invasion_count_max: 0, target_npc_present_required: true, minimum_target_prediction_messages: 20, minimum_target_prediction_trajectory_coverage: 0.90, minimum_planning_channel_coverage: 0.95, minimum_control_channel_coverage: 0.95, minimum_planning_valid_ratio: 0.90, minimum_pass_margin_m: 6.0, minimum_lateral_excursion_m: 2.0, success_region_reached_required: true, bridge_or_runtime_exception_allowed: false}
+mechanism_screening_requirements:
+  target_must_remain_on_lane_minus_2: true
+  ego_must_enter_lane_minus_1: true
+  route_must_not_request_lane_minus_1: true
+  target_prediction_trajectory_coverage_min: 0.90
+  lane_borrow_evidence_required_before_formal_freeze: true
+formal_repeat_policy: {screening_passes_are_not_admission_evidence: true, required_fixed_repeats_after_screen_pass: 3, no_active_fault_run_before_fixed_admission: true}
+forbidden: [modify_success_oracle_after_result, modify_prediction, run_active_fault_before_fixed_admission, external_ego_control, future_ground_truth_to_planning]

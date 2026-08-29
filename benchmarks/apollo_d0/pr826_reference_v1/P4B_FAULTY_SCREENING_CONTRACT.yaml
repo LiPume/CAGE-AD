@@ -1,0 +1,51 @@
+schema_version: 1
+contract_version: p4b-private-screening-v1
+status: FROZEN_BEFORE_SCREENING_RESULTS
+frozen_at: "2026-08-29T12:54:00Z"
+research_scope: P4B_ONE_FAULT_ACTIVE_SCREENING
+candidate_id: RF04_P2B_ROUTE1072Y70_GAP700_LANE_TANGENT_80S_MAP_WIDTH_V1_CTRL_V17
+reference_admission: P2B_FIXED_REFERENCE_ADMITTED_3_OF_3
+screening_pair: {pair_id: SB4B_PAIR_01, fixed_id: SB4B_S01_A, active_id: SB4B_S01_B, execution_policy: ACTIVE_ARM_ONLY_FOR_FIRST_SCREENING}
+semantic_fixture:
+  status: P3_SEMANTIC_FIXTURE_PASS
+  semantic_patch_sha256: f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6
+  fixed_domain: [LEFT, RIGHT, ONTO_LANE]
+  active_domain: [LEFT, RIGHT, ONTO_LANE, STRAIGHT]
+  existing_guards_retained: [non_parking, adc_trajectory_overlap, signed_distance_strictly_between_0_and_10_m, obstacle_polygon_in_own_lane]
+prediction_runtime:
+  library_dir: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction
+  component_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libprediction_component.so
+  component_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
+  behavior_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libapollo_prediction.so
+  behavior_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
+only_allowed_behavioral_manifest_difference: {path: private_prediction_runtime.domain_active, fixed_value: false, active_value: true}
+allowed_metadata_differences: [screening_id, arm]
+frozen_hashes:
+  registry_sha256: 906206161abf856cbc45e4552161f5b7160d8e16701cc584e2d525030e7a775e
+  candidate_canonical_sha256: a0f4263ccc298021ae68b74d65dfd30fa6c710ee63d74ff397a4c8fa818054de
+  fixed_environment_canonical_sha256: 5b7845d336079dd6b38d99ab56f8d5beb9ce55a2a6af51b79c2c9355c017b6d2
+  p2b_fixed_audit_sha256: ac8ff515ae84bbcf247e70808f4c322607ffa524a2290a7d22c71d3de80c5312
+  prepare_pair_sha256: 172cf3dcbca1544a64012e6a04ff99dfc6f8e787494b4a2c748526d44f76fda5
+  pair_checker_sha256: 679f6b95bb7b857956b1c3b924272daa45721f8378d2514c468dd6ac7fb1d6d0
+infrastructure_gate: {infrastructure_valid_required: true, route_accepted_required: true, collision_count_max: 0, illegal_lane_invasion_count_max: 0, target_npc_present_required: true, minimum_target_prediction_messages: 20, minimum_target_prediction_trajectory_coverage: 0.90, minimum_planning_channel_coverage: 0.95, minimum_control_channel_coverage: 0.95, minimum_planning_valid_ratio: 0.90, bridge_or_runtime_exception_allowed: false}
+mechanism_gate:
+  target_obstacle_id: 1001
+  eligibility_activation_required: true
+  activation_signature: {type: STRAIGHT, fixed_eligible: false, active_eligible: true}
+  existing_guard_decision_required: {adc_overlap: true, signed_distance_range_m: [0.0, 10.0], interval: OPEN, polygon_in_own_lane: true, enabled_after: false}
+  published_prediction_semantic_delta_required: true
+  planning_exact_prediction_header_consumption_required: true
+failure_oracle: {name: FAILED_OVERTAKE, observation_deadline_s: 80.0, maximum_pass_margin_m_must_be_below: 6.0, success_region_reached_must_be: false, collision_count_must_be: 0, route_accepted_must_be: true, infrastructure_valid_must_be: true, planning_crash_allowed: false, bridge_drop_allowed: false, control_disconnect_allowed: false, latency_only_is_failure: false}
+causal_order_gate:
+  required_order: [t0_mechanism_activation, t1_published_prediction_delta, t2_planning_consumption, t3_planning_or_vehicle_behavior_change, t4_failure_deadline]
+  maximum_activation_to_published_output_s: 0.25
+  maximum_output_to_planning_consumption_s: 0.50
+  maximum_planning_consumption_to_observable_behavior_change_s: 5.0
+  failure_declaration_time_s: 80.0
+reference_behavior_envelope_frozen_before_screening:
+  pass_margin_6m_first_s: [50.45000075176358, 54.45000081136823]
+  success_region_first_s: [67.80000101029873, 68.00000101327896]
+  minimum_pass_margin_m: 18.970020582901725
+  minimum_planning_valid_ratio: 0.9030226700251889
+screening_classification_order: [INFRA_INVALID, FAULT_NOT_ACTIVATED, SEMANTIC_EFFECT_NOT_PROPAGATED, PLANNING_INSENSITIVE_TO_FAULT, ROUTE_DOMINATED_RESPONSE, SCENE_FAULT_PAIR_NOT_ADMITTED, FAILED_OVERTAKE_SCREENING_PASS]
+forbidden: [modify_fault_semantics_after_result, modify_failure_oracle_after_result, external_ego_control, future_ground_truth_to_planning, run_more_than_one_faulty_screen_before_classification]
