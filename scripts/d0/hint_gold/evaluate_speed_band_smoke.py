@@ -9,6 +9,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 from statistics import median
 
 
@@ -25,6 +26,18 @@ def atomic_json(path: Path, value: dict) -> None:
     temporary = path.with_suffix(path.suffix + f".tmp.{os.getpid()}")
     temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
     os.replace(temporary, path)
+
+
+_SPEED_OPTIMIZER_FAILURE = re.compile(
+    r"(?:speed\s+optimizer\s+failed|speed\s+optimization\s+failed|failed\s+to\s+optimize\s+speed)",
+    re.IGNORECASE,
+)
+
+
+def has_speed_optimizer_failure(stack_log: str) -> bool:
+    """Recognize Apollo speed-optimizer failures without case-sensitive wording gaps."""
+
+    return _SPEED_OPTIMIZER_FAILURE.search(stack_log) is not None
 
 
 def main() -> None:
@@ -112,7 +125,7 @@ def main() -> None:
         )
         <= 0.10,
         "max_lateral_deviation_at_most_0_20_m": max_lateral_deviation <= 0.20,
-        "speed_optimizer_failures_zero": "Speed optimizer failed" not in stack_log,
+        "speed_optimizer_failures_zero": not has_speed_optimizer_failure(stack_log),
     }
     result = {
         "schema_version": 1,
