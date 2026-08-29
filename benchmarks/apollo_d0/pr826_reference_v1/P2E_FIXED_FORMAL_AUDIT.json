@@ -1,0 +1,35 @@
+{
+  "active_fault_runs": 0,
+  "candidate_id": "RF04_P2E_LATERALRIGHT070_ROUTE1072Y70_GAP700_SLOW110_80S_V1",
+  "contract_sha256": "704fb7079974e8172646bc00e5bbc759a445fea97eca2ab88861dfebed732471",
+  "early_stop_policy_applied": true,
+  "formal_status": "REJECT",
+  "reason": "FORMAL_PLANNING_VALID_RATIO_BELOW_FROZEN_GATE",
+  "repeat_1": {
+    "collision_count": 0,
+    "control_channel_coverage": 0.9997526283240569,
+    "illegal_lane_invasion_count": 0,
+    "manifest_sha256": "1d82a3dfcdbc74ca279887fe1f77c7f736aa573c450fb87acb169f231b4505a4",
+    "max_pass_margin_m": 20.898730396226682,
+    "minimum_bbox_clearance_2d_m": 1.8706520643389597,
+    "npc_lane_id_counts": {
+      "-2": 1599
+    },
+    "overtake_success": true,
+    "planning_channel_coverage": 0.9919604205318491,
+    "planning_valid_ratio": 0.8971321695760599,
+    "prediction_trajectory_coverage": 0.9851576994434137,
+    "required_minimum_planning_valid_ratio": 0.9,
+    "route_accepted": true,
+    "run_id": "SE_F01_A",
+    "runtime_exception": null,
+    "success_region_reached": true,
+    "summary_sha256": "2da2339c5844ade60432484316b4b61596c86e2d82cc54263709a338387d3c0f"
+  },
+  "schema_version": 1,
+  "threshold_changed_after_result": false,
+  "unrun_preregistered_repeats": [
+    "SE_F02_A",
+    "SE_F03_A"
+  ]
+}

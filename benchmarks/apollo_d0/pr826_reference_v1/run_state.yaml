@@ -1,9 +1,9 @@
 schema_version: 1
 protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
-current_gate: P2E_P4C_FINAL_LATERAL_SEPARATION_BRACKET
+current_gate: SCENE_FAULT_COMPATIBILITY_ANALYSIS
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-29T13:37:00Z"
+last_updated_at: "2026-08-29T13:53:00Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -16,7 +16,7 @@ gates:
   p1_prediction_bringup: PASS
   p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_port_fixture: PASS_P3_SEMANTIC_FIXTURE
-  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2D_NORMAL_ONLY_IN_PROGRESS
+  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2D_P2E_REFERENCE_CANDIDATES_REJECTED
   p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
   p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
   p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
@@ -117,7 +117,7 @@ reference_scene_result:
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
 terminal_reason: null
-next_action: Freeze one final 0.70 m lateral-separation normal-only candidate with the unchanged 0.90 m clearance gate; stop offset sweeping if it does not admit.
+next_action: Audit the captured P4B fixed/active Prediction-to-Planning spatial and temporal interaction before defining a distinct normal-only scene family; do not continue lateral-offset sweeping.
 p3_semantic_port:
   started_at: "2026-08-29T11:20:00Z"
   pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
@@ -198,6 +198,21 @@ p2d_lateral_separation:
   formal_repeat_2: NOT_RUN_EARLY_STOP
   formal_repeat_3: NOT_RUN_EARLY_STOP
   active_fault_runs: 0
+p2e_lateral_separation:
+  candidate_offset_m: 0.70
+  screen_run: SE_N01_A
+  screen_status: SCREENING_PASS
+  screen_minimum_bbox_clearance_m: 1.2858939105992368
+  screen_planning_valid_ratio: 0.9283042394014963
+  formal_repeat_1: SE_F01_A
+  formal_status: REJECT_EARLY_STOP
+  formal_minimum_bbox_clearance_m: 1.8706520643389597
+  formal_planning_valid_ratio: 0.8971321695760599
+  frozen_planning_valid_gate: 0.90
+  formal_repeat_2: NOT_RUN_EARLY_STOP
+  formal_repeat_3: NOT_RUN_EARLY_STOP
+  active_fault_runs: 0
+  family_disposition: CLOSED_NO_MORE_OFFSET_SWEEP
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
   classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE

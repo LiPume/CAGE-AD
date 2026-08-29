@@ -1223,3 +1223,56 @@ candidates:
       separation from the ego lane-change corridor, while the fixture-proven erroneous lane-change
       trajectory still points toward lane -1. The value is frozen before any result; fixed legality,
       lane association, clearance and all original gates can reject it. It is not a fault-dose change.
+    screening_disposition: REJECT_FORMAL_CLEARANCE_0_898575_LT_0_90
+  - candidate_id: RF04_P2E_LATERALRIGHT070_ROUTE1072Y70_GAP700_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2E_FINAL_LATERAL_SEPARATION_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 10.020791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_lateral_offset_from_p2b_m: 0.70
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2e_final_lateral_separation_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact target offset, gap, route, map, Control,
+      target policy, timing, startup order and oracle. Only the frozen Prediction semantic switch
+      may differ after 3/3 fixed admission. The 0.90 m clearance gate remains unchanged.
+    selection_basis: >-
+      This is the final preregistered lateral-offset bracket after the 0.60 m scene produced a
+      0.898575 m first-formal clearance against a predeclared 0.90 m gate. It changes only target x
+      by another 0.10 m away from the overtake lane, retains the same mechanism hypothesis and does
+      not use any active result on this geometry. The target must remain lane -2, the normal screen
+      and a new 3/3 formal set must pass the unchanged 0.90 m gate, and failure closes offset
+      sweeping rather than triggering another adjustment.

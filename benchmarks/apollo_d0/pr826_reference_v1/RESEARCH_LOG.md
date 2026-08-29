@@ -2279,3 +2279,27 @@ the preregistered early-stop rule. The 0.90 m threshold was not changed.
 
 The lateral-separation mechanism is supported but 0.60 m lacks formal margin. Permit one final
 0.70 m normal-only bracket with the same gate and complete restart; otherwise close this sweep.
+
+## Issue P2E-001 — final 0.70 m lateral bracket rejected
+
+现象与证据：
+
+- `SE_N01_A` fixed-only screen passed with Prediction coverage 0.985130, Planning valid 0.928304,
+  margin 19.996 m and bbox clearance 1.285894 m.
+- Frozen contract SHA256 `704fb7079974e8172646bc00e5bbc759a445fea97eca2ab88861dfebed732471`
+  required Planning-valid ratio >=0.90 and bbox clearance >=0.90 m before formal results.
+- `SE_F01_A` completed a safe overtake with coverage 0.985158, margin 20.899 m and clearance
+  1.870652 m, but Planning-valid ratio 0.897132 failed the frozen gate. Target stayed lane -2 in
+  1599/1599 samples. Summary SHA256:
+  `2da2339c5844ade60432484316b4b61596c86e2d82cc54263709a338387d3c0f`.
+
+设计与结果：
+
+The formal set is REJECT. `SE_F02_A/SE_F03_A` remain unrun under early stop; no active run exists
+on this geometry. Thresholds were not changed and the lateral-offset sweep is closed.
+
+结论与下一步：
+
+Enter `SCENE_FAULT_COMPATIBILITY_ANALYSIS`. Use the captured P4B active/fixed evidence to determine
+whether the faulty target trajectory ever interacts with Planning's selected path/ST domain before
+proposing a distinct, mechanism-derived normal-only scene family.
