@@ -2254,3 +2254,28 @@ REJECT — `REFERENCE_INFRASTRUCTURE_INVALID` and `LONG_TERM_BLOCKING_GATE_NOT_R
 
 Close this P2C family. Making the moving target static to Planning would discard the trajectory
 semantics under study. Next use mechanism-driven lateral separation, with normal-only freeze first.
+
+## Issue P2D-001 — 0.60 m lateral-separation candidate fails first formal clearance gate
+
+Timestamp: 2026-08-29T13:37:00Z
+
+现象与证据：
+
+- `SD_N01_A` normal-only screen passed: target lane -2 throughout, trajectory coverage 0.983292,
+  Planning valid 0.937107, margin 23.285 m, clearance 1.210439 m, no collision/illegal invasion.
+- A separately frozen formal contract required clearance >=0.90 m before any formal result.
+- `SD_F01_A` passed generic gates but clearance was 0.8985751835 m, 1.425 mm below the gate.
+  Contract SHA256: `9e895c1a66de1cdb99ce0aa493dc07a47f540294116e961ad3014273d69bc113`;
+  summary SHA256: `69b8c5dc4ac99d0f0ea23fd0360ea32cd6ffb43befbee55abd04cf5a7dbe5bee`.
+- Private fixed trace contains 1594 STRAIGHT candidates and has SHA256
+  `f0a085e4a7ca8fcb09ce8ee6d8ba665b2e0f76c47857af5b3dcd711d18016162`.
+
+设计与结果：
+
+The active fault was never run. The formal set is REJECT; `SD_F02_A/SD_F03_A` remain unrun under
+the preregistered early-stop rule. The 0.90 m threshold was not changed.
+
+结论与下一步：
+
+The lateral-separation mechanism is supported but 0.60 m lacks formal margin. Permit one final
+0.70 m normal-only bracket with the same gate and complete restart; otherwise close this sweep.

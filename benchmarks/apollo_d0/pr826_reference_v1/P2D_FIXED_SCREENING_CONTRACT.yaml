@@ -1,0 +1,70 @@
+schema_version: 1
+contract_version: p2d-lateral-separation-normal-screen-v1
+status: FROZEN_BEFORE_SCREENING_RESULT
+frozen_at: "2026-08-29T13:25:00Z"
+research_scope: P2D_LATERAL_SEPARATION_NORMAL_ONLY
+screening_id: SD_N01_A
+candidate_id: RF04_P2D_LATERALRIGHT060_ROUTE1072Y70_GAP700_SLOW110_80S_V1
+design_contract:
+  prior_active_fault_result_on_this_exact_geometry: 0
+  active_fault_run_authorized: false
+  changed_variable_from_admitted_p2b: target_initial_lateral_offset_only
+  target_lateral_offset_m: 0.60
+  offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+  route_lane_intent: [-2, -1]
+  required_target_lane: -2
+  required_overtake_lane: -1
+  rationale: >-
+    P4B proved that the frozen fault changes the target from a straight trajectory toward a
+    lane-minus-1 trajectory, but fixed and active occupancy both yielded FOLLOW and a successful
+    route-driven pass. This normal-only probe moves the physical target within lane -2 away from
+    lane -1 so fixed straight occupancy has a larger corridor separation. The frozen fault is not
+    active and its dose is unchanged. All gates may reject this geometry.
+  authorization_condition: SCREEN_PASS_THEN_SEPARATELY_FROZEN_3_OF_3_FIXED_PASS
+prediction_runtime:
+  library_dir: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction
+  component_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libprediction_component.so
+  component_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
+  behavior_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libapollo_prediction.so
+  behavior_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
+  domain_active: false
+  trace_active: true
+frozen_hashes:
+  registry_sha256: 384ae807a3e088b1012d1b74ef627cfd033a003bef8b0633120ff2a6da4df3c3
+  candidate_canonical_sha256: 76a0e8d8b80064d1cb4f64f50bf2307133d8334fb43a635212ed8f9873c426bf
+  fixed_environment_canonical_sha256: 5b7845d336079dd6b38d99ab56f8d5beb9ce55a2a6af51b79c2c9355c017b6d2
+  prepare_screen_sha256: d9ee6e376e79f0d09b37c0d323324a9925fef631bcd4ead545d7ebe8c927f8a3
+fixed_screening_gate:
+  observation_deadline_s: 80.0
+  infrastructure_valid_required: true
+  route_accepted_required: true
+  collision_count_max: 0
+  illegal_lane_invasion_count_max: 0
+  target_npc_present_required: true
+  minimum_target_prediction_messages: 20
+  minimum_target_prediction_trajectory_coverage: 0.90
+  minimum_planning_channel_coverage: 0.95
+  minimum_control_channel_coverage: 0.95
+  minimum_planning_valid_ratio: 0.90
+  minimum_pass_margin_m: 6.0
+  minimum_lateral_excursion_m: 2.0
+  minimum_bbox_clearance_2d_m: 0.90
+  success_region_reached_required: true
+  bridge_or_runtime_exception_allowed: false
+mechanism_screening_requirements:
+  target_must_remain_on_lane_minus_2: true
+  ego_must_enter_lane_minus_1: true
+  target_prediction_trajectory_coverage_min: 0.90
+  fixed_straight_trajectory_required: true
+  target_lane_association_stability_required: true
+formal_repeat_policy:
+  screening_passes_are_not_admission_evidence: true
+  required_fixed_repeats_after_screen_pass: 3
+  repeat_contract_must_be_frozen_before_first_repeat: true
+  no_active_fault_run_before_fixed_admission: true
+forbidden:
+  - modify_success_oracle_after_result
+  - modify_fault_semantics
+  - run_active_fault_before_fixed_admission
+  - external_ego_control
+  - future_ground_truth_to_planning

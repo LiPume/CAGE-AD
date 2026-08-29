@@ -1,9 +1,9 @@
 schema_version: 1
 protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
-current_gate: P2D_P4C_LATERAL_SEPARATION_SCENE_FAULT_MATCHING
+current_gate: P2E_P4C_FINAL_LATERAL_SEPARATION_BRACKET
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-29T13:20:00Z"
+last_updated_at: "2026-08-29T13:37:00Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -117,7 +117,7 @@ reference_scene_result:
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
 terminal_reason: null
-next_action: Freeze one mechanism-derived lateral-separation normal-only candidate; require fixed screening and 3/3 admission before any P4C active run.
+next_action: Freeze one final 0.70 m lateral-separation normal-only candidate with the unchanged 0.90 m clearance gate; stop offset sweeping if it does not admit.
 p3_semantic_port:
   started_at: "2026-08-29T11:20:00Z"
   pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
@@ -186,6 +186,18 @@ p4b_screening:
   system_failure: false
   changed_prediction_headers_consumed_by_planning: 34
   first_consumption_age_s: 0.0397
+p2d_lateral_separation:
+  candidate_offset_m: 0.60
+  screen_run: SD_N01_A
+  screen_status: SCREENING_PASS
+  screen_minimum_bbox_clearance_m: 1.2104394938895435
+  formal_repeat_1: SD_F01_A
+  formal_status: REJECT_EARLY_STOP
+  formal_minimum_bbox_clearance_m: 0.8985751835219767
+  frozen_clearance_gate_m: 0.90
+  formal_repeat_2: NOT_RUN_EARLY_STOP
+  formal_repeat_3: NOT_RUN_EARLY_STOP
+  active_fault_runs: 0
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
   classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE

@@ -1,0 +1,20 @@
+{
+  "candidate_id": "RF04_P2D_LATERALRIGHT060_ROUTE1072Y70_GAP700_SLOW110_80S_V1",
+  "contract_sha256": "9e895c1a66de1cdb99ce0aa493dc07a47f540294116e961ad3014273d69bc113",
+  "early_stop_policy_applied": true,
+  "formal_status": "REJECT",
+  "reason": "FORMAL_MINIMUM_BBOX_CLEARANCE_BELOW_FROZEN_GATE",
+  "repeat_1": {
+    "manifest_sha256": "9c77ceda6cd0183e94f0a06949afa640334feb7010fc0fbd82cd2dd8ff292c85",
+    "minimum_bbox_clearance_2d_m": 0.8985751835219767,
+    "required_minimum_bbox_clearance_2d_m": 0.9,
+    "run_id": "SD_F01_A",
+    "summary_sha256": "69b8c5dc4ac99d0f0ea23fd0360ea32cd6ffb43befbee55abd04cf5a7dbe5bee"
+  },
+  "schema_version": 1,
+  "threshold_changed_after_result": false,
+  "unrun_preregistered_repeats": [
+    "SD_F02_A",
+    "SD_F03_A"
+  ]
+}
