@@ -1,0 +1,136 @@
+schema_version: 1
+protocol_version: cage-ad-pr826-greybox-demo-v1
+status: STABLE_REFERENCE_ADMITTED
+current_gate: P2_REFERENCE_COMPLETE
+started_at: "2026-08-29T00:00:00Z"
+last_updated_at: "2026-08-29T11:10:00Z"
+bundle_root: /root/autodl_apollo10_g0_bundle
+repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
+runtime_root: /root/autodl_apollo10_g0_bundle/runtime
+state_root: /root/autodl_apollo10_g0_bundle/runtime_state/pr826_greybox_demo_v1
+scope: ONE_PR826_SEMANTIC_GOLD_CASE_AND_DEMO
+core_output: GREYBOX_DIAGNOSIS_REPORT
+optional_output: L3_FUNCTION_DRILL_DOWN
+gates:
+  p0_plan_and_research: PASS_USER_APPROVED
+  p1_prediction_bringup: PASS
+  p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
+  p3_semantic_port_fixture: NOT_RUN_CASE_NOT_ADMITTED
+  p4_matched_gold_case: NOT_RUN_CASE_NOT_ADMITTED
+  p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
+  p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
+  p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
+  p8_demo_video: NOT_RUN_CASE_NOT_ADMITTED
+  p9_final_audit: NOT_RUN_CASE_NOT_ADMITTED
+research_facts:
+  hint_paper_case: failed_overtake_FilterLaneSequences
+  public_scene1_case: collision_cut_in_FilterSequence
+  public_artifact_inconsistency: true
+  exact_apollo9_port_patch_found: false
+  google_drive_scenarios_audited: true
+  google_drive_pr826_failed_overtake_artifact_found: false
+  apollo10_prediction_installed: true
+public_scene1_record:
+  path: runtime/raw/pr826_greybox_demo_v1/hint_public_scene1/scene1.record
+  bytes: 139234933
+  sha256: b2d974190f8d1645d33218a2f6f78d890837a5ef8bfb0f9aa1936b55b7ad59f1
+  duration_seconds: 46.218074
+  complete: true
+  message_count: 73260
+  channel_count: 37
+  sampled_obstacle_id: 100
+  sampled_behavior: initially_near_static_then_accelerating_lane_transition
+  paper_failed_overtake_equivalence: NOT_ESTABLISHED
+deepseek:
+  secret_location: EXTERNAL_TO_WORKSPACE
+  model: deepseek-v4-pro
+  json_smoke: PASS
+  total_tokens: 43
+  secret_value_recorded: false
+tests:
+  recovered_empty_road_run: FAIL
+  recovered_empty_road_failed_checks:
+    - planning_coverage_at_least_0_95
+    - brake_active_fraction_at_most_0_10
+    - speed_optimizer_failures_zero
+  evaluator_regression_tests: 6_PASS
+  public_scene1_record_integrity: PASS
+  public_scene1_native_decode_smoke: PASS
+  apollo10_python_record_reader: FAIL_PY_SSIZE_T_CLEAN
+  state_yaml_validation: PASS
+  workspace_secret_scan: PASS
+  git_diff_check: PASS
+  prediction_semantic_slot_tests: 3_PASS
+  stock_prediction_smoke: PASS
+  p2_state_yaml_jsonl_validation: PASS
+  p2_screening_ledger_planned_result_pairs: 6_PASS
+  p2_reference_repeatability: FAIL_VALID_NO_OVERTAKE
+  p2_targeted_secret_content_scan: PASS
+  p2_no_residual_processes: PASS
+  bundle_upload_preflight_scan: NOT_APPLICABLE_AFTER_INSTALL_VENDOR_TEST_CERT_FALSE_POSITIVES
+stock_prediction_smoke:
+  run_id: P1_STOCK_PREDICTION_07
+  summary_path: runtime/runs/pr826_greybox_demo_v1/P1_STOCK_PREDICTION_07/summary.json
+  input_frames: 160
+  output_frames: 158
+  output_coverage: 0.9875
+  target_frames: 158
+  target_trajectory_frames: 150
+  target_trajectory_frame_coverage: 0.9493670886075949
+  target_trajectories: 300
+  critical_input_errors: 0
+  observed_obstacle_ids:
+    - 1001
+  visible_leakage_scan: PASS
+  embedded_source_timestamps_match_inputs: true
+design_freeze:
+  approved_by_user: true
+  approved_at: "2026-08-29T00:52:00Z"
+  cost_function_version: pr826-cost-v1
+  cost_raw_components:
+    - wall_time_sec
+    - simulation_class
+    - access_rank
+    - intervention_risk_rank
+  i2k_minimal_intervention_admission_required: true
+  reference_screening_append_only_ledger_required: true
+  target_prediction_trajectory_coverage_gate: 0.90
+  target_prediction_trajectory_coverage_gate_frozen_at: "2026-08-29T06:37:39Z"
+  target_prediction_trajectory_coverage_gate_scope: P2_V2_FORMAL_REFERENCE_ADMISSION
+  target_prediction_trajectory_coverage_gate_adjustment_status: FROZEN_BEFORE_FORMAL_REPEATS
+reference_scene_result:
+  candidate_id: RF01_01
+  provisional_pass: P2_REFERENCE_05_RF01_01
+  repeat_contract: pr826-reference-repeat-v1
+  first_repeat: P2_REFERENCE_06_RF01_01_REPEAT_1
+  first_repeat_infrastructure_valid: true
+  first_repeat_overtake_success: false
+  first_repeat_max_pass_margin_m: -11.225135341724448
+  first_repeat_max_abs_lateral_excursion_m: 1.3189871261702946
+  repeats_2_and_3: NOT_RUN_EARLY_VALID_FAILURE
+  fault_patch_exists: false
+  rf01_final_eligibility: REJECT_ZERO_TRAJECTORY_AND_NONREPEATABLE
+  p2d_first_physical_divergence: CONTROL_AUTOBOX_STARTUP_PHASE_2_TO_4_CARLA_FRAMES
+  p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
+blocking_issue: null
+terminal_reason: SUCCESS_STABLE_REFERENCE_ADMITTED
+next_action: No further action inside the authorized normal-reference scope; fault injection, diagnosis Agent and animation remain explicitly unstarted.
+final_reference:
+  candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
+  classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE
+  contract_path: runtime_state/pr826_greybox_demo_v1/reference_repeat_contract_v2.yaml
+  contract_sha256: 163f523d2d552cc5627efcce67df01d074db7ea6d52d28c6ea99831f1946dfe2
+  audit_path: runtime_state/pr826_greybox_demo_v1/FORMAL_REPEAT_V2_AUDIT.json
+  audit_sha256: a241a633f285b43d5c4fb40409fa542bc12e68bd4ed591d52f51612c4955afd8
+  report_path: runtime_state/pr826_greybox_demo_v1/FINAL_REFERENCE_REPORT.md
+  report_sha256: 67b0b98c7fb50573d8f4f98be26ae0a3ba5874c53d960d793e0be2b4e6c3061d
+  formal_passes: 3
+  formal_required: 3
+  minimum_prediction_trajectory_coverage: 0.9839208410636983
+  minimum_planning_valid_ratio: 0.9415059116365899
+  minimum_pass_margin_m: 23.625378607252188
+  minimum_bbox_clearance_2d_m: 0.727381087498781
+  maximum_success_region_latency_s: 70.55000105127692
+  collisions_total: 0
+  illegal_lane_invasions_total: 0
+  fault_patch_exists: false
