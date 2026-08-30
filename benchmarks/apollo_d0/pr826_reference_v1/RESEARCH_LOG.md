@@ -185,6 +185,20 @@ about PR826 propagation. Raw runtime artifacts were removed after the compact ma
 written. A subsequent normal-only candidate, if attempted, must remain between the stable 1.10 m/s
 reference and this rejected upper speed and must be frozen before execution.
 
+## P4B speed-1.30 normal reference — stable 3/3
+
+The midpoint normal-only screen changed only physical NPC speed from 1.10 to 1.30 m/s and passed
+at +11.912 m margin. Its contract then froze three fixed repeats before any active execution.
+`RN_V130_F1/F2/F3` all passed the unchanged gate with margins +11.630/+7.937/+13.487 m,
+Prediction trajectory coverage 0.9425/0.9367/0.9478, Planning-valid ratios
+0.9226/0.9148/0.9172, and identical normalized manifests. All three were route/runtime/channel
+valid with zero collision and zero illegal lane invasion.
+
+Minimum bbox clearances were 0.531/0.942/0.968 m. These values are retained because the first run
+has limited geometric margin; they were not introduced as post-result admission gates. Outcome:
+`STABLE_NORMAL_REFERENCE_3_OF_3`. One matched native fixed/active screen is now permitted under a
+new contract; this result alone contains no active PR826 evidence.
+
 ## Cleanup record
 
 The cleanup removed obsolete P1/P2 candidate runs, closed P4B/v3 runs, duplicate state/report
@@ -197,3 +211,7 @@ native mechanism screen.
 The rejected `RN_V150_S1` raw directory (about 27 MB) was removed after its frozen hashes, gate
 result and minimum machine metrics were preserved in
 `reports/P4B_SPEED150_NORMAL_SCREEN_AUDIT.json`.
+
+The speed-1.30 screening and three fixed-repeat raw directories were removed after the compact
+screen/repeat audits and the clearance metrics above were preserved. The canonical manifest and
+frozen contracts remain because the next matched native screen consumes them.

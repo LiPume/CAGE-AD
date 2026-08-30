@@ -3,8 +3,8 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T17:01:00Z"
-current_gate: SPEED130_FIXED_REPEAT_FROZEN_ACTIVE_PROHIBITED
+last_updated_at: "2026-08-30T17:12:00Z"
+current_gate: SPEED130_FIXED_REFERENCE_3_OF_3_NATIVE_SCREEN_NOT_YET_FROZEN
 
 phases:
   p1_prediction_bringup: PASS
@@ -132,10 +132,15 @@ p4b_speed130_normal_screen:
   repeat_contract: contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml
   manifest: configs/NATURAL_MATCH_GAP1225_SPEED130_NORMAL_MANIFEST.json
   screen_audit: reports/P4B_SPEED130_NORMAL_SCREEN_AUDIT.json
+  repeat_run_ids: [RN_V130_F1, RN_V130_F2, RN_V130_F3]
+  repeat_margins_m: [11.630432697665086, 7.9371613522185385, 13.486814047067384]
+  repeat_minimum_bbox_clearance_m: [0.5307245535472734, 0.9420377680863805, 0.9677049237694375]
+  repeat_status: STABLE_NORMAL_REFERENCE_3_OF_3
+  repeat_audit: reports/P4B_SPEED130_NORMAL_REPEAT_AUDIT.json
 
 next_action: >-
-  Run RN_V130_F1, RN_V130_F2 and RN_V130_F3 sequentially under the frozen normal repeat contract,
-  then audit 3/3 before authorizing any active run. Keep fault, geometry and oracle unchanged.
+  Freeze one speed-1.30 matched native fixed/active screen, run fixed first, and authorize active
+  only after fixed passes. Keep fault, geometry, timing and oracle unchanged.
 
 non_claims:
   - privileged_s1_is_not_natural_pr826
