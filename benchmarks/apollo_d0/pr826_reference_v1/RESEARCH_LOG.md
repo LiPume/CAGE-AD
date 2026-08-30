@@ -232,6 +232,14 @@ not converted into a post-result gate. The contract therefore freezes three fixe
 will expose whether the near-contact behavior causes collision or instability before any active
 run. This is a tooling/schema interpretation correction, not a scientific-gate relaxation.
 
+The first formal repeat `RN_V130_D9_F1` then produced one illegal lane-invasion event. That is an
+actual frozen gate failure, independent of the legacy Planning-valid classification. The contract
+therefore early-stopped F2/F3 and prohibited active execution. Outcome:
+`NORMAL_REFERENCE_NOT_STABLE_EARLY_STOP`. The candidate is rejected. The screening's 0.039 m
+near-contact observation was thus a useful warning even though it was not retrospectively promoted
+to a gate. No further merge-timing tuning is authorized on this candidate family without a new
+mechanism-level rationale.
+
 ## Cleanup record
 
 The cleanup removed obsolete P1/P2 candidate runs, closed P4B/v3 runs, duplicate state/report

@@ -3,8 +3,8 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T18:02:00Z"
-current_gate: DELAY9_FIXED_REPEATS_FROZEN_ACTIVE_PROHIBITED
+last_updated_at: "2026-08-30T18:12:00Z"
+current_gate: DELAY9_NORMAL_REFERENCE_REJECTED_EARLY_STOP
 
 phases:
   p1_prediction_bringup: PASS
@@ -174,10 +174,16 @@ p4b_speed130_delay9_normal_screen:
   repeat_contract: contracts/P4B_SPEED130_DELAY9_NORMAL_REPEAT_CONTRACT.yaml
   manifest: configs/NATURAL_MATCH_GAP1225_SPEED130_DELAY9_NORMAL_MANIFEST.json
   screen_audit: reports/P4B_SPEED130_DELAY9_NORMAL_SCREEN_AUDIT.json
+  repeat_run_ids_completed: [RN_V130_D9_F1]
+  repeat_run_ids_not_run: [RN_V130_D9_F2, RN_V130_D9_F3]
+  repeat_f1_illegal_lane_invasion_count: 1
+  repeat_status: NORMAL_REFERENCE_NOT_STABLE_EARLY_STOP
+  repeat_audit: reports/P4B_SPEED130_DELAY9_REPEAT_EARLY_STOP_AUDIT.json
+  active_run_authorized: false
 
 next_action: >-
-  Run RN_V130_D9_F1/F2/F3 sequentially and audit the frozen layered normal gate before any active
-  run. Preserve low-clearance and Planning-valid response metrics; keep fault and oracle unchanged.
+  Reassess scene-fault compatibility from QX/QY/QZ and the delayed-onset rejection before deriving
+  any new normal-only candidate. Do not continue outcome-driven merge timing or change fault/oracle.
 
 non_claims:
   - privileged_s1_is_not_natural_pr826

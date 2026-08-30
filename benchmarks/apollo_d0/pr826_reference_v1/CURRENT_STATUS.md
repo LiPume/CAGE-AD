@@ -50,7 +50,7 @@ Updated: 2026-08-30 UTC
 
 ## Current gate
 
-`DELAY9_FIXED_REPEATS_FROZEN_ACTIVE_PROHIBITED`
+`DELAY9_NORMAL_REFERENCE_REJECTED_EARLY_STOP`
 
 The v5 sensitivity contract is closed without further tuning. Three native-port scene pairs are
 closed without changing the fault: QX missed the distance guard at L1; QY reached L3 but recovered
@@ -60,14 +60,14 @@ golden-case admission.
 
 ## Only next action
 
-Run frozen `RN_V130_D9_F1/F2/F3` and audit the unchanged layered normal gate. The 0.039 m screening
-clearance remains visible as a risk metric. Any collision, illegal invasion or frozen-gate miss
-rejects the candidate without active execution.
+Delayed-onset F1 produced one illegal lane invasion, so the candidate is rejected and F2/F3/active
+were not run. Reassess scene–fault compatibility from the accumulated QX/QY/QZ guard evidence
+before proposing another normal-only candidate; do not continue merge-timing tuning by outcome.
 
-## Active contract and canonical reports
+## Current contracts and canonical reports
 
-- Active contract: `contracts/P4B_SPEED130_DELAY9_NORMAL_SCREEN_CONTRACT.yaml`
-- Active repeat contract: `contracts/P4B_SPEED130_DELAY9_NORMAL_REPEAT_CONTRACT.yaml`
+- Closed delayed-onset screen contract: `contracts/P4B_SPEED130_DELAY9_NORMAL_SCREEN_CONTRACT.yaml`
+- Closed delayed-onset repeat contract: `contracts/P4B_SPEED130_DELAY9_NORMAL_REPEAT_CONTRACT.yaml`
 - Latest closed native contract: `contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml`
 - Completed repeat contract: `contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml`
 - Completed screen contract: `contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml`
@@ -80,6 +80,7 @@ rejects the candidate without active execution.
 - Latest normal-only boundary screen: `reports/P4B_SPEED150_NORMAL_SCREEN_AUDIT.json`
 - Current normal screen: `reports/P4B_SPEED130_NORMAL_SCREEN_AUDIT.json`
 - Current fixed-repeat audit: `reports/P4B_SPEED130_NORMAL_REPEAT_AUDIT.json`
+- Delayed-onset early-stop audit: `reports/P4B_SPEED130_DELAY9_REPEAT_EARLY_STOP_AUDIT.json`
 - Latest native screen: `reports/P4B_SPEED130_NATURAL_SCREEN_REPORT.md`
 - Canonical machine state: `run_state.yaml`
 
