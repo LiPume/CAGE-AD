@@ -199,6 +199,25 @@ has limited geometric margin; they were not introduced as post-result admission 
 `STABLE_NORMAL_REFERENCE_3_OF_3`. One matched native fixed/active screen is now permitted under a
 new contract; this result alone contains no active PR826 evidence.
 
+## P4B speed-1.30 native screen — modern polygon guard compensates
+
+After fixed 3/3, one matched pair was frozen. `QZ0_A` fixed passed at +14.272 m; only then was
+`QZ1_A` active authorized. Active also passed at +13.185 m. Both were valid and safe, and the only
+behavioral manifest difference was the frozen maneuver-domain switch.
+
+Private trace showed L0 but not L1. Active evaluated 1,532 expanded STRAIGHT candidates; 43
+overlapped the ADC trajectory and ten were inside 9.455–9.969 m. Every one of those ten had
+`polygon_in_own_lane=0`, stayed enabled, and therefore produced zero erroneous candidate disables.
+The target reached the nearby-distance condition only after leaving its own lane, so Apollo 10's
+modern polygon guard compensated the PR826-family domain expansion.
+
+The generic detector also observed 38 active versus 36 fixed lateral-signature frames and 35
+Planning consumptions with nine response deltas. Because L1 never occurred, those differences are
+not causally attributed to the port. Outcome: `CANDIDATE_SEMANTIC_DELTA_ABSENT`; the pair is closed
+without fault or oracle changes. The next normal-only hypothesis may delay physical merge onset so
+the unchanged distance and own-lane guards overlap, but it must independently pass fixed screening
+and fixed 3/3 before any active run.
+
 ## Cleanup record
 
 The cleanup removed obsolete P1/P2 candidate runs, closed P4B/v3 runs, duplicate state/report
@@ -215,3 +234,6 @@ result and minimum machine metrics were preserved in
 The speed-1.30 screening and three fixed-repeat raw directories were removed after the compact
 screen/repeat audits and the clearance metrics above were preserved. The canonical manifest and
 frozen contracts remain because the next matched native screen consumes them.
+
+The `QZ0_A/QZ1_A` raw pair and private audit views were removed after the L0/L1 guard evidence,
+matched outcomes and compact machine audit were preserved in the speed-1.30 native report.

@@ -105,8 +105,16 @@ entries:
     canonical_for: P4B_CURRENT_FIXED_REFERENCE_RESULT
   - id: speed130_native_screen_contract
     path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml
-    status: KEEP_CURRENT
-    canonical_for: P4B_CURRENT_NATIVE_SCREEN_CONTRACT
+    status: KEEP_CLOSED_CONTRACT
+    canonical_for: P4B_SPEED130_NATIVE_SCREEN_CONTRACT
+  - id: speed130_native_screen_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_NATURAL_SCREEN_AUDIT.json
+    status: KEEP
+    canonical_for: P4B_SPEED130_NATIVE_SCREEN_MACHINE_RESULT
+  - id: speed130_native_screen_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_NATURAL_SCREEN_REPORT.md
+    status: KEEP
+    canonical_for: P4B_SPEED130_NATIVE_SCREEN
   - id: source_scene_manifest
     path: benchmarks/apollo_d0/pr826_reference_v1/configs/SENSITIVITY_SOURCE_MANIFEST.json
     status: KEEP

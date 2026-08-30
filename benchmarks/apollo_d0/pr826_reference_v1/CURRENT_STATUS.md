@@ -39,29 +39,35 @@ Updated: 2026-08-30 UTC
 - The bracketed 1.30 m/s normal screen passed at +11.912 m with 0.9425 Prediction trajectory
   coverage and no collision/illegal lane invasion. Its 0.536 m minimum clearance is explicitly
   retained as a response metric. Formal fixed repeats then passed 3/3 at
-  +11.630/+7.937/+13.487 m with identical normalized manifests. One frozen matched native screen
-  may now be prepared; no active result has been seen at this speed.
+  +11.630/+7.937/+13.487 m with identical normalized manifests, which authorized one matched
+  native screen.
+- Its matched native screen is now closed: fixed passed +14.272 m and active passed +13.185 m.
+  L0 executed, but all ten expanded candidates inside 9.455–9.969 m had
+  `polygon_in_own_lane=0`, so L1 produced zero disables. Apparent L2/L3 differences are not causal
+  evidence without L1. This is another scene–fault mismatch, not a golden case.
 - No PR826 L0→L4 causal chain or golden case is admitted.
 - No diagnosis Agent, probability claim, repair, or animation is in scope yet.
 
 ## Current gate
 
-`SPEED130_NATIVE_SCREEN_FROZEN_FIXED_ARM_FIRST`
+`NORMAL_ONLY_GUARD_ORDERING_MATCH_AFTER_SPEED130_L1_MISS`
 
-The v5 sensitivity contract is closed without further tuning. Two native-port scene pairs are
-closed without changing the fault: the first missed L1; the second reached L3 but recovered before
-L4. The first lower-relative-speed normal candidate (1.50 m/s) failed its frozen normal gate, so no
-active result exists for it. None is golden-case admission.
+The v5 sensitivity contract is closed without further tuning. Three native-port scene pairs are
+closed without changing the fault: QX missed the distance guard at L1; QY reached L3 but recovered
+before L4; QZ entered the distance guard but failed the modern own-lane polygon guard at L1. The
+1.50 m/s normal candidate failed its frozen normal gate and never received an active run. None is
+golden-case admission.
 
 ## Only next action
 
-Fixed `QZ0_A` passed at +14.272 m with valid runtime/transport/safety gates. Execute the now
-authorized active `QZ1_A`, then audit L0→L4 without changing the semantic port, geometry, timing or
-failure oracle.
+Create one normal-only candidate that delays physical merge onset while keeping speed 1.30 m/s and
+all other geometry/configuration unchanged, so nearby distance can overlap the retained own-lane
+polygon guard. Validate fixed screening and 3/3 before any new active run. Do not change the fault
+or oracle.
 
 ## Active contract and canonical reports
 
-- Active contract: `contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml`
+- Latest closed native contract: `contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml`
 - Completed repeat contract: `contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml`
 - Completed screen contract: `contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml`
 - Closed persistent-sensitivity contract: `P4_SENS_V5_CONFIRMATION_CONTRACT.yaml`
@@ -73,6 +79,7 @@ failure oracle.
 - Latest normal-only boundary screen: `reports/P4B_SPEED150_NORMAL_SCREEN_AUDIT.json`
 - Current normal screen: `reports/P4B_SPEED130_NORMAL_SCREEN_AUDIT.json`
 - Current fixed-repeat audit: `reports/P4B_SPEED130_NORMAL_REPEAT_AUDIT.json`
+- Latest native screen: `reports/P4B_SPEED130_NATURAL_SCREEN_REPORT.md`
 - Canonical machine state: `run_state.yaml`
 
 ## Explicit non-claim

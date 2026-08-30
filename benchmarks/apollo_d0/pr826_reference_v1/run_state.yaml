@@ -3,8 +3,8 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T17:28:00Z"
-current_gate: SPEED130_NATIVE_SCREEN_ACTIVE_AUTHORIZED
+last_updated_at: "2026-08-30T17:40:00Z"
+current_gate: NORMAL_ONLY_GUARD_ORDERING_MATCH_AFTER_SPEED130_L1_MISS
 
 phases:
   p1_prediction_bringup: PASS
@@ -145,13 +145,25 @@ p4b_speed130_native_screen:
   fixed_maximum_pass_margin_m: 14.272278240321867
   fixed_prediction_trajectory_coverage: 0.9367321867321867
   fixed_status: PASS
-  status: FIXED_PASS_ACTIVE_AUTHORIZED
-  active_run_authorized: true
+  active_maximum_pass_margin_m: 13.184956993513026
+  active_status: PASS_NORMAL_OUTCOME
+  l0_fault_activation: PASS
+  l1_candidate_semantic_delta: FAIL_POLYGON_IN_OWN_LANE_GUARD
+  expanded_nearby_events: 10
+  expanded_disabled_events: 0
+  nearby_distance_range_m: [9.455376924577578, 9.968572880497717]
+  l2_to_l3_causally_attributable: false
+  l4_vehicle_failure: false
+  status: SCENE_FAULT_PAIR_NOT_ADMITTED
+  active_run_authorized: false
   contract: contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml
+  report: reports/P4B_SPEED130_NATURAL_SCREEN_REPORT.md
+  audit: reports/P4B_SPEED130_NATURAL_SCREEN_AUDIT.json
 
 next_action: >-
-  Execute QZ1_A active under the frozen contract, prepare immutable audit views, and audit L0-L4.
-  Keep fault, geometry, timing and oracle unchanged.
+  Derive one normal-only delayed-merge-onset candidate so the unchanged nearby-distance and
+  own-lane-polygon guards can overlap; validate fixed screening and 3/3 before any active run. Keep
+  fault and oracle unchanged.
 
 non_claims:
   - privileged_s1_is_not_natural_pr826
