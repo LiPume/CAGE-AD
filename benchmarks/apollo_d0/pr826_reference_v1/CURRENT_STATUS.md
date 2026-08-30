@@ -27,24 +27,25 @@ Updated: 2026-08-30 UTC
 
 ## Not established
 
-- No evidence yet shows that the frozen PR826 semantic port naturally emits the persistent S1
-  phenotype in this scene.
+- The first natural-port screen on the physical-merge scene reached L0 but not L1: 43 expanded
+  overlap events remained at 12.326–14.341 m, outside the unchanged `(0,10 m)` guard. The active arm
+  still overtook. This scene–fault pair is rejected.
 - No PR826 L0→L4 causal chain or golden case is admitted.
 - No diagnosis Agent, probability claim, repair, or animation is in scope yet.
 
 ## Current gate
 
-`NATURAL_PR826_L0_TO_L4_MECHANISM_SCREEN_READY`
+`NORMAL_ONLY_SCENE_FAULT_MATCHING_AFTER_L1_MISS`
 
-The v5 sensitivity contract is closed without further tuning. The three-pair aggregate and final
-sensitivity report are canonical. This result proves a repeatable interface-level failure
-amplifier, not natural PR826 reproduction.
+The v5 sensitivity contract is closed without further tuning. The first native-port screen is also
+closed without changing the fault: L0 passed, L1/L4 failed. Its result is a scene geometry mismatch,
+not permission to broaden the predicate.
 
 ## Only next action
 
-Begin the separate frozen native PR826-family semantic-port screen. Instrument and evaluate L0
-activation → L1 candidate delta → L2 native Prediction phenotype → L3 Planning response → L4
-vehicle outcome without changing the fault predicate or using privileged S1 as the faulty arm.
+Create one mechanism-derived, closer normal-only candidate that can enter the existing 10 m nearby
+guard. Freeze and validate its fixed arm before any active run. Keep the semantic port, Planning,
+Control, map, route, NPC policy and all failure gates unchanged.
 
 ## Active contract and canonical reports
 
@@ -52,6 +53,7 @@ vehicle outcome without changing the fault predicate or using privileged S1 as t
 - Canonical configured-reference report: `reports/FINAL_REFERENCE_REPORT.md`
 - Canonical persistent-sensitivity report: `reports/P4_PERSISTENT_SENSITIVITY_REPORT.md`
 - Canonical persistent-sensitivity aggregate: `reports/aggregate.json`
+- Latest native-port screen: `reports/P4_NATURAL_PORT_SCREEN_REPORT.md`
 - Canonical machine state: `run_state.yaml`
 
 ## Explicit non-claim

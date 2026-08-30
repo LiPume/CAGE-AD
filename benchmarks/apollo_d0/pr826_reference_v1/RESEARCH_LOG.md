@@ -131,6 +131,24 @@ Sensitivity confirmation is complete. The frozen semantic port may now be evalua
 If L0/L1 occurs without the required L2 phenotype, the scene–fault pair closes. Fault dose must not
 be increased to manufacture L4.
 
+## P4 native-port screen 01 — physical-merge scene rejected at L1
+
+After persistent sensitivity passed 3/3, one matched native-port pair was frozen before execution.
+There was no interface interposer; the only behavioral manifest difference was the frozen
+Prediction maneuver-domain switch. Fixed QX0_A overtook with +12.089 m margin. Active QX1_A also
+overtook with +23.880 m margin; both arms were runtime/transport valid and safe.
+
+Private Prediction telemetry proved L0: domain 1 executed 4588 target eligibility events and
+expanded STRAIGHT eligibility 1535 times. L1 did not occur. The expanded candidate overlapped 43
+times, but signed distance was always 12.326–14.341 m, never inside the unchanged `(0,10 m)` nearby
+guard, so no expanded candidate was disabled. Apparent downstream trajectory/Planning differences
+were classified incidental to the physical NPC merge because the causal prerequisite L1 failed.
+
+Outcome: `CANDIDATE_SEMANTIC_DELTA_ABSENT`; this scene–fault pair is closed without changing the
+fault. The next permitted search is normal-only and mechanism-derived: move the initial target
+geometry closer enough to exercise the existing historical nearby guard, validate the fixed arm
+first, then freeze any active screening.
+
 ## Cleanup record
 
 The cleanup removed obsolete P1/P2 candidate runs, closed P4B/v3 runs, duplicate state/report

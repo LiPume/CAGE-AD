@@ -3,15 +3,15 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T15:20:00Z"
-current_gate: NATURAL_PR826_L0_TO_L4_MECHANISM_SCREEN_READY
+last_updated_at: "2026-08-30T15:40:00Z"
+current_gate: NORMAL_ONLY_SCENE_FAULT_MATCHING_AFTER_L1_MISS
 
 phases:
   p1_prediction_bringup: PASS
   p2_configured_reference: STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_fixture: P3_SEMANTIC_FIXTURE_PASS
   p4_persistent_sensitivity: STABLE_PERSISTENT_S1_CANCELLATION_3_OF_3
-  p4_natural_pr826_chain: NOT_STARTED
+  p4_natural_pr826_chain: SCREEN_01_REJECTED_L0_PASS_L1_ABSENT
   diagnosis_agent_and_animation: OUT_OF_SCOPE
 
 configured_reference:
@@ -66,9 +66,23 @@ validity_model:
   fields: [runtime_valid, transport_valid, semantic_valid, behavior_valid, admission_valid]
   legacy_infrastructure_valid: COMPATIBILITY_TELEMETRY_ONLY
 
+p4_natural_port_screen_01:
+  contract: contracts/P4_NATURAL_PORT_SCREEN_CONTRACT.yaml
+  contract_sha256: 4f0ddab4ee437969c49dc3cae2c9a605d35d37df57230caa5fea565438536268
+  run_ids: [QX0_A, QX1_A]
+  matched_manifest: PASS
+  l0_fault_activation: PASS
+  l1_candidate_semantic_delta: FAIL_DISTANCE_GUARD
+  expanded_overlap_distance_m: [12.325743685754503, 14.34148236919144]
+  l2_to_l4_causally_attributable: false
+  active_overtake_success: true
+  status: SCENE_FAULT_PAIR_NOT_ADMITTED
+  report: reports/P4_NATURAL_PORT_SCREEN_REPORT.md
+  audit: reports/P4_NATURAL_PORT_SCREEN_AUDIT.json
+
 next_action: >-
-  Start the frozen native PR826-family L0-to-L4 mechanism screen without modifying the semantic
-  predicate or treating privileged S1 as a natural fault.
+  Derive one closer normal-only candidate from the measured L1 distance miss, then freeze and
+  validate the fixed arm before any active run; do not modify the semantic predicate.
 
 non_claims:
   - privileged_s1_is_not_natural_pr826

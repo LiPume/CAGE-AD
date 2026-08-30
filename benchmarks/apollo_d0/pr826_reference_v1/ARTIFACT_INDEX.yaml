@@ -47,6 +47,18 @@ entries:
     path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_PERSISTENT_SENSITIVITY_REPORT.md
     status: KEEP
     canonical_for: P4_PERSISTENT_CONFIRMATION
+  - id: natural_port_screen_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4_NATURAL_PORT_SCREEN_CONTRACT.yaml
+    status: KEEP_CLOSED_CONTRACT
+    canonical_for: P4_NATIVE_PORT_SCREEN_01_CONTRACT
+  - id: natural_port_screen_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_NATURAL_PORT_SCREEN_AUDIT.json
+    status: KEEP
+    canonical_for: P4_NATIVE_PORT_SCREEN_01_MACHINE_RESULT
+  - id: natural_port_screen_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_NATURAL_PORT_SCREEN_REPORT.md
+    status: KEEP
+    canonical_for: P4_NATIVE_PORT_SCREEN_01
   - id: source_scene_manifest
     path: benchmarks/apollo_d0/pr826_reference_v1/configs/SENSITIVITY_SOURCE_MANIFEST.json
     status: KEEP

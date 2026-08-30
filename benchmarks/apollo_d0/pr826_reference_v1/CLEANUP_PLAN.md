@@ -78,3 +78,5 @@ Pair C follow-up on 2026-08-30 UTC:
 - Validated `P4_SENS_PAIR_C.json`, `aggregate.json` and the final sensitivity report.
 - Removed the PZ0_C/PZ1_C raw directories (about 55 MB) after confirming no current experiment or
   test consumed them. Compact metrics, hashes and the aggregate remain canonical.
+- Removed the rejected QX0_A/QX1_A native-screen raw directories (about 54 MB) and their temporary
+  audit views after the compact L0/L1 report and machine audit validated.
