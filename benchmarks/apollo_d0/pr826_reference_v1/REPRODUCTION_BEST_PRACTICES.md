@@ -35,6 +35,9 @@
 - A sensitivity probe is privileged non-admission evidence. Never present it as a natural PR826
   run.
 - Never promote pass delay or smaller margin to `FAILED_OVERTAKE` after observing results.
+- Screen every mechanism-derived geometry/speed change in fixed normal mode first. A candidate that
+  is runtime-valid but misses the frozen pass margin is a reference-capability rejection; do not
+  run its active arm or weaken the normal oracle.
 
 ## Temporal coverage
 

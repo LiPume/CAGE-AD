@@ -33,22 +33,26 @@ Updated: 2026-08-30 UTC
 - A mechanism-derived 12.25 m-gap scene then passed fixed reference 3/3. Its native active screen
   reached L0→L3 (24 candidates disabled, 59 changed sequences consumed, 28 Planning response
   deltas) but recovered and overtook at +18.501 m. L4 failed; this pair is also rejected.
+- A normal-only 1.50 m/s temporal-persistence candidate was rejected before any active run. It was
+  runtime/route/channel valid and safe, but its +5.556 m maximum pass margin missed the unchanged
+  +6.0 m normal gate. The result is a normal-reference capability boundary, not PR826 evidence.
 - No PR826 L0→L4 causal chain or golden case is admitted.
 - No diagnosis Agent, probability claim, repair, or animation is in scope yet.
 
 ## Current gate
 
-`NORMAL_ONLY_TEMPORAL_PERSISTENCE_MATCHING_AFTER_L0_TO_L3_PASS_L4_MISS`
+`NORMAL_ONLY_SPEED_BOUNDARY_SEARCH_AFTER_SPEED150_REJECTED`
 
 The v5 sensitivity contract is closed without further tuning. Two native-port scene pairs are
 closed without changing the fault: the first missed L1; the second reached L3 but recovered before
-L4. Neither is golden-case admission.
+L4. The first lower-relative-speed normal candidate (1.50 m/s) failed its frozen normal gate, so no
+active result exists for it. None is golden-case admission.
 
 ## Only next action
 
-Create one normal-only candidate that reduces ego–target relative speed while retaining the admitted
-12.25 m geometry, so the unchanged nearby guard can remain active longer. Validate and freeze the
-normal arm before any active result. Do not change the semantic port or failure oracle.
+Test one bracketed normal-only candidate at 1.30 m/s, between the stable 1.10 m/s reference and the
+rejected 1.50 m/s capability boundary, while retaining the admitted 12.25 m geometry. Freeze and
+validate the normal arm before any active result. Do not change the semantic port or failure oracle.
 
 ## Active contract and canonical reports
 
@@ -58,6 +62,7 @@ normal arm before any active result. Do not change the semantic port or failure 
 - Canonical persistent-sensitivity aggregate: `reports/aggregate.json`
 - Latest native-port screen: `reports/P4_NATURAL_PORT_SCREEN_REPORT.md`
 - Latest L0→L3 native screen: `reports/P4B_GAP1225_NATURAL_SCREEN_REPORT.md`
+- Latest normal-only boundary screen: `reports/P4B_SPEED150_NORMAL_SCREEN_AUDIT.json`
 - Canonical machine state: `run_state.yaml`
 
 ## Explicit non-claim

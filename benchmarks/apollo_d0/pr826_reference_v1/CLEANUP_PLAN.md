@@ -82,3 +82,7 @@ Pair C follow-up on 2026-08-30 UTC:
   audit views after the compact L0/L1 report and machine audit validated.
 - Removed the gap-12.25 screening, three fixed repeats, QY matched pair and temporary audit views
   (about 160 MB) after the compact 3/3 reference audit and L0→L3/L4 report validated.
+- Removed the rejected `RN_V150_S1` raw directory under `TEXT_ONLY_THEN_DELETE`: it was not an
+  aggregation input, no later run read it, and its frozen hashes, gate result and minimum metrics
+  remain in the concise research log and compact machine audit. The uncommitted candidate manifest
+  and closed one-run contract were also removed after those records validated.

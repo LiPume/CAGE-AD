@@ -166,6 +166,25 @@ at roughly elapsed 8.9–14.7 s and does not create L4 in this scene. No faulty 
 next mechanism-derived normal-only search may reduce relative speed to extend time inside the same
 guard; the fault predicate and oracle remain unchanged.
 
+## P4B speed-1.50 normal screen — rejected before active testing
+
+The first temporal-persistence candidate kept the admitted 12.25 m geometry and changed only the
+physical NPC target speed from 1.10 to 1.50 m/s. The manifest and normal-only contract were frozen
+before the run, with SHA256 values `2c29b8eb...647a7419` and `507b080d...24cb200`. No active
+Prediction fault was enabled or observed for this geometry.
+
+`RN_V150_S1` was runtime/route/channel valid, safe, entered the legal adjacent lane, reached the
+success region, and retained target Prediction trajectory coverage 0.9478. It nevertheless reached
+only +5.556 m maximum pass margin, below the unchanged +6.0 m gate, so the frozen normal oracle
+returned `STOCK_REFERENCE_NO_OVERTAKE`. Planning-valid ratio was 0.9018 and is retained only as a
+response metric, not reclassified as an infrastructure failure.
+
+Outcome: `NORMAL_CANDIDATE_REJECTED`; no fixed repeats and no active run are authorized. This
+rejects 1.50 m/s as a normal reference at the frozen 80 s horizon. The result does not say anything
+about PR826 propagation. Raw runtime artifacts were removed after the compact machine audit was
+written. A subsequent normal-only candidate, if attempted, must remain between the stable 1.10 m/s
+reference and this rejected upper speed and must be frozen before execution.
+
 ## Cleanup record
 
 The cleanup removed obsolete P1/P2 candidate runs, closed P4B/v3 runs, duplicate state/report
@@ -174,3 +193,7 @@ large timelines/telemetry were removed only after compact common audits and norm
 hashes were validated. Pair C raw output was retained through its common audit and aggregate, then
 became eligible for the same compact retention policy. Apollo/CARLA/map/build assets remain for the
 native mechanism screen.
+
+The rejected `RN_V150_S1` raw directory (about 27 MB) was removed after its frozen hashes, gate
+result and minimum machine metrics were preserved in
+`reports/P4B_SPEED150_NORMAL_SCREEN_AUDIT.json`.
