@@ -56,7 +56,8 @@ validate the normal arm before any active result. Do not change the semantic por
 
 ## Active contract and canonical reports
 
-- Active contract: `P4_SENS_V5_CONFIRMATION_CONTRACT.yaml`
+- Active contract: `contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml`
+- Closed persistent-sensitivity contract: `P4_SENS_V5_CONFIRMATION_CONTRACT.yaml`
 - Canonical configured-reference report: `reports/FINAL_REFERENCE_REPORT.md`
 - Canonical persistent-sensitivity report: `reports/P4_PERSISTENT_SENSITIVITY_REPORT.md`
 - Canonical persistent-sensitivity aggregate: `reports/aggregate.json`

@@ -114,10 +114,18 @@ p4b_speed150_normal_screen:
   active_run_authorized: false
   audit: reports/P4B_SPEED150_NORMAL_SCREEN_AUDIT.json
 
+p4b_speed130_normal_screen:
+  run_id: RN_V130_S1
+  active_fault_domain: false
+  target_speed_mps: 1.30
+  status: FROZEN_PENDING_SCREEN
+  active_run_authorized: false
+  contract: contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml
+  manifest: configs/NATURAL_MATCH_GAP1225_SPEED130_NORMAL_MANIFEST.json
+
 next_action: >-
-  Test one bracketed 1.30 m/s normal-only candidate between the stable 1.10 m/s reference and the
-  rejected 1.50 m/s boundary; validate fixed behavior before any active run and keep the fault and
-  oracle unchanged.
+  Execute the frozen RN_V130_S1 normal-only screen. If it passes, freeze three fixed repeats before
+  any active run; if it fails, reject it without active execution. Keep fault and oracle unchanged.
 
 non_claims:
   - privileged_s1_is_not_natural_pr826
