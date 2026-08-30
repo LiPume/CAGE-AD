@@ -50,7 +50,7 @@ Updated: 2026-08-30 UTC
 
 ## Current gate
 
-`NORMAL_ONLY_GUARD_ORDERING_MATCH_AFTER_SPEED130_L1_MISS`
+`DELAY9_NORMAL_SCREEN_FROZEN_ACTIVE_PROHIBITED`
 
 The v5 sensitivity contract is closed without further tuning. Three native-port scene pairs are
 closed without changing the fault: QX missed the distance guard at L1; QY reached L3 but recovered
@@ -60,13 +60,12 @@ golden-case admission.
 
 ## Only next action
 
-Create one normal-only candidate that delays physical merge onset while keeping speed 1.30 m/s and
-all other geometry/configuration unchanged, so nearby distance can overlap the retained own-lane
-polygon guard. Validate fixed screening and 3/3 before any new active run. Do not change the fault
-or oracle.
+Execute normal-only `RN_V130_D9_S1`. If it passes, freeze 3 fixed repeats before any active run; if
+it fails, reject without active execution. Do not change the fault or oracle.
 
 ## Active contract and canonical reports
 
+- Active contract: `contracts/P4B_SPEED130_DELAY9_NORMAL_SCREEN_CONTRACT.yaml`
 - Latest closed native contract: `contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml`
 - Completed repeat contract: `contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml`
 - Completed screen contract: `contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml`
