@@ -46,7 +46,7 @@ Updated: 2026-08-30 UTC
 
 ## Current gate
 
-`SPEED130_FIXED_REFERENCE_3_OF_3_NATIVE_SCREEN_NOT_YET_FROZEN`
+`SPEED130_NATIVE_SCREEN_FROZEN_FIXED_ARM_FIRST`
 
 The v5 sensitivity contract is closed without further tuning. Two native-port scene pairs are
 closed without changing the fault: the first missed L1; the second reached L3 but recovered before
@@ -55,12 +55,12 @@ active result exists for it. None is golden-case admission.
 
 ## Only next action
 
-Freeze one matched native fixed/active screen for the 1.30 m/s reference. Execute fixed first and
-authorize active only if fixed passes the frozen normal/transport checks. Do not change the semantic
-port, geometry, timing or failure oracle.
+Execute fixed `QZ0_A`. Authorize active `QZ1_A` only if fixed passes the frozen normal/transport
+checks. Do not change the semantic port, geometry, timing or failure oracle.
 
 ## Active contract and canonical reports
 
+- Active contract: `contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml`
 - Completed repeat contract: `contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml`
 - Completed screen contract: `contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml`
 - Closed persistent-sensitivity contract: `P4_SENS_V5_CONFIRMATION_CONTRACT.yaml`

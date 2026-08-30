@@ -1,0 +1,138 @@
+schema_version: 1
+contract_version: p4b-gap1225-speed130-natural-pr826-port-screen-v1
+status: FROZEN_BEFORE_SCREENING_RESULTS
+frozen_at: "2026-08-30T17:20:00Z"
+classification: PRIVATE_BENCHMARK_BUILDER_ORACLE
+admission_evidence: false
+research_scope: ONE_MATCHED_NATIVE_PORT_SCREEN_BEFORE_FORMAL_FAULTY_REPEATS
+
+scientific_question: >-
+  Does the already frozen Apollo 10 PR826-family maneuver-domain port naturally propagate from
+  candidate filtering to native Prediction output, Planning response and failed overtake in the
+  12.25 m, 1.30 m/s physical-merge scene after its fixed arm passed 3/3?
+
+screening_pair:
+  pair_id: QZ_PAIR_A
+  fixed_id: QZ0_A
+  active_id: QZ1_A
+  execution_order: [QZ0_A, QZ1_A]
+  active_authorization: FIXED_ARM_MUST_PASS_RUNTIME_TRANSPORT_AND_OVERTAKE_GATES_FIRST
+
+semantic_fixture:
+  status: P3_SEMANTIC_FIXTURE_PASS
+  semantic_patch_sha256: f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6
+  fixed_domain: [LEFT, RIGHT, ONTO_LANE]
+  active_domain: [LEFT, RIGHT, ONTO_LANE, STRAIGHT]
+  existing_guards_retained:
+    - non_parking
+    - adc_trajectory_overlap
+    - signed_distance_strictly_between_0_and_10_m
+    - obstacle_polygon_in_own_lane
+  prohibited_after_result: CHANGE_PREDICATE_OR_FAULT_DOSE
+
+prediction_runtime:
+  library_dir: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction
+  component_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libprediction_component.so
+  component_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
+  behavior_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libapollo_prediction.so
+  behavior_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
+
+matching:
+  only_behavioral_difference:
+    path: private_prediction_runtime.domain_active
+    fixed_value: false
+    active_value: true
+  allowed_metadata_differences: [arm, screening_id]
+  trace_active_in_both_arms: true
+
+fixed_reference_admission:
+  status: STABLE_NORMAL_REFERENCE_3_OF_3
+  audit: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_NORMAL_REPEAT_AUDIT.json
+  audit_sha256: 0d8b204e85e3bbc8b775d31bcbc74c401643c0994a2a63ecb0a58adcf13903af
+
+transport_gates:
+  prediction_trajectory_coverage_min: 0.90
+  planning_channel_coverage_min: 0.95
+  control_channel_coverage_min: 0.95
+  route_accepted_required: true
+  runtime_exception_absent_required: true
+  collision_count_max: 0
+  illegal_lane_invasion_count_max: 0
+  planning_valid_ratio_is_response_metric_not_transport_gate: true
+
+mechanism_gates:
+  target_obstacle_id: 1001
+  L0_activation: DOMAIN_ACTIVE_AND_EXPANDED_STRAIGHT_ELIGIBILITY
+  L1_candidate_delta: EXPANDED_STRAIGHT_SATISFIES_ALL_STOCK_GUARDS_AND_IS_DISABLED
+  minimum_expanded_disabled_events: 1
+
+native_output_gate:
+  definition: ABS_FIRST_TARGET_TRAJECTORY_TERMINAL_X_MINUS_INITIAL_X
+  terminal_lateral_signature_m: 2.0
+  minimum_excess_frames: 1
+  rationale: >-
+    The threshold remains frozen from the prior native-port phenotype and independent persistent
+    left-occupancy probe. It is not a vehicle failure threshold.
+
+planning_gate:
+  exact_prediction_header_consumption_required: true
+  minimum_changed_sequences_consumed: 1
+  minimum_response_delta_frames: 1
+  planned_horizon_delta_m: 1.0
+  response_definition: >-
+    While consuming an active native-output signature, Planning differs from the matched fixed arm
+    in validity, lane-change-path state, main-decision fields or planned horizon by at least 1 m.
+
+failure_oracle:
+  name: FAILED_OVERTAKE
+  observation_deadline_s: 80.0
+  fixed_overtake_success_required: true
+  active_overtake_success_required: false
+  maximum_pass_margin_m: 6.0
+  active_success_region_reached_required: false
+  collision_count_max: 0
+  illegal_lane_invasion_count_max: 0
+  latency_only_is_failure: false
+
+causal_order_gate:
+  required_order: [L0_activation, L1_candidate_delta, L2_native_output, L3_planning_consumption_and_response, L4_failure_deadline]
+  evidence_rule: >-
+    L0/L1 are code-local pre-publication trace events. L2 sequences must be consumed by exact
+    Prediction header identity before a matched Planning response delta; L4 is declared only at
+    the frozen 80 s deadline.
+
+classification_order:
+  - INFRA_INVALID
+  - FAULT_NOT_ACTIVATED
+  - CANDIDATE_SEMANTIC_DELTA_ABSENT
+  - NATIVE_PREDICTION_PHENOTYPE_ABSENT
+  - SEMANTIC_EFFECT_NOT_PROPAGATED
+  - PLANNING_INSENSITIVE_TO_FAULT
+  - SCENE_FAULT_PAIR_NOT_ADMITTED
+  - NATURAL_PORT_SCREEN_PASS_CONFIRMATION_REQUIRED
+
+frozen_hashes:
+  source_manifest_sha256: e156d4da44947cd7fa6861dec612a13f5bf18e332626c6e400b6b730b941197a
+  renderer:
+    path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/render_reference_launch.py
+    sha256: d5fe3d31d3f362ba2a506456bf2951a68d9569078226ccd7b456ffa922ce1daa
+  runner:
+    path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/run_reference_screen.sh
+    sha256: 157c49debedf98550370b7bc9d067ca04d9c857222c8a17af5bc6116023d2cd8
+  pair_checker:
+    path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/check_p4_manifest_pair.py
+    sha256: 679f6b95bb7b857956b1c3b924272daa45721f8378d2514c468dd6ac7fb1d6d0
+  preparer:
+    path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/prepare_p4_natural_pair.py
+    sha256: 06b56c0903c1aef0a21e233dedb1ff060eed9e0df74e91cf53b0fdbe13a39c0d
+  auditor:
+    path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/audit_p4_natural_pair.py
+    sha256: 7ecbbdf6971825e180a0557e6cdbb4c0525c8562167ee14beb8318311581aba2
+
+forbidden:
+  - privileged_prediction_output_interposer
+  - future_ground_truth_to_planning
+  - external_ego_control
+  - modify_fault_semantics_after_result
+  - modify_failure_oracle_after_result
+  - classify_one_screen_as_golden_case_admission

@@ -3,8 +3,8 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T17:12:00Z"
-current_gate: SPEED130_FIXED_REFERENCE_3_OF_3_NATIVE_SCREEN_NOT_YET_FROZEN
+last_updated_at: "2026-08-30T17:20:00Z"
+current_gate: SPEED130_NATIVE_SCREEN_FROZEN_FIXED_ARM_FIRST
 
 phases:
   p1_prediction_bringup: PASS
@@ -138,9 +138,17 @@ p4b_speed130_normal_screen:
   repeat_status: STABLE_NORMAL_REFERENCE_3_OF_3
   repeat_audit: reports/P4B_SPEED130_NORMAL_REPEAT_AUDIT.json
 
+p4b_speed130_native_screen:
+  pair_id: QZ_PAIR_A
+  fixed_run_id: QZ0_A
+  active_run_id: QZ1_A
+  status: FROZEN_FIXED_ARM_PENDING
+  active_run_authorized: false
+  contract: contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml
+
 next_action: >-
-  Freeze one speed-1.30 matched native fixed/active screen, run fixed first, and authorize active
-  only after fixed passes. Keep fault, geometry, timing and oracle unchanged.
+  Execute QZ0_A fixed. Authorize QZ1_A active only if fixed passes the frozen normal/transport
+  checks. Keep fault, geometry, timing and oracle unchanged.
 
 non_claims:
   - privileged_s1_is_not_natural_pr826
