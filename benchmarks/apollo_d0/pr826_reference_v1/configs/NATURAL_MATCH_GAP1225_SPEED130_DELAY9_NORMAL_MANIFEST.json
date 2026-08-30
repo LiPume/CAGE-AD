@@ -1,0 +1,153 @@
+{
+  "admission_evidence": false,
+  "arm": "A",
+  "candidate": {
+    "allowed_lane_crossing_marking_signatures": [
+      "Broken|White|Both"
+    ],
+    "allowed_overtake_lane_ids": [
+      -1
+    ],
+    "apollo_map_variant": "carla_town04_road_width_v1",
+    "candidate_id": "RF04_NATIVE_MATCH_MICROLINO_ACKERMANN_FORWARD12_LANE3_TO_LANE2_T9D4_ROUTE1072Y70_SPEED130_80S_V1",
+    "carla_lane_id": -2,
+    "carla_road_id": 46,
+    "configured_base_map_sha256": "fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372",
+    "configured_map_manifest": "runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json",
+    "control_calibration_prior_validation": "runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml",
+    "control_calibration_scope": "NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS",
+    "control_calibration_sha256": "2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa",
+    "control_calibration_variant": "lincoln_carla_v17_low_speed",
+    "ego_spawn_carla": {
+      "x": 9.356113,
+      "y": 186.451248,
+      "yaw_deg": -90.289116,
+      "z": 0.281942
+    },
+    "execution_allowed": true,
+    "fixed_future_faulty_arm_constraint": "Any fixed and later active arms must use this exact native Ackermann controller, 12.25 m adjacent-lane lead, lanes, route, map, Control, timing, startup order and oracle. Only the already frozen Prediction semantic switch may differ after separate 3/3 fixed admission.",
+    "initial_npc_lane_id": -3,
+    "map": "Town04",
+    "nominal_npc_gap_m": 12.25,
+    "npc_blueprint": "vehicle.micro.microlino",
+    "npc_initial_position_relation": "AHEAD_IN_ADJACENT_SOURCE_LANE",
+    "npc_policy": {
+      "acceleration_mps2": 1.0,
+      "apollo_output_used": false,
+      "command_transport": "VEHICLE_APPLY_ACKERMANN_CONTROL",
+      "ego_state_used": false,
+      "future_ground_truth_used": false,
+      "jerk_mps3": 1.0,
+      "lane_change_duration_s": 4.0,
+      "lane_change_start_s": 9.0,
+      "lookahead_m": 3.0,
+      "maximum_steer_rad": 0.5,
+      "path_reference": "CURRENT_CARLA_SOURCE_AND_TARGET_LANE_CENTERS",
+      "pose_or_velocity_override_used": false,
+      "source_lane_id": -3,
+      "speed_mps": 1.3,
+      "steer_speed_rad_s": 0.5,
+      "target_lane_id": -2,
+      "traffic_manager_used": false,
+      "trigger": "SIMULATION_ELAPSED_SINCE_OBSERVATION_START",
+      "type": "CARLA_TIMED_ACKERMANN_LANE_MERGE",
+      "wheelbase_m": 1.5
+    },
+    "npc_spawn_carla": {
+      "x": 12.77419,
+      "y": 174.202545,
+      "yaw_deg": -90.289124,
+      "z": 0.281942
+    },
+    "observation_window_s": 80.0,
+    "p2b_normal_only_before_new_active_run": true,
+    "p2m_physics_controller_probe": "P2M_CONTROLLER_PROBE_AUDIT.json",
+    "reference_label": "APOLLO_10_CONFIGURED_NATIVE_MATCH_GAP1225_SPEED130_DELAY9_NORMAL_ONLY_CANDIDATE",
+    "route_end_apollo_xy": [
+      5.124774,
+      -70.038346
+    ],
+    "route_length_m": 116.49,
+    "route_start_apollo_xy": [
+      9.356113,
+      -186.451248
+    ],
+    "route_waypoint_lane_intent": [
+      -2,
+      -1
+    ],
+    "route_waypoints_apollo_xy": [
+      [
+        9.356113,
+        -186.451248
+      ],
+      [
+        5.124774,
+        -70.038346
+      ]
+    ],
+    "same_direction_adjacent_lanes": [
+      -1,
+      -3
+    ],
+    "selection_basis": "The closed speed-1.30 matched screen observed ten expanded candidates inside the unchanged 0-10 m distance guard, but all had polygon_in_own_lane=0 because the physical merge had already progressed. Before any active result for this new candidate, merge onset changes from 6.0 to 9.0 s so the same nearby interval can occur while the obstacle remains in its own lane. Speed 1.30 m/s, gap 12.25 m, lane-change duration 4.0 s, lanes, route, physics controller, map, Planning, Control, fault predicate and failure oracle remain unchanged. This is a normal-only modern-guard-ordering candidate, not fault-dose tuning.",
+    "success_region_carla": {
+      "center_xy": [
+        5.124774,
+        70.038346
+      ],
+      "lane_id": -1,
+      "radius_m": 15.0,
+      "road_id": 1072
+    },
+    "topology_screened_before_active": true
+  },
+  "created_at": "2026-08-30T17:50:00Z",
+  "fault_patch_exists": true,
+  "fault_result_seen_for_this_geometry": false,
+  "fixed_environment": {
+    "background_vehicle_count": 0,
+    "ego_blueprint": "vehicle.lincoln.mkz_2017",
+    "fixed_delta_seconds": 0.05,
+    "npc_blueprint": "vehicle.audi.tt",
+    "observation_window_s": 45.0,
+    "pedestrian_count": 0,
+    "seed": 82601,
+    "success_oracle": {
+      "collision_count_max": 0,
+      "expected_control_per_clock": 5.0,
+      "minimum_control_channel_coverage": 0.95,
+      "minimum_control_messages": 100,
+      "minimum_lateral_excursion_m": 2.0,
+      "minimum_pass_margin_m": 6.0,
+      "minimum_planning_channel_coverage": 0.95,
+      "minimum_planning_messages": 100,
+      "minimum_planning_valid_ratio": 0.9,
+      "minimum_target_prediction_messages": 20,
+      "minimum_target_prediction_trajectory_coverage": 0.9,
+      "route_accepted_required": true
+    },
+    "synchronous_mode": true,
+    "weather": "ClearNoon"
+  },
+  "p2b_contract": {
+    "contract_version": "p2n-outcome-relevant-physical-merge-normal-screen-v1",
+    "path": "/root/autodl_apollo10_g0_bundle/project/CAGE-AD/benchmarks/apollo_d0/pr826_reference_v1/P2N_FIXED_SCREENING_CONTRACT.yaml",
+    "sha256": "c33269ed659222126c10e2bfb754e2589a565f986133d6ee2e6920aedd53fa25"
+  },
+  "phase": "P4B_NORMAL_ONLY_SCENE_FAULT_MATCHING",
+  "private_prediction_runtime": {
+    "behavior_library": "/root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libapollo_prediction.so",
+    "behavior_sha256": "251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71",
+    "component_library": "/root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libprediction_component.so",
+    "component_sha256": "0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70",
+    "domain_active": false,
+    "library_dir": "/root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction",
+    "trace_active": true
+  },
+  "protocol_version": "cage-ad-pr826-greybox-demo-v1",
+  "registry_path": "/root/autodl_apollo10_g0_bundle/project/CAGE-AD/benchmarks/apollo_d0/pr826_reference_candidates.yaml",
+  "registry_sha256": "8699e083351f964a1d56600c7110e85b24623c170f7f384f39eb7215e424e3d3",
+  "schema_version": 1,
+  "screening_id": "RN_V130_D9_S1"
+}

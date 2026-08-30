@@ -1,0 +1,52 @@
+schema_version: 1
+contract_version: p4b-gap1225-speed130-normal-screen-v1
+status: FROZEN_BEFORE_SCREENING_RESULT
+frozen_at: "2026-08-30T16:42:00Z"
+research_scope: NORMAL_ONLY_TEMPORAL_PERSISTENCE_MATCHING
+active_fault_run_authorized: false
+
+candidate:
+  run_id: RN_V130_S1
+  manifest: benchmarks/apollo_d0/pr826_reference_v1/configs/NATURAL_MATCH_GAP1225_SPEED130_NORMAL_MANIFEST.json
+  nominal_gap_m: 12.25
+  target_speed_mps: 1.30
+  stable_lower_bound_speed_mps: 1.10
+  rejected_upper_bound_speed_mps: 1.50
+  only_behavioral_delta_from_admitted_gap1225_reference: candidate.npc_policy.speed_mps
+
+mechanism_rationale: >-
+  The 1.10 m/s reference passed 3/3 but its native L0-L3 effect recovered; the independently
+  preregistered 1.50 m/s normal-only screen missed the unchanged pass gate at +5.556 m. The
+  midpoint 1.30 m/s candidate is tested without active fault to seek a longer unchanged nearby
+  guard interval while preserving fixed reference capability. This is a normal capability bracket,
+  not a fault-dose or outcome-threshold change.
+
+normal_gate:
+  runtime_exception_absent: true
+  route_accepted: true
+  collision_count_max: 0
+  illegal_lane_invasion_count_max: 0
+  prediction_trajectory_coverage_min: 0.90
+  planning_channel_coverage_min: 0.95
+  control_channel_coverage_min: 0.95
+  overtake_success: true
+  maximum_pass_margin_m_min: 6.0
+  success_region_reached: true
+  planning_valid_ratio_is_response_metric_not_gate: true
+
+decision:
+  if_pass: FREEZE_THREE_FIXED_REPEATS_BEFORE_ANY_ACTIVE_RUN
+  if_fail: REJECT_CANDIDATE_WITHOUT_ACTIVE_RUN
+
+frozen_hashes:
+  manifest_sha256: e156d4da44947cd7fa6861dec612a13f5bf18e332626c6e400b6b730b941197a
+  renderer_sha256: d5fe3d31d3f362ba2a506456bf2951a68d9569078226ccd7b456ffa922ce1daa
+  runner_sha256: 157c49debedf98550370b7bc9d067ca04d9c857222c8a17af5bc6116023d2cd8
+  semantic_patch_sha256: f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6
+
+forbidden:
+  - active_fault_domain
+  - change_normal_gate_after_result
+  - privileged_prediction_interface_intervention
+  - future_ground_truth_to_planning
+  - external_ego_control

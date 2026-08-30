@@ -1,0 +1,60 @@
+schema_version: 1
+contract_version: p4b-gap1225-speed130-normal-only-repeat-v1
+status: FROZEN_BEFORE_FORMAL_REPEAT_RESULTS
+frozen_at: "2026-08-30T17:01:00Z"
+research_scope: NORMAL_ONLY_TEMPORAL_PERSISTENCE_MATCHING_FORMAL_REPEAT
+active_fault_run_authorized_before_audit: false
+
+source_screen:
+  run_id: RN_V130_S1
+  status: PASS
+  summary_sha256: d68f28388cf5dd81f910ae79a575d95d303d06c7289a7e09384ab15a4163e4df
+  max_pass_margin_m: 11.911970854471605
+  minimum_bbox_clearance_2d_m: 0.5357503362355731
+  prediction_trajectory_coverage: 0.9425216316440049
+  planning_valid_ratio: 0.9420199501246883
+
+repeat_schedule:
+  - {run_id: RN_V130_F1, created_at: "2026-08-30T17:02:00Z"}
+  - {run_id: RN_V130_F2, created_at: "2026-08-30T17:02:01Z"}
+  - {run_id: RN_V130_F3, created_at: "2026-08-30T17:02:02Z"}
+
+normal_gate:
+  runtime_exception_absent: true
+  route_accepted: true
+  collision_count_max: 0
+  illegal_lane_invasion_count_max: 0
+  prediction_trajectory_coverage_min: 0.90
+  planning_channel_coverage_min: 0.95
+  control_channel_coverage_min: 0.95
+  overtake_success: true
+  maximum_pass_margin_m_min: 6.0
+  success_region_reached: true
+  planning_valid_ratio_is_response_metric_not_gate: true
+
+response_metrics_not_posthoc_gates:
+  - planning_valid_ratio
+  - minimum_bbox_clearance_2d_m
+  - maximum_lateral_excursion_m
+  - success_region_first_reached_elapsed_s
+
+admission_rule:
+  required_passes: 3
+  normalized_manifests_identical: true
+  if_pass: AUTHORIZE_ONE_FROZEN_NATIVE_ACTIVE_SCREEN
+  if_fail: REJECT_CANDIDATE_WITHOUT_ACTIVE_RUN
+
+frozen_hashes:
+  source_manifest_sha256: e156d4da44947cd7fa6861dec612a13f5bf18e332626c6e400b6b730b941197a
+  preparer_sha256: 7331eed45f416b2aacda075cdbf24e50a12d428cc6a1eb4f00759610b83623ba
+  auditor_sha256: 77bbd4e12e72ee56efa3c9ea33f4799b74bccf9138c8101145d6d146b109060b
+  renderer_sha256: d5fe3d31d3f362ba2a506456bf2951a68d9569078226ccd7b456ffa922ce1daa
+  runner_sha256: 157c49debedf98550370b7bc9d067ca04d9c857222c8a17af5bc6116023d2cd8
+
+forbidden:
+  - active_fault_domain_before_3_of_3_audit
+  - change_geometry_between_repeats
+  - change_normal_gate_after_result
+  - privileged_prediction_interface_intervention
+  - future_ground_truth_to_planning
+  - external_ego_control

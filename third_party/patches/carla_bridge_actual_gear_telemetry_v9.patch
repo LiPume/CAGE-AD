@@ -1,0 +1,18 @@
+diff --git a/carla_bridge/actor/ego_vehicle.py b/carla_bridge/actor/ego_vehicle.py
+--- a/carla_bridge/actor/ego_vehicle.py
++++ b/carla_bridge/actor/ego_vehicle.py
+@@ -322,5 +322,6 @@ class EgoVehicle(Vehicle):
+             self.carla_actor.apply_control(vehicle_control)
+             if self.control_telemetry is not None:
+                 snapshot = self.world.get_snapshot()
++                actual_control = self.carla_actor.get_control()
+                 self.control_apply_index += 1
+                 record = {
+@@ -344,5 +345,7 @@ class EgoVehicle(Vehicle):
+                         "steer": vehicle_control.steer,
+                         "reverse": vehicle_control.reverse,
+                         "hand_brake": vehicle_control.hand_brake,
++                        "actual_gear": actual_control.gear,
++                        "actual_manual_gear_shift": actual_control.manual_gear_shift,
+                     },
+                 }

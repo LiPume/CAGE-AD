@@ -1,0 +1,15 @@
+--- a/modules/prediction/BUILD
++++ b/modules/prediction/BUILD
+@@ -208,10 +208,8 @@
+         "@npp",
+         "@opencv//:highgui",
+         "@opencv//:imgcodecs",
+-    ] + if_gpu(
+-        ["@libtorch_gpu"],
+-        ["@libtorch_cpu"],
+-    ),
++        "@libtorch_gpu",
++    ],
+ )
+ 
+ apollo_cc_binary(

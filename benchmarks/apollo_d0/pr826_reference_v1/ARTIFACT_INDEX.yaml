@@ -1,0 +1,157 @@
+schema_version: 1
+purpose: minimal_current_dependencies_only
+canonical_state: benchmarks/apollo_d0/pr826_reference_v1/run_state.yaml
+human_status: benchmarks/apollo_d0/pr826_reference_v1/CURRENT_STATUS.md
+entries:
+  - id: configured_reference_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/FINAL_REFERENCE_REPORT.md
+    status: KEEP
+    canonical_for: P2_CONFIGURED_REFERENCE
+  - id: configured_reference_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/FORMAL_REPEAT_V2_AUDIT.json
+    status: KEEP
+    canonical_for: P2_CONFIGURED_REFERENCE_MACHINE_RESULT
+  - id: configured_reference_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/reference_repeat_contract_v2.yaml
+    status: KEEP
+    canonical_for: P2_CONFIGURED_REFERENCE_CONTRACT
+  - id: p3_fixture_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P3_SEMANTIC_FIXTURE_REPORT.md
+    status: KEEP
+    canonical_for: P3_SEMANTIC_FIXTURE
+  - id: p3_mapping
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P3_SEMANTIC_MAPPING.md
+    status: KEEP
+    canonical_for: P3_SEMANTIC_MAPPING
+  - id: v5_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/P4_SENS_V5_CONFIRMATION_CONTRACT.yaml
+    status: KEEP_CLOSED_CONTRACT
+    canonical_for: P4_PERSISTENT_CONFIRMATION_CONTRACT
+  - id: pair_a_compact
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_SENS_PAIR_A.json
+    status: KEEP
+    canonical_for: P4_PAIR_A_AGGREGATION_INPUT
+  - id: pair_b_compact
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_SENS_PAIR_B.json
+    status: KEEP
+    canonical_for: P4_PAIR_B_AGGREGATION_INPUT
+  - id: pair_c_compact
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_SENS_PAIR_C.json
+    status: KEEP
+    canonical_for: P4_PAIR_C_AGGREGATION_INPUT
+  - id: persistent_sensitivity_aggregate
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/aggregate.json
+    status: KEEP
+    canonical_for: P4_PERSISTENT_CONFIRMATION_MACHINE_RESULT
+  - id: persistent_sensitivity_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_PERSISTENT_SENSITIVITY_REPORT.md
+    status: KEEP
+    canonical_for: P4_PERSISTENT_CONFIRMATION
+  - id: natural_port_screen_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4_NATURAL_PORT_SCREEN_CONTRACT.yaml
+    status: KEEP_CLOSED_CONTRACT
+    canonical_for: P4_NATIVE_PORT_SCREEN_01_CONTRACT
+  - id: natural_port_screen_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_NATURAL_PORT_SCREEN_AUDIT.json
+    status: KEEP
+    canonical_for: P4_NATIVE_PORT_SCREEN_01_MACHINE_RESULT
+  - id: natural_port_screen_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_NATURAL_PORT_SCREEN_REPORT.md
+    status: KEEP
+    canonical_for: P4_NATIVE_PORT_SCREEN_01
+  - id: gap1225_normal_repeat_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_GAP1225_NORMAL_REPEAT_CONTRACT.yaml
+    status: KEEP
+    canonical_for: P4B_GAP1225_FIXED_REFERENCE_CONTRACT
+  - id: gap1225_normal_repeat_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_GAP1225_NORMAL_REPEAT_AUDIT.json
+    status: KEEP
+    canonical_for: P4B_GAP1225_FIXED_REFERENCE
+  - id: gap1225_natural_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_GAP1225_NATURAL_SCREEN_CONTRACT.yaml
+    status: KEEP_CLOSED_CONTRACT
+    canonical_for: P4B_NATIVE_PORT_SCREEN_02_CONTRACT
+  - id: gap1225_natural_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_GAP1225_NATURAL_SCREEN_AUDIT.json
+    status: KEEP
+    canonical_for: P4B_NATIVE_PORT_SCREEN_02_MACHINE_RESULT
+  - id: gap1225_natural_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_GAP1225_NATURAL_SCREEN_REPORT.md
+    status: KEEP
+    canonical_for: P4B_NATIVE_PORT_SCREEN_02
+  - id: speed150_normal_screen_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED150_NORMAL_SCREEN_AUDIT.json
+    status: KEEP
+    canonical_for: P4B_NORMAL_REFERENCE_CAPABILITY_BOUNDARY
+  - id: speed130_normal_screen_manifest
+    path: benchmarks/apollo_d0/pr826_reference_v1/configs/NATURAL_MATCH_GAP1225_SPEED130_NORMAL_MANIFEST.json
+    status: KEEP_CURRENT
+    canonical_for: P4B_CURRENT_NORMAL_SCREEN_CONFIGURATION
+  - id: speed130_normal_screen_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml
+    status: KEEP_CURRENT
+    canonical_for: P4B_COMPLETED_NORMAL_SCREEN_CONTRACT
+  - id: speed130_normal_screen_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_NORMAL_SCREEN_AUDIT.json
+    status: KEEP_CURRENT
+    canonical_for: P4B_CURRENT_NORMAL_SCREEN_RESULT
+  - id: speed130_normal_repeat_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml
+    status: KEEP_CURRENT
+    canonical_for: P4B_COMPLETED_FIXED_REPEAT_CONTRACT
+  - id: speed130_normal_repeat_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_NORMAL_REPEAT_AUDIT.json
+    status: KEEP_CURRENT
+    canonical_for: P4B_CURRENT_FIXED_REFERENCE_RESULT
+  - id: speed130_native_screen_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml
+    status: KEEP_CLOSED_CONTRACT
+    canonical_for: P4B_SPEED130_NATIVE_SCREEN_CONTRACT
+  - id: speed130_native_screen_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_NATURAL_SCREEN_AUDIT.json
+    status: KEEP
+    canonical_for: P4B_SPEED130_NATIVE_SCREEN_MACHINE_RESULT
+  - id: speed130_native_screen_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_NATURAL_SCREEN_REPORT.md
+    status: KEEP
+    canonical_for: P4B_SPEED130_NATIVE_SCREEN
+  - id: delay9_normal_manifest
+    path: benchmarks/apollo_d0/pr826_reference_v1/configs/NATURAL_MATCH_GAP1225_SPEED130_DELAY9_NORMAL_MANIFEST.json
+    status: KEEP_CURRENT
+    canonical_for: P4B_CURRENT_NORMAL_SCREEN_CONFIGURATION
+  - id: delay9_normal_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_SPEED130_DELAY9_NORMAL_SCREEN_CONTRACT.yaml
+    status: KEEP_CURRENT
+    canonical_for: P4B_COMPLETED_NORMAL_SCREEN_CONTRACT
+  - id: delay9_normal_screen_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_DELAY9_NORMAL_SCREEN_AUDIT.json
+    status: KEEP_CURRENT
+    canonical_for: P4B_CURRENT_NORMAL_SCREEN_RESULT
+  - id: delay9_normal_repeat_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_SPEED130_DELAY9_NORMAL_REPEAT_CONTRACT.yaml
+    status: KEEP_CLOSED_CONTRACT
+    canonical_for: P4B_DELAY9_FIXED_REPEAT_CONTRACT
+  - id: delay9_repeat_early_stop_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_DELAY9_REPEAT_EARLY_STOP_AUDIT.json
+    status: KEEP
+    canonical_for: P4B_DELAY9_NORMAL_REFERENCE_REJECTION
+  - id: source_scene_manifest
+    path: benchmarks/apollo_d0/pr826_reference_v1/configs/SENSITIVITY_SOURCE_MANIFEST.json
+    status: KEEP
+    canonical_for: P4_SCENE_CONFIGURATION
+  - id: gap1225_scene_manifest
+    path: benchmarks/apollo_d0/pr826_reference_v1/configs/NATURAL_MATCH_GAP1225_NORMAL_MANIFEST.json
+    status: KEEP
+    canonical_for: P4B_CURRENT_SCENE_CONFIGURATION_BASE
+  - id: fix_ledger
+    path: benchmarks/apollo_d0/pr826_reference_v1/ledgers/fix_ledger.jsonl
+    status: KEEP
+    canonical_for: TOOL_AND_CHANGE_HISTORY
+  - id: sensitivity_ledger
+    path: benchmarks/apollo_d0/pr826_reference_v1/ledgers/p4_sensitivity_ledger.jsonl
+    status: KEEP
+    canonical_for: CURRENT_P4_RUN_EVENTS
+  - id: fault_ledger
+    path: benchmarks/apollo_d0/pr826_reference_v1/ledgers/fault_experiment_ledger.jsonl
+    status: KEEP
+    canonical_for: NATURAL_FAULT_EXPERIMENTS

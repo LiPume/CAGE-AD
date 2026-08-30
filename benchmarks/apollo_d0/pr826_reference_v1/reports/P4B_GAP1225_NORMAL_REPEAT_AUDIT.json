@@ -1,0 +1,94 @@
+{
+  "active_fault_run_authorized": true,
+  "analysis_type": "P4B_NORMAL_ONLY_FORMAL_REPEAT_AUDIT",
+  "contract_sha256": "e346bd26fcf047a0e0a4b6e467aff212ccfb88718f2a0ceecf544e1e362eba98",
+  "runs": [
+    {
+      "checks": {
+        "collision_free": true,
+        "control_coverage": true,
+        "domain_inactive": true,
+        "illegal_lane_invasion_free": true,
+        "overtake_success": true,
+        "pass_margin": true,
+        "planning_coverage": true,
+        "prediction_coverage": true,
+        "route_accepted": true,
+        "run_id": true,
+        "runtime_exception_absent": true,
+        "success_region": true
+      },
+      "manifest_sha256": "962e786a7c880686b8c3dc13d9377d27465cbbf852799b6badd02d7f2dcf69bf",
+      "metrics": {
+        "control_channel_coverage": 0.9996268656716418,
+        "max_pass_margin_m": 18.86109343763468,
+        "planning_channel_coverage": 0.9912935323383084,
+        "planning_valid_ratio": 0.9535759096612296,
+        "prediction_trajectory_coverage": 0.9421641791044776
+      },
+      "normalized_manifest_sha256": "d9a4397f6c9a486ef7f96e5844fc1be409cb5961b5066e3c3c0b9adad4677e9d",
+      "run_id": "RN_G1225_F1",
+      "status": "PASS",
+      "summary_sha256": "1d757f8cc07859583531fdf03f9e54e43e0e4282cd043b6e2dc17a88d3a15316"
+    },
+    {
+      "checks": {
+        "collision_free": true,
+        "control_coverage": true,
+        "domain_inactive": true,
+        "illegal_lane_invasion_free": true,
+        "overtake_success": true,
+        "pass_margin": true,
+        "planning_coverage": true,
+        "prediction_coverage": true,
+        "route_accepted": true,
+        "run_id": true,
+        "runtime_exception_absent": true,
+        "success_region": true
+      },
+      "manifest_sha256": "75112c2db1cba7fbde5982ba25f3fc1722c66f68f5437e83745abc718e0d0c76",
+      "metrics": {
+        "control_channel_coverage": 0.9981458590852905,
+        "max_pass_margin_m": 12.843381576916101,
+        "planning_channel_coverage": 0.9530284301606922,
+        "planning_valid_ratio": 0.9325551232166018,
+        "prediction_trajectory_coverage": 0.9313967861557478
+      },
+      "normalized_manifest_sha256": "d9a4397f6c9a486ef7f96e5844fc1be409cb5961b5066e3c3c0b9adad4677e9d",
+      "run_id": "RN_G1225_F2",
+      "status": "PASS",
+      "summary_sha256": "3a83bda63152ef8d44677758a476fa1066c8e2741413887eb6e8aafa270bc8f9"
+    },
+    {
+      "checks": {
+        "collision_free": true,
+        "control_coverage": true,
+        "domain_inactive": true,
+        "illegal_lane_invasion_free": true,
+        "overtake_success": true,
+        "pass_margin": true,
+        "planning_coverage": true,
+        "prediction_coverage": true,
+        "route_accepted": true,
+        "run_id": true,
+        "runtime_exception_absent": true,
+        "success_region": true
+      },
+      "manifest_sha256": "f583cd210451b7e7f576f4412d60252f3ab19c365475f3c301bd472310f4a481",
+      "metrics": {
+        "control_channel_coverage": 0.9958980733374767,
+        "max_pass_margin_m": 20.353403661134564,
+        "planning_channel_coverage": 0.9912989434431324,
+        "planning_valid_ratio": 0.9529780564263323,
+        "prediction_trajectory_coverage": 0.9372280919825979
+      },
+      "normalized_manifest_sha256": "d9a4397f6c9a486ef7f96e5844fc1be409cb5961b5066e3c3c0b9adad4677e9d",
+      "run_id": "RN_G1225_F3",
+      "status": "PASS",
+      "summary_sha256": "345bc551deaec35e9bfb7bdcaf84b12bf78de071ef0fe4214865abd00567a259"
+    }
+  ],
+  "schema_version": 1,
+  "stable_reference": true,
+  "status": "STABLE_NORMAL_REFERENCE_3_OF_3"
+}

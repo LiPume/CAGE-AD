@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "analysis_type": "P4B_NORMAL_ONLY_FORMAL_REPEAT_EARLY_STOP",
+  "contract_sha256": "20478cb8719cf33eda5b1756c0d21dedd8cf33a11dfd79933e92f7412cade755",
+  "runs": [
+    {
+      "run_id": "RN_V130_D9_F1",
+      "status": "REJECT",
+      "failed_frozen_gate": "illegal_lane_invasion_count <= 0",
+      "metrics": {
+        "illegal_lane_invasion_count": 1,
+        "collision_count": 0,
+        "maximum_pass_margin_m": 29.054636999488423,
+        "overtake_success": true,
+        "success_region_reached": true,
+        "prediction_trajectory_coverage": 0.9367321867321867,
+        "planning_channel_coverage": 0.9828009828009828,
+        "control_channel_coverage": 0.9977886977886978,
+        "planning_valid_ratio_response_metric": 0.826875,
+        "minimum_bbox_clearance_response_metric_m": 2.0358450882598094
+      }
+    }
+  ],
+  "not_run": ["RN_V130_D9_F2", "RN_V130_D9_F3"],
+  "stable_reference": false,
+  "active_fault_run_authorized": false,
+  "status": "NORMAL_REFERENCE_NOT_STABLE_EARLY_STOP"
+}

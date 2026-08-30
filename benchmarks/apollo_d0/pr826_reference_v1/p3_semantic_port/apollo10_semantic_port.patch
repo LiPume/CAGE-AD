@@ -1,0 +1,151 @@
+--- a/modules/prediction/predictor/sequence/sequence_predictor.cc
++++ b/modules/prediction/predictor/sequence/sequence_predictor.cc
+@@ -23,6 +23,12 @@
+ #include "modules/prediction/common/prediction_gflags.h"
+ #include "modules/prediction/container/container_manager.h"
+ #include "modules/prediction/container/pose/pose_container.h"
++#include "modules/prediction/predictor/sequence/nearby_filter_policy.h"
++
++DEFINE_bool(s3_domain_v1, false,
++            "Enable the private P3 candidate maneuver-domain experiment.");
++DEFINE_bool(s3_trace_v1, false,
++            "Emit private structured P3 candidate-filter telemetry.");
+ 
+ namespace apollo {
+ namespace prediction {
+@@ -69,6 +75,10 @@
+                                                LaneChangeType::INVALID);
+   std::pair<int, double> change(-1, -1.0);
+   std::pair<int, double> all(-1, -1.0);
++  const auto filter_domain =
++      FLAGS_s3_domain_v1
++          ? cage_ad::p3::NearbyFilterDomain::kCandidateExpandedStraight
++          : cage_ad::p3::NearbyFilterDomain::kPinnedFixed;
+ 
+   /**
+    * Filter out those obstacles that are close to the ADC
+@@ -84,9 +94,22 @@
+     }
+     lane_change_type[i] = GetLaneChangeType(lane_id, sequence);
+ 
+-    if (lane_change_type[i] != LaneChangeType::LEFT &&
+-        lane_change_type[i] != LaneChangeType::RIGHT &&
+-        lane_change_type[i] != LaneChangeType::ONTO_LANE) {
++    const bool fixed_eligible = cage_ad::p3::EligibleForNearbyFilter(
++        lane_change_type[i], cage_ad::p3::NearbyFilterDomain::kPinnedFixed);
++    const bool active_eligible = cage_ad::p3::EligibleForNearbyFilter(
++        lane_change_type[i], filter_domain);
++    if (FLAGS_s3_trace_v1) {
++      AINFO << "S3TRACE stage=eligibility obstacle=" << feature.id()
++            << " candidate_index=" << i
++            << " candidate_id=" << sequence.lane_sequence_id()
++            << " type=" << static_cast<int>(lane_change_type[i])
++            << " probability=" << sequence.probability()
++            << " fixed_eligible=" << fixed_eligible
++            << " active_eligible=" << active_eligible
++            << " domain=" << static_cast<int>(filter_domain);
++    }
++
++    if (!active_eligible) {
+       ADEBUG << "Ignore lane sequence [" << ToString(sequence) << "].";
+       continue;
+     }
+@@ -94,6 +117,14 @@
+     // The obstacle has interference with ADC within a small distance
+     double distance = GetLaneChangeDistanceWithADC(sequence, ego_vehicle_ptr,
+                                                    adc_trajectory_container);
++    if (FLAGS_s3_trace_v1) {
++      AINFO << "S3TRACE stage=distance obstacle=" << feature.id()
++            << " candidate_index=" << i
++            << " candidate_id=" << sequence.lane_sequence_id()
++            << " adc_overlap="
++            << adc_trajectory_container->HasOverlap(sequence)
++            << " signed_distance_m=" << std::setprecision(17) << distance;
++    }
+     ADEBUG << "Distance to ADC " << std::fixed << std::setprecision(6)
+            << distance;
+     if (distance > 0.0 && distance < FLAGS_lane_change_dist) {
+@@ -127,6 +158,13 @@
+         ADEBUG << "Filter trajectory [" << ToString(sequence)
+                << "] due to small distance " << distance << ".";
+       }
++      if (FLAGS_s3_trace_v1) {
++        AINFO << "S3TRACE stage=nearby_decision obstacle=" << feature.id()
++              << " candidate_index=" << i
++              << " candidate_id=" << sequence.lane_sequence_id()
++              << " polygon_in_own_lane=" << obs_within_its_own_lane
++              << " enabled=" << (*enable_lane_sequence)[i];
++      }
+     }
+   }
+ 
+@@ -174,6 +212,19 @@
+                 lane_change_type[i] == LaneChangeType::RIGHT) &&
+                lane_change_type[i] != lane_change_type[change.first]) {
+       (*enable_lane_sequence)[i] = false;
++    }
++  }
++
++  if (FLAGS_s3_trace_v1) {
++    for (int i = 0; i < num_lane_sequence; ++i) {
++      const LaneSequence& sequence = lane_graph.lane_sequence(i);
++      AINFO << "S3TRACE stage=final obstacle=" << feature.id()
++            << " candidate_index=" << i
++            << " candidate_id=" << sequence.lane_sequence_id()
++            << " type=" << static_cast<int>(lane_change_type[i])
++            << " probability=" << sequence.probability()
++            << " enabled=" << (*enable_lane_sequence)[i]
++            << " domain=" << static_cast<int>(filter_domain);
+     }
+   }
+ }
+--- /dev/null
++++ b/modules/prediction/predictor/sequence/nearby_filter_policy.h
+@@ -0,0 +1,37 @@
++// Copyright 2026 CAGE-AD contributors.
++// SPDX-License-Identifier: Apache-2.0
++//
++// Pure policy seam for the P3 semantic fixture and the Apollo overlay patch.
++// This header deliberately has no Apollo or runtime dependency.
++
++#pragma once
++
++namespace cage_ad {
++namespace p3 {
++
++enum class NearbyFilterDomain {
++  kPinnedFixed,
++  kCandidateExpandedStraight,
++};
++
++template <typename LaneChangeType>
++constexpr bool EligibleForNearbyFilter(
++    const LaneChangeType type, const NearbyFilterDomain domain) {
++  const bool pinned_fixed = type == LaneChangeType::LEFT ||
++                            type == LaneChangeType::RIGHT ||
++                            type == LaneChangeType::ONTO_LANE;
++  return pinned_fixed ||
++         (domain == NearbyFilterDomain::kCandidateExpandedStraight &&
++          type == LaneChangeType::STRAIGHT);
++}
++
++constexpr bool MeetsExistingNearbyGuards(const bool overlaps_adc,
++                                         const double signed_distance_m,
++                                         const double distance_limit_m,
++                                         const bool polygon_in_own_lane) {
++  return overlaps_adc && signed_distance_m > 0.0 &&
++         signed_distance_m < distance_limit_m && polygon_in_own_lane;
++}
++
++}  // namespace p3
++}  // namespace cage_ad
+--- a/modules/prediction/BUILD
++++ b/modules/prediction/BUILD
+@@ -158,6 +158,7 @@
+         "predictor/predictor.h",
+         "predictor/predictor_manager.h",
+         "predictor/sequence/sequence_predictor.h",
++        "predictor/sequence/nearby_filter_policy.h",
+         "predictor/single_lane/single_lane_predictor.h",
+         "scenario/analyzer/scenario_analyzer.h",
+         "scenario/feature_extractor/feature_extractor.h",

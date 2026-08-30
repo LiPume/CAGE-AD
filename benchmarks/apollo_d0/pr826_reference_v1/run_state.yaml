@@ -1,0 +1,191 @@
+schema_version: 2
+protocol: pr826-greybox-demo-v1
+status: IN_PROGRESS
+canonical: true
+mirror_rule: NO_EDITABLE_MIRROR
+last_updated_at: "2026-08-30T18:12:00Z"
+current_gate: DELAY9_NORMAL_REFERENCE_REJECTED_EARLY_STOP
+
+phases:
+  p1_prediction_bringup: PASS
+  p2_configured_reference: STABLE_REFERENCE_ADMITTED_3_OF_3
+  p3_semantic_fixture: P3_SEMANTIC_FIXTURE_PASS
+  p4_persistent_sensitivity: STABLE_PERSISTENT_S1_CANCELLATION_3_OF_3
+  p4_natural_pr826_chain: SCREEN_02_REJECTED_L0_TO_L3_PASS_L4_FAIL
+  diagnosis_agent_and_animation: OUT_OF_SCOPE
+
+configured_reference:
+  label: APOLLO_10_CONFIGURED_REFERENCE
+  carla_version: 0.9.15
+  apollo_version: 10
+  map: Town04
+  target_speed_mps: 1.10
+  prediction_behavior: STOCK
+  planning_behavior: STOCK
+  compatibility_configuration:
+    - road_width_metadata
+    - carla_lincoln_control_calibration
+    - bridge_configuration
+    - deterministic_npc_policy
+  report: reports/FINAL_REFERENCE_REPORT.md
+  audit: reports/FORMAL_REPEAT_V2_AUDIT.json
+  contract: contracts/reference_repeat_contract_v2.yaml
+
+p3_semantic_port:
+  status: PASS
+  semantic_patch_sha256: f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6
+  report: reports/P3_SEMANTIC_FIXTURE_REPORT.md
+  mapping: reports/P3_SEMANTIC_MAPPING.md
+
+p4_persistent_confirmation:
+  classification: NON_ADMISSION_CAUSAL_SENSITIVITY_PROBE
+  active_contract: P4_SENS_V5_CONFIRMATION_CONTRACT.yaml
+  contract_sha256: eb7fa709edea9f2e0710dcb9707e9a18eccace85953165e93148c7d622672e61
+  semantic: TARGET_LEFT_MERGE_OCCUPANCY_3_5M_RELATIVE_2_TO_4S
+  active_window_s: [12.0, 75.0]
+  pair_a:
+    run_ids: [PY0_A, PY1_A]
+    status: PASS_COMMON_CORE
+    compact_audit: reports/P4_SENS_PAIR_A.json
+  pair_b:
+    run_ids: [PZ0_B, PZ1_B]
+    status: PASS_COMMON_CORE
+    compact_audit: reports/P4_SENS_PAIR_B.json
+  pair_c:
+    s0_run_id: PZ0_C
+    s0_execution: PASS_COMMON_CORE
+    s1_run_id: PZ1_C
+    s1_execution: PASS_COMMON_CORE
+    status: PASS_COMMON_CORE
+    compact_audit: reports/P4_SENS_PAIR_C.json
+  aggregate_status: STABLE_PERSISTENT_S1_CANCELLATION_3_OF_3
+  aggregate: reports/aggregate.json
+  report: reports/P4_PERSISTENT_SENSITIVITY_REPORT.md
+
+validity_model:
+  fields: [runtime_valid, transport_valid, semantic_valid, behavior_valid, admission_valid]
+  legacy_infrastructure_valid: COMPATIBILITY_TELEMETRY_ONLY
+
+p4_natural_port_screen_01:
+  contract: contracts/P4_NATURAL_PORT_SCREEN_CONTRACT.yaml
+  contract_sha256: 4f0ddab4ee437969c49dc3cae2c9a605d35d37df57230caa5fea565438536268
+  run_ids: [QX0_A, QX1_A]
+  matched_manifest: PASS
+  l0_fault_activation: PASS
+  l1_candidate_semantic_delta: FAIL_DISTANCE_GUARD
+  expanded_overlap_distance_m: [12.325743685754503, 14.34148236919144]
+  l2_to_l4_causally_attributable: false
+  active_overtake_success: true
+  status: SCENE_FAULT_PAIR_NOT_ADMITTED
+  report: reports/P4_NATURAL_PORT_SCREEN_REPORT.md
+  audit: reports/P4_NATURAL_PORT_SCREEN_AUDIT.json
+
+p4b_gap1225_normal_reference:
+  status: STABLE_NORMAL_REFERENCE_3_OF_3
+  run_ids: [RN_G1225_F1, RN_G1225_F2, RN_G1225_F3]
+  margins_m: [18.86109343763468, 12.843381576916101, 20.353403661134564]
+  audit: reports/P4B_GAP1225_NORMAL_REPEAT_AUDIT.json
+
+p4b_gap1225_natural_screen:
+  contract: contracts/P4B_GAP1225_NATURAL_SCREEN_CONTRACT.yaml
+  contract_sha256: b8e36d2505c1ecc6178020c6001d19a245af1213cc727f8d4440cfe426a6364d
+  run_ids: [QY0_A, QY1_A]
+  l0_fault_activation: PASS
+  l1_candidate_semantic_delta: PASS_24_DISABLED
+  l2_native_prediction_phenotype: PASS
+  l3_planning_response: PASS
+  l4_vehicle_failure: FAIL_ACTIVE_OVERTAKES
+  status: SCENE_FAULT_PAIR_NOT_ADMITTED
+  report: reports/P4B_GAP1225_NATURAL_SCREEN_REPORT.md
+  audit: reports/P4B_GAP1225_NATURAL_SCREEN_AUDIT.json
+
+p4b_speed150_normal_screen:
+  run_id: RN_V150_S1
+  active_fault_domain: false
+  target_speed_mps: 1.50
+  prediction_trajectory_coverage: 0.9477936606587943
+  planning_channel_coverage: 0.9931634555624611
+  control_channel_coverage: 0.998011187072716
+  planning_valid_ratio_response_metric: 0.9017521902377973
+  maximum_pass_margin_m: 5.555903848949626
+  success_region_reached: true
+  overtake_success: false
+  status: NORMAL_CANDIDATE_REJECTED
+  active_run_authorized: false
+  audit: reports/P4B_SPEED150_NORMAL_SCREEN_AUDIT.json
+
+p4b_speed130_normal_screen:
+  run_id: RN_V130_S1
+  active_fault_domain: false
+  target_speed_mps: 1.30
+  prediction_trajectory_coverage: 0.9425216316440049
+  planning_channel_coverage: 0.9913473423980222
+  control_channel_coverage: 0.9951792336217552
+  planning_valid_ratio_response_metric: 0.9420199501246883
+  maximum_pass_margin_m: 11.911970854471605
+  minimum_bbox_clearance_2d_m: 0.5357503362355731
+  success_region_reached: true
+  overtake_success: true
+  status: SCREENING_PASS_FIXED_REPEATS_FROZEN
+  active_run_authorized: false
+  screen_contract: contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml
+  repeat_contract: contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml
+  manifest: configs/NATURAL_MATCH_GAP1225_SPEED130_NORMAL_MANIFEST.json
+  screen_audit: reports/P4B_SPEED130_NORMAL_SCREEN_AUDIT.json
+  repeat_run_ids: [RN_V130_F1, RN_V130_F2, RN_V130_F3]
+  repeat_margins_m: [11.630432697665086, 7.9371613522185385, 13.486814047067384]
+  repeat_minimum_bbox_clearance_m: [0.5307245535472734, 0.9420377680863805, 0.9677049237694375]
+  repeat_status: STABLE_NORMAL_REFERENCE_3_OF_3
+  repeat_audit: reports/P4B_SPEED130_NORMAL_REPEAT_AUDIT.json
+
+p4b_speed130_native_screen:
+  pair_id: QZ_PAIR_A
+  fixed_run_id: QZ0_A
+  active_run_id: QZ1_A
+  fixed_maximum_pass_margin_m: 14.272278240321867
+  fixed_prediction_trajectory_coverage: 0.9367321867321867
+  fixed_status: PASS
+  active_maximum_pass_margin_m: 13.184956993513026
+  active_status: PASS_NORMAL_OUTCOME
+  l0_fault_activation: PASS
+  l1_candidate_semantic_delta: FAIL_POLYGON_IN_OWN_LANE_GUARD
+  expanded_nearby_events: 10
+  expanded_disabled_events: 0
+  nearby_distance_range_m: [9.455376924577578, 9.968572880497717]
+  l2_to_l3_causally_attributable: false
+  l4_vehicle_failure: false
+  status: SCENE_FAULT_PAIR_NOT_ADMITTED
+  active_run_authorized: false
+  contract: contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml
+  report: reports/P4B_SPEED130_NATURAL_SCREEN_REPORT.md
+  audit: reports/P4B_SPEED130_NATURAL_SCREEN_AUDIT.json
+
+p4b_speed130_delay9_normal_screen:
+  run_id: RN_V130_D9_S1
+  target_speed_mps: 1.30
+  lane_change_start_s: 9.0
+  active_fault_domain: false
+  maximum_pass_margin_m: 16.2115447919236
+  planning_valid_ratio_response_metric: 0.8470149253731343
+  minimum_bbox_clearance_response_metric_m: 0.03897091718213364
+  status: SCREENING_PASS_LAYERED_AUDIT_FIXED_REPEATS_FROZEN
+  active_run_authorized: false
+  screen_contract: contracts/P4B_SPEED130_DELAY9_NORMAL_SCREEN_CONTRACT.yaml
+  repeat_contract: contracts/P4B_SPEED130_DELAY9_NORMAL_REPEAT_CONTRACT.yaml
+  manifest: configs/NATURAL_MATCH_GAP1225_SPEED130_DELAY9_NORMAL_MANIFEST.json
+  screen_audit: reports/P4B_SPEED130_DELAY9_NORMAL_SCREEN_AUDIT.json
+  repeat_run_ids_completed: [RN_V130_D9_F1]
+  repeat_run_ids_not_run: [RN_V130_D9_F2, RN_V130_D9_F3]
+  repeat_f1_illegal_lane_invasion_count: 1
+  repeat_status: NORMAL_REFERENCE_NOT_STABLE_EARLY_STOP
+  repeat_audit: reports/P4B_SPEED130_DELAY9_REPEAT_EARLY_STOP_AUDIT.json
+  active_run_authorized: false
+
+next_action: >-
+  Reassess scene-fault compatibility from QX/QY/QZ and the delayed-onset rejection before deriving
+  any new normal-only candidate. Do not continue outcome-driven merge timing or change fault/oracle.
+
+non_claims:
+  - privileged_s1_is_not_natural_pr826
+  - natural_pr826_l0_to_l4_not_established
+  - no_diagnosis_agent_probability_repair_or_animation

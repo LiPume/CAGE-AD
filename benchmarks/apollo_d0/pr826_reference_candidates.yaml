@@ -1,0 +1,1838 @@
+schema_version: 1
+protocol_version: cage-ad-pr826-greybox-demo-v1
+selection_policy: normal_only_before_fault_patch
+fixed_environment:
+  synchronous_mode: true
+  fixed_delta_seconds: 0.05
+  seed: 82601
+  weather: ClearNoon
+  background_vehicle_count: 0
+  pedestrian_count: 0
+  ego_blueprint: vehicle.lincoln.mkz_2017
+  npc_blueprint: vehicle.audi.tt
+  observation_window_s: 45.0
+  success_oracle:
+    minimum_pass_margin_m: 6.0
+    minimum_lateral_excursion_m: 2.0
+    collision_count_max: 0
+    route_accepted_required: true
+    minimum_planning_messages: 100
+    minimum_control_messages: 100
+    minimum_target_prediction_messages: 20
+    minimum_target_prediction_trajectory_coverage: 0.90
+    minimum_planning_channel_coverage: 0.95
+    minimum_control_channel_coverage: 0.95
+    minimum_planning_valid_ratio: 0.90
+    expected_control_per_clock: 5.0
+candidates:
+  - candidate_id: RF01_TOPOLOGY_ONLY
+    map: Town01
+    admission_status: TOPOLOGY_REJECT
+    reject_code: NO_SAME_DIRECTION_ADJACENT_DRIVING_LANE_AT_SPAWN_POINTS
+    execution_allowed: false
+  - candidate_id: RF01_01
+    map: Town01
+    carla_road_id: 10
+    carla_lane_id: -1
+    ego_spawn_carla:
+      x: 202.550003
+      y: 59.486336
+      z: 0.0
+      yaw_deg: -0.006982
+    route_start_apollo_xy: [202.550003, -59.330017]
+    route_end_apollo_xy: [288.237488, -59.330009]
+    npc_spawn_carla:
+      x: 227.550018
+      y: 59.483
+      z: 0.0
+      yaw_deg: -0.006982
+    nominal_npc_gap_m: 25.0
+    adjacent_reverse_lane_id: 1
+    apollo_left_boundary_type: DOTTED_YELLOW
+    apollo_reverse_neighbor_lane_id: road_10_lane_0_1
+    route_length_m: 85.69
+    execution_allowed: true
+    selection_basis: >-
+      Existing G0-validated Town01 route. The same-direction topology audit rejected Town01 for
+      multilane overtaking, but Apollo's HD map explicitly marks a DOTTED_YELLOW left boundary
+      and reverse-neighbor lane on this 158 m straight segment. This supports stock lane-borrow
+      overtaking without changing Planning configuration or the frozen success oracle.
+  - candidate_id: RF04_01
+    map: Town04
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [8.699, -56.275]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    same_direction_adjacent_lanes: [-1, -3]
+    route_length_m: 130.18
+    execution_allowed: true
+    selection_basis: >-
+      CARLA Town04 topology only: straight center lane with two same-direction driving lanes,
+      a stationary lead position 25 m ahead, and an approximately 130 m clear route. Selected
+      before any fault patch or faulty outcome exists.
+  - candidate_id: RF04_01_SLOW_110
+    map: Town04
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [8.699, -56.275]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY
+      speed_mps: 1.10
+      traffic_manager_used: false
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1, -3]
+    route_length_m: 130.18
+    execution_allowed: true
+    selection_basis: >-
+      P2-V2 first mechanism-aware candidate. It changes only the target NPC policy from still to
+      a deterministic 1.10 m/s local longitudinal velocity on the previously selected Town04
+      same-direction three-lane segment. The value is above Apollo 10 Prediction's verified
+      0.99 m/s still threshold; stock Planning and all ego controls remain unchanged. Selected and
+      recorded before any P2-V2 outcome or formal-repeat result exists.
+  - candidate_id: RF04_01_SLOW_110_CFG_STATIC_120
+    reference_label: APOLLO_10_CONFIGURED_REFERENCE
+    map: Town04
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [8.699, -56.275]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY
+      speed_mps: 1.10
+      traffic_manager_used: false
+    planning_overrides:
+      static_obstacle_speed_threshold: 1.20
+    fixed_future_faulty_arm_constraint: >-
+      The identical Planning override is mandatory in both the configured normal reference and
+      every future faulty arm; the only future matched-pair difference may be the Prediction fault.
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1, -3]
+    route_length_m: 130.18
+    execution_allowed: true
+    selection_basis: >-
+      The stock 1.10 m/s screen passed the frozen Prediction trajectory mechanism gate at
+      0.9313 but never entered LaneBorrow, matching Apollo's static-only lane-borrow semantics.
+      This configured-reference candidate changes one Planning classification threshold to 1.20
+      m/s, only 0.10 m/s above the frozen target speed. Prediction remains stock and the target
+      remains trajectory-bearing. Selected before this configured candidate was executed.
+  - candidate_id: RF04_02_SLOW_110_ROUTE_LC_LEFT
+    reference_label: APOLLO_10_STOCK_PNC_ROUTE_CONSTRAINED_REFERENCE
+    map: Town04
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [9.254320, -166.273788]
+      - [5.653439, -146.291687]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -2, -1, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY
+      speed_mps: 1.10
+      traffic_manager_used: false
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    selection_basis: >-
+      P2-V2 stock-PnC route-driven lane-change candidate. CARLA topology audit found lane -2 and
+      left lane -1 are same-direction 3.5 m driving lanes separated by Broken White markings with
+      lane-change permission. The waypoints keep ego in lane -2 until 20 m ahead, require lane -1
+      by 40 m ahead, and end in lane -1. Target geometry/speed and stock Prediction/Planning remain
+      identical to the mechanism-positive stock screen. Selected before this route was executed.
+  - candidate_id: RF04_03_SLOW_110_ROUTE_LC_LEFT_MAP_WIDTH_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [9.254320, -166.273788]
+      - [5.653439, -146.291687]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -2, -1, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY
+      speed_mps: 1.10
+      traffic_manager_used: false
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical derived HD-map metadata must be used in every future matched faulty arm. The
+      only future matched-pair difference may be the Prediction fault.
+    selection_basis: >-
+      The preceding route-driven screen proved Routing exposed a lane-change reference line, but
+      LaneChangePath was primal-infeasible because the bridge-supplied base map omitted every
+      lane's Apollo left_road_sample/right_road_sample metadata. This configured map changes only
+      those samples for the three target-lane segments used by the frozen route; a protobuf audit
+      proves all geometry and routing fields are byte-semantically identical after clearing the
+      added samples. Prediction, Planning, Control, route, actors, speed, seed, and oracle are
+      unchanged. Selected before this candidate was executed.
+  - candidate_id: RF04_04_SLOW_110_ROUTE_LC_EARLY_MAP_WIDTH_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.807944, -176.909052]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY
+      speed_mps: 1.10
+      traffic_manager_used: false
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical derived HD-map metadata and early lane-change route must be used in every
+      future matched faulty arm; the only future matched-pair difference may be Prediction.
+    selection_basis: >-
+      The metadata-repaired screen eliminated all LaneChangePath optimizer failures and produced
+      a real regular/lane_change candidate plus four legal Broken-White crossings, but its first
+      lane-change reference line appeared only after ego traversed the frozen 20 m same-lane
+      waypoint, leaving insufficient observation distance for the 0.8 m/s ego to finish. This
+      candidate changes only that route onset: it requests lane -1 approximately 10 m ahead.
+      Actors, target speed, map variant, 45 s window, oracle and all Apollo modules remain fixed.
+      Selected before this candidate was executed.
+  - candidate_id: RF04_05_SLOW_110_ROUTE_LC_LONG_MAP_WIDTH_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY
+      speed_mps: 1.10
+      traffic_manager_used: false
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical derived HD-map metadata and two-waypoint route must be used in every future
+      matched faulty arm; the only future matched-pair difference may be Prediction.
+    selection_basis: >-
+      The 10 m early-transition candidate made a feasible regular/lane_change path, but its
+      current-lane routing passage ended at s=105.429 while the vehicle center was still in lane
+      -2. At s=105.964, PncMap could no longer find the current lane waypoint; 668 subsequent
+      reference-line constructions failed and Planning became invalid. This candidate changes
+      only the route waypoint list: it removes the premature intermediate lane-1 waypoint and
+      retains the lane-2 start plus the far lane-1 endpoint, allowing Routing to choose the
+      longest available native transition corridor. Map, actors, target speed, 45 s window,
+      success oracle, trajectory gate, and all Apollo module configurations remain fixed.
+  - candidate_id: RF04_06_SLOW_110_AGENT_LC_LONG_MAP_WIDTH_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_VELOCITY_AGENT
+      speed_mps: 1.10
+      destination_carla_xy: [8.699, 56.275]
+      traffic_manager_used: false
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical derived map, two-waypoint route, and CARLA 0.9.15 bundled NPC controller must
+      be used in every future matched faulty arm; only the Prediction fault may differ.
+    selection_basis: >-
+      The two-waypoint screen proved native lane-change feasibility and entered lane -1 with zero
+      optimizer or reference-line failures, but the raw constant-local-velocity NPC preserved its
+      tangent on the mildly curved road, drifted 7.63 m from lane center, and struck the road edge
+      near 43 s. That violates the target lane-association requirement. This candidate changes
+      only the NPC controller implementation to CARLA 0.9.15's bundled ConstantVelocityAgent,
+      which uses the same official constant-velocity primitive plus LocalPlanner steering along a
+      frozen same-lane destination. Speed remains 1.10 m/s; TrafficManager is not used. The 45 s
+      window, route, map, actors, oracle, trajectory gate, and Apollo stack remain unchanged.
+  - candidate_id: RF04_07_SLOW_110_AGENT_ORDERED_LC_LONG_MAP_WIDTH_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_VELOCITY_AGENT
+      speed_mps: 1.10
+      destination_carla_xy: [8.699, 56.275]
+      traffic_manager_used: false
+      rpc_order: APPLY_STEERING_THEN_REASSERT_CONSTANT_LOCAL_VELOCITY
+      constructor_motion_guard: PHYSICS_DISABLED_DURING_AGENT_INITIALIZATION
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical map, route, ordered NPC policy, and constructor guard must be used in every
+      future matched faulty arm; only the Prediction fault may differ.
+    selection_basis: >-
+      Screen 07 proved ConstantVelocityAgent steering keeps the target on lane -2 with no more
+      than 0.178 m centerline error, but the multi-client RPC order alternated target speed between
+      approximately 1.19 and 0.006 m/s. Prediction therefore classified exactly half the steady
+      frames as still and trajectory coverage fell to 0.5044. The bundled constructor also issued
+      a one-time 3.96 m/s command because it passed its km/h target directly to an m/s API. This
+      candidate retains the same policy and changes only execution correctness: freeze physics
+      during agent construction, then apply steering before reasserting 1.10 m/s as the final RPC
+      for each next frame. The 45 s window and all scenario, Apollo, and oracle values remain fixed.
+  - candidate_id: RF04_08_SLOW_110_AGENT_ORDERED_LC_LONG_100S_MAP_WIDTH_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_VELOCITY_AGENT
+      speed_mps: 1.10
+      destination_carla_xy: [8.699, 56.275]
+      traffic_manager_used: false
+      rpc_order: APPLY_STEERING_THEN_REASSERT_CONSTANT_LOCAL_VELOCITY
+      constructor_motion_guard: PHYSICS_DISABLED_DURING_AGENT_INITIALIZATION
+    observation_window_s: 100.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical configured map, route, ordered NPC policy, and 100 s observation window must
+      be used in every future matched faulty arm; only the Prediction fault may differ.
+    selection_basis: >-
+      Ordered-agent Screen 08 passed target lane stability and the frozen 0.90 Prediction gate,
+      entered lane -1 legally, and had no reference-line or optimizer failures. At 45 s the native
+      lane-change trajectory was still converging: lateral excursion was 2.056 m and ego speed
+      remained about 0.845 m/s, so the run ended before lane-change completion and post-entry
+      acceleration could be tested. This candidate changes only the pre-manifested observation
+      window from 45 to 100 s. It does not change the success oracle, target speed, route, map,
+      controller, Apollo config, or trajectory gate. Selected before any 100 s outcome exists.
+  - candidate_id: RF04_09_SLOW_110_AGENT_ORDERED_LC_LONG_100S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_VELOCITY_AGENT
+      speed_mps: 1.10
+      destination_carla_xy: [8.699, 56.275]
+      traffic_manager_used: false
+      rpc_order: APPLY_STEERING_THEN_REASSERT_CONSTANT_LOCAL_VELOCITY
+      constructor_motion_guard: PHYSICS_DISABLED_DURING_AGENT_INITIALIZATION
+    observation_window_s: 100.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical configured map, V17 Control calibration, route, ordered NPC policy, and 100 s
+      window must be used in every future matched faulty arm; only the Prediction fault may differ.
+    selection_basis: >-
+      Screen 09 proved that extending the window does not yield passing: after LaneChangePath
+      reported finished, Planning continued to publish valid seven-second trajectories of about
+      23.6 m and requested positive acceleration, while Apollo Control emitted only about 18--19%
+      throttle (27--29% after the frozen bridge gain). Ego therefore climbed only from 0.85 to
+      1.02 m/s and could not catch the 1.072 m/s target. Independent, pre-existing CARLA-Lincoln
+      calibration work localized this exact low-speed interface mismatch and preregistered V17:
+      it changes only nonnegative Control-table entries at speeds <=2.0 m/s, preserves all braking
+      and higher-speed entries, is bounded to 50% CARLA throttle, and passed a no-NPC tracking
+      contract at ratio 0.756. This candidate changes only that run-scoped Control calibration.
+      It is explicitly configured, not stock. Map, Planning, Prediction, route, actors, target
+      policy, 100 s window, success oracle, and trajectory gate remain identical to Screen 09.
+  - candidate_id: RF04_10_SLOW_110_TM_LC_LONG_MAP_WIDTH_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_SYNCHRONOUS_TRAFFIC_MANAGER
+      speed_mps: 1.10
+      destination_carla_xy: [8.699, 56.275]
+      traffic_manager_used: true
+      port: 8060
+      seed: 82601
+      synchronous_mode: true
+      hybrid_physics: false
+      auto_lane_change: false
+      random_left_lanechange_percentage: 0.0
+      random_right_lanechange_percentage: 0.0
+      ignore_vehicles_percentage: 100.0
+      ignore_lights_percentage: 100.0
+      ignore_signs_percentage: 100.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      If this policy passes its mechanism screen, the identical configured map, route, frozen
+      synchronous Traffic Manager settings, target path, speed, and seed must be used in every
+      future matched arm; only the future Prediction fault may differ.
+    selection_basis: >-
+      Source and run evidence invalidated the bundled ConstantVelocityAgent as an exogenous NPC:
+      its run_step unconditionally detects nearby vehicles and changes constant velocity to the
+      hazard speed, so target motion depends on ego proximity and showed nonrepeatable Prediction
+      coverage. This candidate changes only the target controller from that rejected agent to
+      CARLA 0.9.15 Traffic Manager under the official deterministic contract: bridge-attested
+      synchronous fixed-delta world reloaded before the run, TM synchronous on fixed port 8060,
+      seed reset to 82601 after reload, hybrid physics disabled, desired speed 3.96 km/h,
+      automatic and random lane changes disabled, all vehicle/light/sign reactions ignored, and
+      a frozen lane -2 endpoint. It retains stock Control, the 45 s mechanism-screen window,
+      configured map, Apollo route, actor geometry, Prediction, Planning, and frozen oracle.
+      Selected and recorded before runtime; its purpose is target-policy and mechanism screening,
+      not reference admission.
+  - candidate_id: RF04_11_SLOW_110_LANE_TANGENT_LC_LONG_MAP_WIDTH_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      If this policy passes its mechanism screen, the identical configured map, route, current-lane
+      heading policy, target speed, actor physics, and command ordering must be used in every
+      future matched arm; only the future Prediction fault may differ.
+    selection_basis: >-
+      Screen 11 showed that a separate synchronous TM client never issued target controls in the
+      bridge-owned tick architecture. A same-client TM probe did move but its stock low-speed PID
+      alternated full throttle and braking, placing only 35.3% of steady frames above Apollo
+      Prediction's verified 0.99 m/s still threshold. A BasicAgent PID sweep either remained below
+      that threshold or oscillated, so neither can satisfy the pre-frozen 0.90 mechanism gate.
+      The original CARLA local constant-velocity primitive already proved stable at 1.10 m/s but
+      preserved the spawn tangent and drifted off this mildly curved lane. This candidate retains
+      that physical longitudinal primitive and changes only heading: once per observed frame a
+      batched, no-tick command aligns yaw to the actor's current nearest driving-lane tangent while
+      preserving its current position. An isolated 80 s probe measured mean 1.099198 m/s,
+      standard deviation 0.0000024 m/s, 100% of steady frames above 0.99 m/s, lane -2 throughout,
+      and <=0.1783 m planar center offset after settling. It uses no future point, no future GT,
+      no Apollo output, no position projection, no TrafficManager, and never controls ego. Stock
+      Control, the 45 s mechanism window, map, route, Prediction, Planning, and oracle are retained.
+      Selected before integrated runtime; this is a mechanism screen, not admission evidence.
+  - candidate_id: RF04_12_SLOW_110_LANE_TANGENT_LC_LONG_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      If the calibration-load screen passes, the identical configured map, V17 table, route,
+      current-lane heading policy, target speed, actor physics, and command ordering must be used
+      in every future matched arm; only the future Prediction fault may differ.
+    selection_basis: >-
+      Integrated Screens 12 and 13 repeated the lane-tangent mechanism with 0.9716 and 0.9720
+      target trajectory coverage, identical target speed extrema, 900/900 error-free batched
+      heading commands each, lane -2 throughout, and <=0.1781 m center offset. This candidate
+      changes only Control calibration from stock to the checksum-locked V17 low-speed table and
+      retains the 45 s window so calibration loading and immediate closed-loop response can be
+      audited before any long-window pass claim. The renderer now supplies Control an absolute
+      run-scoped DAG and flag file after Screen 10 proved APOLLO_CONF_PATH alone was shadowed.
+      Native Control log path plus protobuf `simple_lon_debug` lookup/calibration fields are
+      mandatory evidence. Map, Planning, Prediction, route, actors, target policy, oracle, and
+      trajectory gate are unchanged. Selected before runtime; this is not admission evidence.
+  - candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.229
+      y: 161.274
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures:
+      - Broken|White|Both
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical configured map, V17 table, 80 s window, route, current-lane heading policy,
+      target speed, actor physics, command ordering, and success oracle must be used in every
+      future matched arm; only the future Prediction fault may differ.
+    selection_basis: >-
+      The 45 s V17 load screen natively loaded the absolute checksum-locked table, preserved
+      target lane -2 with 0.9771 Prediction trajectory coverage and zero heading-command errors,
+      legally crossed only Broken White markings, and completed a longitudinal pass with 6.721 m
+      margin. It was rejected solely because the frozen destination success region was still
+      47.756 m away when the pre-existing 45 s mechanism window ended. Ego was stably traveling
+      2.088 m/s at that point. This candidate changes only observation duration to a pre-frozen
+      80 s, providing more than twice the approximately 16 s nominal travel time to enter the
+      success-region boundary while retaining the original oracle. All other candidate, Apollo,
+      CARLA, bridge, map, target, route, and mechanism values are identical. Selected before any
+      80 s result; it is the final screening candidate before a separately frozen 3-run protocol.
+  - candidate_id: RF04_P2B_GAP700_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_P2B_SCENE_FAULT_MATCHING_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.320791
+      y: 179.451337
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 7.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures:
+      - Broken|White|Both
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    fixed_future_faulty_arm_constraint: >-
+      This candidate changes only the initial target center gap from the admitted P2 scene. The
+      map, V17 table, 80 s window, route, target speed/policy, actor physics, startup order,
+      success oracle and final fixed/faulty binary must remain matched; only the already-frozen
+      Prediction semantic switch may differ after a new 3/3 fixed admission.
+    selection_basis: >-
+      Selected after P4 Screen 1 was classified FAULT_NOT_ACTIVATED and before any result on this
+      geometry. Private telemetry showed the active-only STRAIGHT candidate overlapped the ADC
+      path only at signed distances 26.717--28.327 m; once the target was within 10 m, route intent
+      had shifted overlap to a stock lane-change candidate. The approximately 7.0 m center gap is
+      a one-variable, mechanism-derived probe expected to place the initial STRAIGHT overlap near
+      8.5 m while retaining about 2.46 m initial body clearance. It is not selected from a faulty
+      outcome sweep. Fixed behavior must screen and then pass 3/3 before another active run.
+  - candidate_id: RF04_P2B_GAP750_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_P2B_SCENE_FAULT_MATCHING_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.318268
+      y: 178.951343
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 7.5
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures:
+      - Broken|White|Both
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    fixed_future_faulty_arm_constraint: >-
+      This candidate changes only the initial target center gap from the admitted P2 scene. The
+      map, V17 table, 80 s window, route, target speed/policy, actor physics, startup order,
+      success oracle and final fixed/faulty binary must remain matched; only the already-frozen
+      Prediction semantic switch may differ after a new 3/3 fixed admission.
+    selection_basis: >-
+      Selected after the preregistered 7.0 m fixed-only screen and before any active result on
+      either close-gap geometry. The 7.0 m screen safely and legally overtook with 29.355 m margin
+      and 0.9913 trajectory coverage, but stopped on overlapping CARLA road 1072 rather than road
+      47 and therefore correctly failed the unchanged destination gate. Increasing only the
+      center gap by 0.5 m is the smallest bracketed probe: the measured P4 Screen 1 offset implies
+      the active-only straight-overlap distance should remain inside the frozen (0,10) m guard,
+      while giving stock Planning slightly more initial interaction room. This is normal-only;
+      it must screen and pass 3/3 before any active run.
+  - candidate_id: RF04_P2B_GAP650_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_P2B_SCENE_FAULT_MATCHING_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla:
+      x: 9.356113
+      y: 186.451248
+      z: 0.281942
+      yaw_deg: -90.289116
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.199275, -56.292660]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.199275, -56.292660]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla:
+      x: 9.323314
+      y: 179.951333
+      z: 0.281942
+      yaw_deg: -90.289116
+    nominal_npc_gap_m: 6.5
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures:
+      - Broken|White|Both
+    success_region_carla:
+      center_xy: [5.199275, 56.292660]
+      radius_m: 15.0
+      road_id: 47
+      lane_id: -1
+    route_length_m: 130.18
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    fixed_future_faulty_arm_constraint: >-
+      This candidate changes only the initial target center gap from the admitted P2 scene. The
+      map, V17 table, 80 s window, route, target speed/policy, actor physics, startup order,
+      success oracle and final fixed/faulty binary must remain matched; only the already-frozen
+      Prediction semantic switch may differ after a new 3/3 fixed admission.
+    selection_basis: >-
+      Selected after both 7.0 m and 7.5 m fixed-only results and before any close-gap active run.
+      The 7.0 m run entered lane -1 10.95 s earlier and passed 9.20 s earlier than 7.5 m, but
+      stopped just before the unchanged road-47 transition. Reducing only the center gap by 0.5 m
+      is the final preregistered bracket intended to test whether that earlier normal behavior has
+      enough completion margin. Initial geometric body clearance remains about 1.96 m before
+      dynamics, and the candidate must satisfy the unchanged collision/clearance/route gates. If
+      rejected, gap sweeping stops and the route is redesigned from topology evidence.
+  - candidate_id: RF04_P2B_ROUTE1072_GAP700_LANE_TANGENT_80S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_P2B_TOPOLOGY_MATCHED_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.194954, -90.050056]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.194954, -90.050056]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 9.320791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla:
+      center_xy: [5.194954, 90.050056]
+      radius_m: 15.0
+      road_id: 1072
+      lane_id: -1
+    route_length_m: 96.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical 7.0 m geometry, road-1072 route, destination, map, V17 table, 80 s window,
+      target policy, actor physics, startup order and success oracle must be used in future arms;
+      only the already-frozen Prediction semantic switch may differ after 3/3 fixed admission.
+    selection_basis: >-
+      Selected after all preregistered 6.5/7.0/7.5 m gap-only fixed screens were rejected and
+      before any close-gap active run. Their shared cause was not failure to overtake: all safely
+      passed with real Prediction trajectories, then decelerated on road 1072 just before the old
+      road-47 endpoint. This candidate restores the safer 7.0 m clearance and changes the route as
+      a new scene, ending on an observed unambiguous road-1072/lane--1 point at y=90.05 m. In the
+      prior 7.0 m fixed trace, the 6 m pass occurred near y=119 m, so the 15 m destination region
+      centered at y=90.05 m is reached only after the pass rather than serving as a relaxed pass
+      threshold. The new route and oracle are frozen before its first result.
+  - candidate_id: RF04_P2B_ROUTE1072Y70_GAP700_LANE_TANGENT_80S_MAP_WIDTH_V1_CTRL_V17
+    reference_label: APOLLO_10_CONFIGURED_P2B_TOPOLOGY_MATCHED_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 9.320791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    fixed_future_faulty_arm_constraint: >-
+      The identical 7.0 m geometry, road-1072 route, destination, map, V17 table, 80 s window,
+      target policy, actor physics, startup order and success oracle must be used in future arms;
+      only the frozen Prediction semantic switch may differ after 3/3 fixed admission.
+    selection_basis: >-
+      Selected after the first road-1072 fixed-only screen and before any close-gap active result.
+      That screen proved the topology/task ordering: pass at 53.85 s and destination at 57.95 s,
+      but the long post-goal parking interval reduced Planning valid ratio to 0.89569. This new
+      normal task moves only the road-1072 endpoint 20 m downstream to an observed lane--1 point,
+      so destination entry is expected nearer the admitted reference's 68--70 s completion band.
+      The 80 s window, 0.90 Planning gate, 15 m radius and pass oracle are not changed.
+  - candidate_id: RF04_P2C_LANEBORROW_ROUTE1072Y70_GAP2500_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_MAP_CONTROL_AND_PLANNING_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    planning_overrides: {static_obstacle_speed_threshold: 1.2}
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [8.768, -70.0]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [8.768, -70.0]
+    route_waypoint_lane_intent: [-2, -2]
+    npc_spawn_carla: {x: 9.229, y: 161.274, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 25.0
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [8.768, 70.0], radius_m: 15.0, road_id: 1072, lane_id: -2}
+    route_length_m: 116.45
+    execution_allowed: true
+    p2c_normal_only_before_new_active_run: true
+    configured_reference_reason: >-
+      Pinned Apollo 10 Prediction declares still_obstacle_speed_threshold=0.99 m/s while Planning
+      declares static_obstacle_speed_threshold=0.5 m/s. The 1.10 m/s target therefore has real
+      lane-sequence trajectories but is excluded from stock static-obstacle path-bound logic. A
+      frozen 1.2 m/s Planning threshold bridges only that semantic gap and is identical in future
+      fixed/faulty arms; Prediction remains stock/default-off in the reference.
+    fixed_future_faulty_arm_constraint: >-
+      The identical same-lane route, 25 m gap, 1.10 m/s target, Planning threshold 1.2 m/s, map,
+      Control, timing, target policy and oracle must be used in future arms; only the frozen
+      Prediction semantic switch may differ after a separate 3/3 fixed admission.
+    selection_basis: >-
+      Selected after P4B proved that a route-commanded lane change consumes the faulty Prediction
+      but remains behaviorally route-dominated, and before any active result for this scene. The
+      route now remains lane -2; any lane -1 entry/pass must come from obstacle interaction. The
+      25 m gap restores the admitted reference's clearance and permits ego to approach the target
+      naturally. Official Planning code uses predicted trajectories for lane-change direction and
+      ST boundaries, so a later nearby candidate change is mechanistically relevant. This is a
+      normal-only configured-reference test, not a strengthened Prediction fault.
+    screening_disposition: REJECT_LONG_TERM_BLOCKING_GATE_NOT_REACHED
+    post_screening_correction: >-
+      The preregistered 1.2 m/s Planning threshold did not bridge the semantic gap. Pinned Planning
+      first consumes PredictionObstacle.is_static; target blocking decisions were isolated and
+      never accumulated the three required long-term cycles. This retained candidate is rejected
+      evidence and does not authorize an active run.
+  - candidate_id: RF04_P2D_LATERALRIGHT060_ROUTE1072Y70_GAP700_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2D_LATERAL_SEPARATION_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 9.920791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_lateral_offset_from_p2b_m: 0.60
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2d_lateral_separation_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact target offset, gap, route, map, Control,
+      target policy, timing, startup order and oracle. Only the already-frozen Prediction semantic
+      switch may differ, and no active arm is authorized before a separate 3/3 fixed admission.
+    selection_basis: >-
+      Selected after P4B proved mechanism activation and a published straight-to-left-lane semantic
+      delta, but the original route-driven scene treated both fixed and active target occupancy as
+      FOLLOW and passed. Moving the physical target 0.60 m within lane -2 away from lane -1 is a
+      single geometry variable intended to give the fixed straight trajectory a larger measured
+      separation from the ego lane-change corridor, while the fixture-proven erroneous lane-change
+      trajectory still points toward lane -1. The value is frozen before any result; fixed legality,
+      lane association, clearance and all original gates can reject it. It is not a fault-dose change.
+    screening_disposition: REJECT_FORMAL_CLEARANCE_0_898575_LT_0_90
+  - candidate_id: RF04_P2E_LATERALRIGHT070_ROUTE1072Y70_GAP700_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2E_FINAL_LATERAL_SEPARATION_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 10.020791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_lateral_offset_from_p2b_m: 0.70
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2e_final_lateral_separation_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact target offset, gap, route, map, Control,
+      target policy, timing, startup order and oracle. Only the frozen Prediction semantic switch
+      may differ after 3/3 fixed admission. The 0.90 m clearance gate remains unchanged.
+    selection_basis: >-
+      This is the final preregistered lateral-offset bracket after the 0.60 m scene produced a
+      0.898575 m first-formal clearance against a predeclared 0.90 m gate. It changes only target x
+      by another 0.10 m away from the overtake lane, retains the same mechanism hypothesis and does
+      not use any active result on this geometry. The target must remain lane -2, the normal screen
+      and a new 3/3 formal set must pass the unchanged 0.90 m gate, and failure closes offset
+      sweeping rather than triggering another adjustment.
+  - candidate_id: RF04_P2F_TIMING_GAP550_LATERALRIGHT070_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2F_TEMPORAL_INTERACTION_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 10.020791, y: 180.951319, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 5.5
+    npc_lateral_offset_from_p2b_m: 0.70
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2f_temporal_interaction_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact 5.5 m gap, 0.70 m target offset, route,
+      map, Control, target policy, timing, startup order and oracle. Only the already-frozen
+      Prediction semantic switch may differ after a separate 3/3 fixed admission. The 0.90 m
+      body-clearance and Planning-valid gates remain unchanged.
+    selection_basis: >-
+      A read-only audit of the already captured P4B active run found that all 35 altered target
+      trajectories ended by 1.85 s, while Planning first exposed a lane-change path at 3.00 s.
+      The initial 7.0 m gap therefore missed the selected maneuver by 1.15 s. Reducing the gap by
+      1.5 m is a kinematic timing probe intended to keep the unchanged nearby predicate active
+      through the first lane-change-path frames; it is not a fault-dose change. The independently
+      screened 0.70 m within-lane offset is retained to keep the fixed straight target away from
+      lane -1 and to preserve the already frozen 0.90 m body-clearance requirement. No active
+      result exists for this exact geometry. This is one final combined mechanism candidate, not
+      a new gap or offset sweep; rejection returns to compatibility analysis.
+  - candidate_id: RF04_P2G_HOLD3500_GAP700_LATERALRIGHT070_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2G_STOP_AND_GO_INTERACTION_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 10.020791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_lateral_offset_from_p2b_m: 0.70
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_policy:
+      type: CARLA_HOLD_THEN_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      initial_hold_s: 3.5
+      speed_mps: 1.10
+      traffic_manager_used: false
+      release_trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      apollo_output_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2g_stop_and_go_interaction_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact 3.5 s simulation-time hold, 7.0 m gap,
+      0.70 m target offset, route, map, Control, target policy, timing, startup order and oracle.
+      Only the frozen Prediction semantic switch may differ after a separate 3/3 fixed admission.
+      The 0.90 m body-clearance and Planning-valid gates remain unchanged.
+    selection_basis: >-
+      P4B's altered Prediction ended 1.15 s before its first selected lane-change path, while the
+      P2F closer-gap probe delayed that path to 5.25 s and was rejected before active execution.
+      This distinct stop-and-go policy keeps the safe 7.0 m geometry and holds the NPC using only
+      CARLA vehicle control until 3.5 s, then releases the documented 1.10 m/s local constant
+      velocity along the current lane tangent. The transition uses frozen simulation time only;
+      it reads neither ego nor Apollo outputs and never uses future GT. The design aims to create
+      real target trajectories while the normal route lane-change path is already selected. Its
+      fixed-only mechanism gate requires measured overlap between trajectory-bearing Prediction
+      inputs and lane-change Planning frames before any active run. No active result exists for
+      this exact policy/geometry.
+    screening_disposition: REJECT_PLANNING_VALID_AND_CLEARANCE_GATES
+  - candidate_id: RF04_P2H_HOLD3500_PROJECTEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2H_PROJECTED_STOP_AND_GO_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 10.020791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_lateral_offset_from_p2b_m: 0.70
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_policy:
+      type: CARLA_HOLD_THEN_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      initial_hold_s: 3.5
+      speed_mps: 1.10
+      traffic_manager_used: false
+      release_trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: CURRENT_LANE_FROZEN_OFFSET
+      apollo_output_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2h_current_lane_projection_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact current-lane frozen-offset projection,
+      3.5 s hold, 7.0 m gap, route, map, Control, target policy, timing, startup order and oracle.
+      Only the frozen Prediction semantic switch may differ after a separate 3/3 fixed admission.
+      The 0.90 m body-clearance and Planning-valid gates remain unchanged.
+    selection_basis: >-
+      P2G proved the intended fixed-arm interaction window with 571 trajectory-bearing lane-change
+      Planning frames, but failed reference admission. At minimum clearance the target's measured
+      lane-center offset had drifted from 0.72 m to 0.35 m; the prior constant-motion reference at
+      the same road position retained about 1.01 m offset. This candidate changes no geometry,
+      timing, speed, Apollo module, fault or gate. It uses the actor's current nearest driving-lane
+      waypoint to preserve the signed lateral offset measured at spawn while CARLA constant local
+      velocity supplies longitudinal motion. It reads no future waypoint, future GT, ego state or
+      Apollo output. The correction is explicit and matched in all future arms. Rejection closes
+      this stop-and-go policy family rather than triggering further projection/hold tuning.
+    screening_disposition: INVALID_WRONG_ADJACENT_LANE_WAYPOINT_RESOLVED
+  - candidate_id: RF04_P2I_HOLD3500_RESOLVEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2I_RESOLVED_PROJECTED_STOP_AND_GO_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 10.020791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_lateral_offset_from_p2b_m: 0.70
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_policy:
+      type: CARLA_HOLD_THEN_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      initial_hold_s: 3.5
+      speed_mps: 1.10
+      traffic_manager_used: false
+      release_trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: CURRENT_LANE_FROZEN_OFFSET
+      target_lane_resolution: CURRENT_WAYPOINT_LEFT_RIGHT_ADJACENCY_TO_DECLARED_LANE_ID
+      apollo_output_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2i_projection_resolver_correction: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact target-lane adjacency resolver, current-
+      lane frozen-offset projection, 3.5 s hold, 7.0 m gap, route, map, Control, target policy,
+      timing, startup order and oracle. Only the frozen Prediction semantic switch may differ
+      after a separate 3/3 fixed admission. All P2H numeric scene values and gates are unchanged.
+    selection_basis: >-
+      P2H did not execute its declared scene: CARLA's unconstrained nearest-waypoint query selected
+      adjacent lane -1 at initialization, yielding a nonsensical -4.94 m offset and projecting the
+      target into lane -1. The frozen lane and trajectory gates rejected it. This candidate changes
+      no scientific parameter. It corrects the instrumentation by walking only the current
+      waypoint's left/right driving-lane adjacency until the declared lane ID -2 is found, records
+      the resolved road/lane, and otherwise retains P2H byte-equivalent scene semantics. This is a
+      replacement for an implementation-invalid run, not a retry after a valid negative result.
+    screening_disposition: INVALID_PRE_SNAPSHOT_ACTOR_TRANSFORM_READ
+  - candidate_id: RF04_P2J_HOLD3500_MATERIALIZEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2J_MATERIALIZED_PROJECTED_STOP_AND_GO_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_spawn_carla: {x: 10.020791, y: 179.451337, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 7.0
+    npc_lateral_offset_from_p2b_m: 0.70
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_policy:
+      type: CARLA_HOLD_THEN_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      initial_hold_s: 3.5
+      speed_mps: 1.10
+      traffic_manager_used: false
+      release_trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: CURRENT_LANE_FROZEN_OFFSET
+      target_lane_resolution: CURRENT_WAYPOINT_LEFT_RIGHT_ADJACENCY_TO_DECLARED_LANE_ID
+      spawn_transform_materialization: WAIT_FOR_NEXT_SYNCHRONOUS_SNAPSHOT_BEFORE_OFFSET_CAPTURE
+      apollo_output_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2j_spawn_materialization_correction: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact post-snapshot target-lane resolver,
+      current-lane frozen-offset projection, 3.5 s hold, 7.0 m gap, route, map, Control, target
+      policy, timing, startup order and oracle. Only the frozen Prediction semantic switch may
+      differ after a separate 3/3 fixed admission. All P2H/P2I scientific values and gates are
+      unchanged.
+    selection_basis: >-
+      P2I proved that lane-ID-only adjacency was not the remaining error. CARLA synchronous-mode
+      probing then reproduced the underlying lifecycle issue: immediately after try_spawn_actor,
+      actor.get_location returned the origin, while the first synchronous snapshot materialized
+      the exact frozen spawn on road 46/lane -2. P2I captured its offset before that snapshot,
+      resolved road 47/lane -2 and derived -8.43845 m, so its run was implementation-invalid.
+      This replacement changes no geometry, timing, speed, Apollo module, fault, or gate. It waits
+      for the next bridge-owned snapshot, requires XY spawn error <=0.25 m and exact frozen
+      road/lane 46/-2, then derives the offset. Any failed validation aborts instead of moving the
+      target. This is an instrumentation-lifecycle correction, not result-driven fault tuning.
+  - candidate_id: RF04_P2K_MICROLINO_GAP550_LATERALRIGHT090_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2K_NARROW_TARGET_CONTINUOUS_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_blueprint: vehicle.micro.microlino
+    npc_spawn_carla: {x: 10.220791, y: 180.951319, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 5.5
+    npc_lateral_offset_from_p2b_m: 0.90
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_measured_full_width_m: 1.4809197187423706
+    npc_measured_full_length_m: 2.2072951793670654
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2k_narrow_vehicle_interaction_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact Microlino blueprint, 5.5 m gap, 0.90 m
+      within-lane offset, continuous 1.10 m/s policy, route, map, Control, timing, startup order and
+      oracle. Only the frozen Prediction semantic switch may differ after a separate 3/3 fixed
+      admission. Vehicle dimensions and blueprint ID are part of the matched manifest.
+    selection_basis: >-
+      P4B proved that the frozen fault changes output only while the straight candidate overlaps
+      the ADC lane sequence and is within 10 m, but its delta ended 1.15 s before the selected
+      lane-change path. P2F extended timing with a 5.5 m gap, yet the Audi TT's 1.994 m body still
+      delayed the fixed lane-change path to 5.25 s. P2J showed that stop-and-go timing creates the
+      desired overlap but fails the fixed Planning-valid gate, so that family is closed. A local
+      CARLA 0.9.15 probe measured the four-wheel car-class Microlino at 1.481 m wide versus the Audi
+      at 1.994 m. This distinct continuous-motion candidate uses the previously tested 5.5 m gap
+      and moves the narrower body center 0.90 m away from lane -1 while keeping its full body inside
+      the 3.5 m lane with about 0.11 m geometric margin. The design seeks an early fixed lane-change
+      path without changing fault dose or Planning. It was selected before any active result for
+      this blueprint/geometry; normal-only screening and 3/3 admission remain mandatory.
+    screening_disposition: REJECT_FORMAL_FIRST_OVERLAP_TIMING_GATE
+  - candidate_id: RF04_P2L_MICROLINO_LANE3_TO_LANE2_T6D2_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2L_TIME_SEPARATED_MERGE_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    initial_npc_lane_id: -3
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_blueprint: vehicle.micro.microlino
+    npc_spawn_carla: {x: 12.856113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 0.0
+    npc_policy:
+      type: CARLA_TIMED_ADJACENT_LANE_MERGE_LOCAL_VELOCITY
+      speed_mps: 1.10
+      traffic_manager_used: false
+      source_lane_id: -3
+      target_lane_id: -2
+      lane_change_start_s: 6.0
+      lane_change_duration_s: 2.0
+      release_trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      position_source: CURRENT_ADJACENT_LANE_CENTERS_AND_SMOOTHSTEP
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      apollo_output_used: false
+      ego_state_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: false
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2l_time_separated_merge_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact Microlino, initial lane -3 pose, 1.10 m/s
+      velocity, 6.0--8.0 s smoothstep merge into lane -2, route, map, Control, timing, startup order
+      and oracle. Only the frozen Prediction semantic switch may differ after a separate 3/3 fixed
+      admission. The NPC policy reads simulation time and current adjacent lane centers only.
+    selection_basis: >-
+      P2K formally rejected a scene whose mechanism depended on a sub-second race between fault
+      proximity and Apollo route initialization. An offline translation of all three admitted P2B
+      trajectories also showed that increasing the gap to 8--10 m never re-enters the <10 m
+      trigger while ego remains on lane -2. This distinct design separates initialization from
+      interaction physically: the narrow target starts alongside ego in lane -3, moves continuously
+      at 1.10 m/s, then changes into lane -2 from 6.0 to 8.0 s using a fixed CARLA-time smoothstep
+      between current adjacent lane centers. At merge completion, admitted P2B kinematics predict
+      the target is roughly 6 m ahead while Planning is already initialized. There is no teleport,
+      hidden actor, ego control, Apollo/ego-state trigger or future GT. The normal arm must first
+      prove safe merge/overtake, real target trajectories and stable post-initialization interaction
+      in 3/3 repeats before any active execution.
+    screening_disposition: REJECT_PREEXECUTION_APPLY_TRANSFORM_VIOLATES_NO_TELEPORT_CONTRACT
+  - candidate_id: RF04_P2M_MICROLINO_ACKERMANN_LANE3_TO_LANE2_T6D4_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2M_PHYSICS_CONTROLLED_MERGE_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    initial_npc_lane_id: -3
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_blueprint: vehicle.micro.microlino
+    npc_spawn_carla: {x: 12.856113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 0.0
+    npc_policy:
+      type: CARLA_TIMED_ACKERMANN_LANE_MERGE
+      speed_mps: 1.10
+      traffic_manager_used: false
+      source_lane_id: -3
+      target_lane_id: -2
+      lane_change_start_s: 6.0
+      lane_change_duration_s: 4.0
+      trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      path_reference: CURRENT_CARLA_SOURCE_AND_TARGET_LANE_CENTERS
+      command_transport: VEHICLE_APPLY_ACKERMANN_CONTROL
+      lookahead_m: 3.0
+      wheelbase_m: 1.50
+      maximum_steer_rad: 0.50
+      steer_speed_rad_s: 0.50
+      acceleration_mps2: 1.0
+      jerk_mps3: 1.0
+      pose_or_velocity_override_used: false
+      apollo_output_used: false
+      ego_state_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2m_physics_controller_probe: P2M_CONTROLLER_PROBE_AUDIT.json
+    fixed_future_faulty_arm_constraint: >-
+      Any fixed and later active arms must use this exact native Ackermann controller and parameters,
+      Microlino, source/target lanes, route, map, Control, timing, startup order and oracle. Only the
+      already frozen Prediction semantic switch may differ after a separate 3/3 fixed admission.
+    selection_basis: >-
+      P2L was rejected before execution because smooth per-frame ApplyTransform still violated its
+      no-teleport invariant. P2M replaces only that invalid transport with CARLA's native Ackermann
+      physics controller. Three standalone deterministic probes produced a lane -3 to -2 transition
+      at exactly 11.0 s, median speed range 0.002861 m/s, maximum per-frame physical displacement
+      0.05643 m and zero collisions. The controller uses only simulation elapsed time, the NPC's
+      current pose and current CARLA lane centers; it reads no ego state, Apollo output or future GT.
+      This controller evidence was obtained before any Apollo-integrated P2M result.
+    screening_disposition: REJECT_FIXED_GATE_AND_INTERACTION_AFTER_PASS_OUTCOME
+  - candidate_id: RF04_P2N_MICROLINO_ACKERMANN_FORWARD16_LANE3_TO_LANE2_T6D4_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2N_OUTCOME_RELEVANT_PHYSICAL_MERGE_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    initial_npc_lane_id: -3
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_blueprint: vehicle.micro.microlino
+    npc_spawn_carla: {x: 12.774190, y: 170.202545, z: 0.281942, yaw_deg: -90.289124}
+    nominal_npc_gap_m: 16.25
+    npc_initial_position_relation: AHEAD_IN_ADJACENT_SOURCE_LANE
+    npc_policy:
+      type: CARLA_TIMED_ACKERMANN_LANE_MERGE
+      speed_mps: 1.10
+      traffic_manager_used: false
+      source_lane_id: -3
+      target_lane_id: -2
+      lane_change_start_s: 6.0
+      lane_change_duration_s: 4.0
+      trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      path_reference: CURRENT_CARLA_SOURCE_AND_TARGET_LANE_CENTERS
+      command_transport: VEHICLE_APPLY_ACKERMANN_CONTROL
+      lookahead_m: 3.0
+      wheelbase_m: 1.50
+      maximum_steer_rad: 0.50
+      steer_speed_rad_s: 0.50
+      acceleration_mps2: 1.0
+      jerk_mps3: 1.0
+      pose_or_velocity_override_used: false
+      apollo_output_used: false
+      ego_state_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2m_physics_controller_probe: P2M_CONTROLLER_PROBE_AUDIT.json
+    fixed_future_faulty_arm_constraint: >-
+      Any fixed and later active arms must use this exact native Ackermann controller, 16.25 m
+      adjacent-lane lead, lanes, route, map, Control, timing, startup order and oracle. Only the
+      already frozen Prediction semantic switch may differ after separate 3/3 fixed admission.
+    selection_basis: >-
+      P2M measured ego gaining 10.425 m on an alongside target by physical target-lane entry at
+      11.0 s; its interaction was therefore too late. P2N changes only the normal scene's initial
+      longitudinal relation before any active result. CARLA map traversal placed the target 16.25 m
+      ahead on road 46 lane -3. Holding the previously verified physical controller fixed predicts
+      about 5.8 m target lead at lane entry: before the 6 m pass outcome and inside the historical
+      <10 m nearby semantic domain, with positive geometric clearance. This is a single
+      mechanism-derived candidate, not a parameter sweep or a fault-dose change.
+    screening_disposition: REJECT_FROZEN_MINIMUM_BODY_CLEARANCE_GATE

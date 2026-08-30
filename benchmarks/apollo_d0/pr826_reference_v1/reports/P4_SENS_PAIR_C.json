@@ -1,0 +1,189 @@
+{
+  "admission_evidence": false,
+  "analysis_type": "P4_SENS_PERSISTENT_PAIR_COMMON_CORE",
+  "checks": {
+    "manifest_allowed_delta": true,
+    "planning_delta_observed": true,
+    "s0_behavior_valid": true,
+    "s0_runtime_valid": true,
+    "s0_semantic_valid": true,
+    "s0_transport_valid": true,
+    "s1_behavior_valid": true,
+    "s1_runtime_valid": true,
+    "s1_semantic_valid": true,
+    "s1_transport_valid": true
+  },
+  "classification": "NON_ADMISSION_CAUSAL_SENSITIVITY_PROBE",
+  "contract_sha256": "eb7fa709edea9f2e0710dcb9707e9a18eccace85953165e93148c7d622672e61",
+  "contract_version": "p4-sens-boundary-v5-persistent-confirmation",
+  "first_planning_delta": {
+    "elapsed_s": 12.0,
+    "s0_lane_change_path": true,
+    "s0_planned_horizon_m": 13.320193911559494,
+    "s0_valid": true,
+    "s1_lane_change_path": false,
+    "s1_planned_horizon_m": 11.400040554772966,
+    "s1_valid": true
+  },
+  "manifest_delta": {
+    "allowed": [
+      "created_at",
+      "p4_sensitivity_probe.lateral_offset_m",
+      "p4_sensitivity_probe.relative_end_s",
+      "p4_sensitivity_probe.relative_start_s",
+      "p4_sensitivity_probe.semantic",
+      "screening_id"
+    ],
+    "observed": [
+      "created_at",
+      "p4_sensitivity_probe.lateral_offset_m",
+      "p4_sensitivity_probe.relative_end_s",
+      "p4_sensitivity_probe.relative_start_s",
+      "p4_sensitivity_probe.semantic",
+      "screening_id"
+    ],
+    "pass": true
+  },
+  "non_claims": [
+    "Not a natural PR826 fault run.",
+    "Not admission evidence.",
+    "Legacy infrastructure_valid is compatibility telemetry, not the common validity decision."
+  ],
+  "persistent_s1_cancels_overtake": true,
+  "runs": {
+    "S0": {
+      "behavior_checks": {
+        "collision_free": true,
+        "expected_overtake": true,
+        "illegal_lane_invasion_free": true
+      },
+      "files": {
+        "manifest_sha256": "9237a1319cdddccc343c311f840c1225ddd121be56a524821852ea74add6becf",
+        "normalized_repeat_manifest_sha256": "7f6bee3fda0eb7d082630ab3d8e5ce3e4b929a66659bbea80d740565aa8418bf",
+        "stats_sha256": "a0d1c985ecfcb81975835c6c4046345a17f8730f7c44f8240c1e9b040a4f853d",
+        "summary_sha256": "f71c105b1b24b30df43c6806a1970e96c2832dde03c02fa647e62a17262da96e",
+        "telemetry_sha256": "a9dbd7e370cbb3462764ba3a53dbaf97f352181f7f12f50a86e0005245217af8",
+        "timeline_sha256": "f2372f6c428080358a3a33fbb240652375ae83ae39a1b431d7f964b0af4fc7af"
+      },
+      "first_active_prediction_consumed_s": 12.000000178461399,
+      "legacy_infrastructure_valid": true,
+      "outcome": {
+        "lane_minus_1_entry_s": 34.00000050663948,
+        "max_pass_margin_m": 19.104197444334815,
+        "overtake_success": true,
+        "pass_margin_6m_s": 49.05000073090196,
+        "success_region_reached": true
+      },
+      "response_metrics": {
+        "planning_valid_ratio": 0.943609022556391,
+        "prediction_trajectory_coverage": 0.9496268656716418
+      },
+      "run_id": "PZ0_C",
+      "runtime_checks": {
+        "interposer_exception_absent": true,
+        "runtime_exception_absent": true
+      },
+      "semantic": "S0_STRAIGHT",
+      "semantic_checks": {
+        "active_target_present": true,
+        "field_preservation": true,
+        "identity": true,
+        "persistent_window_end": true,
+        "persistent_window_start": true,
+        "planning_consumed_active_prediction": true
+      },
+      "telemetry_extent": {
+        "first_elapsed_s": 12.000000178999997,
+        "last_elapsed_s": 74.950001117,
+        "rows": 1260
+      },
+      "transport_checks": {
+        "control_channel_coverage": true,
+        "interposer_output_coverage": true,
+        "planning_channel_coverage": true,
+        "raw_prediction_messages": true,
+        "route_accepted": true
+      },
+      "validity": {
+        "admission_valid": false,
+        "behavior_valid": true,
+        "runtime_valid": true,
+        "semantic_valid": true,
+        "transport_valid": true
+      }
+    },
+    "S1": {
+      "behavior_checks": {
+        "collision_free": true,
+        "expected_overtake_cancellation": true,
+        "illegal_lane_invasion_free": true,
+        "pass_margin_within_gate": true
+      },
+      "files": {
+        "manifest_sha256": "fdba3c13eb953b0233fd505593f906b1bcdb45dd0434053a8edb322472435fd4",
+        "normalized_repeat_manifest_sha256": "5ddc327d1b1bed20f8b91a18e76dd96ab221d9e9c4243a86d81d5948f49e6790",
+        "stats_sha256": "3a530f33672f92fd79671dc73c2ced5eb2c83d4de4a510b7a16c5dda12f9af91",
+        "summary_sha256": "9b6a6a81ac4fc7c4d455286e408ed386fa9d2641a10c1c0f36fcb1f360251666",
+        "telemetry_sha256": "819c80399bb8ef7a974f35ec47de2791b39fd3a5ee368c08302890196606f983",
+        "timeline_sha256": "62246fee5a5f3d32d88124072f3d6303c7cd9f8eeaeb6e1ea6f830dd17f04170"
+      },
+      "first_active_prediction_consumed_s": 11.900000177166916,
+      "legacy_infrastructure_valid": true,
+      "outcome": {
+        "lane_minus_1_entry_s": 34.150000508874655,
+        "max_pass_margin_m": -6.858905920142888,
+        "overtake_success": false,
+        "pass_margin_6m_s": null,
+        "success_region_reached": false
+      },
+      "response_metrics": {
+        "planning_valid_ratio": 0.9849906191369606,
+        "prediction_trajectory_coverage": 0.9496268656716418
+      },
+      "run_id": "PZ1_C",
+      "runtime_checks": {
+        "interposer_exception_absent": true,
+        "runtime_exception_absent": true
+      },
+      "semantic": "S1_LEFT_MERGE_OCCUPANCY",
+      "semantic_checks": {
+        "active_target_present": true,
+        "endpoint_max": true,
+        "endpoint_min": true,
+        "field_preservation": true,
+        "persistent_window_end": true,
+        "persistent_window_start": true,
+        "planning_consumed_active_prediction": true,
+        "transformed": true
+      },
+      "telemetry_extent": {
+        "first_elapsed_s": 12.000000178,
+        "last_elapsed_s": 74.950001116,
+        "rows": 1260
+      },
+      "transport_checks": {
+        "control_channel_coverage": true,
+        "interposer_output_coverage": true,
+        "planning_channel_coverage": true,
+        "raw_prediction_messages": true,
+        "route_accepted": true
+      },
+      "validity": {
+        "admission_valid": false,
+        "behavior_valid": true,
+        "runtime_valid": true,
+        "semantic_valid": true,
+        "transport_valid": true
+      }
+    }
+  },
+  "schema_version": 2,
+  "status": "PERSISTENT_INTERFACE_PAIR_PASS",
+  "validity_model": {
+    "admission_valid": "always false for privileged sensitivity probes",
+    "behavior_valid": "arm-specific frozen outcome plus collision/lane-safety checks",
+    "runtime_valid": "process/runtime and interposer exception checks",
+    "semantic_valid": "target transform, preservation, persistence and Planning consumption",
+    "transport_valid": "runtime plus route and channel/relay coverage"
+  }
+}

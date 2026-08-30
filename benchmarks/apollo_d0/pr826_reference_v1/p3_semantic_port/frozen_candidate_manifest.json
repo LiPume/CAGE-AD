@@ -1,0 +1,17 @@
+{
+  "behavior_change_outside_prediction": false,
+  "behavior_library_sha256": "251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71",
+  "behavior_switch_default": false,
+  "build_compat_behavioral_delta_between_arms": false,
+  "build_compat_patch_sha256": "54b7aed35992e9781669bcb654ac410ba04b1b973b9fa7ab708c9392e81609fe",
+  "candidate_sequence_predictor_sha256": "dd61ad35539e30e918325ffb1d4a909cab05bc88eb87d12ba84e5bc156c9122c",
+  "candidate_source_root": "/root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/apollo_src_candidate_01",
+  "component_library_sha256": "0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70",
+  "pinned_apollo_commit": "d994e55fb3c3cf88222f8b4813fa5425cc7c1f56",
+  "policy_header_sha256": "7340834b5af643563a4f6545106a49917b2e2b02e3cfdaa6e20db5308de14305",
+  "schema_version": 1,
+  "semantic_patch_sha256": "f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6",
+  "status": "FROZEN_CANDIDATE",
+  "stock_sequence_predictor_sha256": "8c8ad816ac7aff8caefcd873f8f7c07378e1a678817854fb4d9bd1af14ec4bb5",
+  "stock_source_root": "/root/autodl_apollo10_g0_bundle/runtime/apollo/application-pnc/.aem/envroot/opt/apollo/neo/src"
+}

@@ -33,6 +33,7 @@ case "${1:-status}" in
     fi
     rm -f "${PID_FILE}"
     setsid env CARLA_BRIDGE_CONTROL_TOPIC="${CARLA_BRIDGE_CONTROL_TOPIC:-/apollo/control}" \
+      CAGE_BRIDGE_CONTROL_TELEMETRY="${CAGE_BRIDGE_CONTROL_TELEMETRY:-}" \
       "${BUNDLE_ROOT}/scripts/apollo_bridge_exec.sh" \
       python3 -m carla_bridge.main >"${LOG_FILE}" 2>&1 </dev/null &
     pid=$!

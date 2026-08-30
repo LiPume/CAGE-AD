@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-30T16:30:00Z",
+  "run_id": "RN_V150_S1",
+  "phase": "P4B_NORMAL_ONLY_TEMPORAL_PERSISTENCE_MATCHING",
+  "candidate": {
+    "nominal_gap_m": 12.25,
+    "target_speed_mps": 1.5,
+    "active_fault_domain": false,
+    "manifest_sha256": "2c29b8ebc7f3162e586fb3a514c9f86fbc0e86f945faa4c09cc5e6ad647a7419",
+    "contract_sha256": "507b080de4c5a32509bbe82106c6a5d387f43a16c5517445fa783b86c24cb200",
+    "raw_summary_sha256": "f82dc1572e1d021f4899557be1aa13d82f69cea783eca00640e01a2c15915114"
+  },
+  "frozen_normal_gate": {
+    "prediction_trajectory_coverage_min": 0.9,
+    "planning_channel_coverage_min": 0.95,
+    "control_channel_coverage_min": 0.95,
+    "maximum_pass_margin_m_min": 6.0,
+    "overtake_success": true,
+    "success_region_reached": true
+  },
+  "observed": {
+    "runtime_valid": true,
+    "route_accepted": true,
+    "collision_count": 0,
+    "illegal_lane_invasion_count": 0,
+    "prediction_trajectory_coverage": 0.9477936606587943,
+    "planning_channel_coverage": 0.9931634555624611,
+    "control_channel_coverage": 0.998011187072716,
+    "planning_valid_ratio_response_metric": 0.9017521902377973,
+    "entered_allowed_overtake_lane": true,
+    "maximum_pass_margin_m": 5.555903848949626,
+    "success_region_reached": true,
+    "overtake_success": false,
+    "minimum_bbox_clearance_2d_m": 1.4179873092799404
+  },
+  "failed_gate": "maximum_pass_margin_m >= 6.0 and overtake_success",
+  "status": "NORMAL_CANDIDATE_REJECTED",
+  "active_run_authorized": false,
+  "interpretation": "The target-speed increase preserved runtime, transport, Prediction coverage and legal lane entry, but reduced the frozen pass margin below the preregistered threshold. The candidate is rejected without an active fault run; the oracle is unchanged."
+}

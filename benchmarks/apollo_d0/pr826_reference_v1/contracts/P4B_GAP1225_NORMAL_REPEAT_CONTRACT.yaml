@@ -1,0 +1,53 @@
+schema_version: 1
+contract_version: p4b-gap1225-normal-only-repeat-v1
+status: FROZEN_BEFORE_FORMAL_REPEAT_RESULTS
+frozen_at: "2026-08-30T15:50:00Z"
+research_scope: NORMAL_ONLY_SCENE_FAULT_MATCHING_FORMAL_REPEAT
+active_fault_run_authorized_before_audit: false
+
+source_screen:
+  run_id: RN_G1225_S1
+  status: PASS
+  summary_sha256: e4798ab5b76d76ba04f1b308b6bcb86596a769f425db2b5293617732f8581d5b
+  max_pass_margin_m: 14.274524226666912
+  prediction_trajectory_coverage: 0.9421641791044776
+  planning_valid_ratio: 0.9267214150347441
+
+repeat_schedule:
+  - {run_id: RN_G1225_F1, created_at: "2026-08-30T15:51:00Z"}
+  - {run_id: RN_G1225_F2, created_at: "2026-08-30T15:51:01Z"}
+  - {run_id: RN_G1225_F3, created_at: "2026-08-30T15:51:02Z"}
+
+normal_gate:
+  runtime_exception_absent: true
+  route_accepted: true
+  collision_count_max: 0
+  illegal_lane_invasion_count_max: 0
+  prediction_trajectory_coverage_min: 0.90
+  planning_channel_coverage_min: 0.95
+  control_channel_coverage_min: 0.95
+  overtake_success: true
+  maximum_pass_margin_m_min: 6.0
+  success_region_reached: true
+  planning_valid_ratio_is_response_metric_not_gate: true
+
+admission_rule:
+  required_passes: 3
+  normalized_manifests_identical: true
+  if_pass: AUTHORIZE_ONE_FROZEN_NATIVE_ACTIVE_SCREEN
+  if_fail: REJECT_CANDIDATE_WITHOUT_ACTIVE_RUN
+
+frozen_hashes:
+  source_manifest_sha256: c27ba226c849abbf7f0a8f4294f5be960fac56957b4c0af3b0727e9714892998
+  preparer_sha256: 7331eed45f416b2aacda075cdbf24e50a12d428cc6a1eb4f00759610b83623ba
+  auditor_sha256: 77bbd4e12e72ee56efa3c9ea33f4799b74bccf9138c8101145d6d146b109060b
+  renderer_sha256: d5fe3d31d3f362ba2a506456bf2951a68d9569078226ccd7b456ffa922ce1daa
+  runner_sha256: 157c49debedf98550370b7bc9d067ca04d9c857222c8a17af5bc6116023d2cd8
+
+forbidden:
+  - active_fault_domain_before_3_of_3_audit
+  - change_geometry_between_repeats
+  - change_normal_gate_after_result
+  - privileged_prediction_interface_intervention
+  - future_ground_truth_to_planning
+  - external_ego_control

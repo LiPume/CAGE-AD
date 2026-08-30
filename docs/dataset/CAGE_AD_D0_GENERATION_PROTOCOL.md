@@ -1,6 +1,6 @@
 # CAGE-AD D0 数据生成协议：从候选 recipe 到可诊断 episode
 
-状态：**v1 规范已冻结；数值尚待 Apollo 10 服务器校准，不代表数据已通过**
+状态：**v1 规范已冻结；正在 Apollo 10 服务器逐条校准，不代表数据已通过**
 
 适用环境：Apollo 10 host mode + CARLA 0.9.15，perfect-perception PnC
 
@@ -69,6 +69,18 @@ Apollo 未启动、route 失败、actor 没生成、planning stream 缺失一律
 | CAL-C02 | early cut-in | whole-command delay | 横向命令序列上复现相同 delay，检验跨 outcome geometry | 只延迟 brake 字段 |
 | CAL-C03 | close lead brake | actuator effectiveness scalar | 保持命令符号与互斥，等比例降低 actuator effect | throttle 加 bias 且 brake 清零 |
 | CAL-C04 | early cut-in | actuator effectiveness scalar | 同一 scalar 同时作用于 steering/braking demand | 为此 case 单独发明另一控制 fault |
+
+### 4.1 当前校准进度（2026-08-07）
+
+| ID | 通俗场景含义 | 已执行内容 | 当前终态 | 为什么没有继续生成 fault 数据 |
+|---|---|---|---|---|
+| CAL-F01 | 近距离跟车，前车制动；检查旧预测是否会让自车反应太晚 | LBC0/LBC1/LBC2 各 5 个名义种子，共 15 次 | `rejected_no_causal_dose` | 15/15 基础设施有效且无碰撞，但 15/15 没有进入要求的 TTC 敏感区间 |
+| CAL-F02 | 中等距离跟车，前车制动；检查同一预测延迟现象能否换一组车距复现 | LBM0/LBM1/LBM2 各 5 个名义种子，共 15 次 | `rejected_no_causal_dose` | 15/15 基础设施有效且无碰撞，但 15/15 没有进入要求的 TTC 敏感区间 |
+| CAL-F03 | 车辆较早从侧方切入；检查低估未来横向侵入是否会损失安全余量 | CIE0/CIE1/CIE2 各 5 个名义种子，共 15 次 | `rejected_no_causal_dose` | 15/15 基础设施有效且无碰撞，但 15/15 没有进入要求的 TTC 敏感区间 |
+
+这些终态的意思是：当前冻结场景没有把 Apollo 带到足够接近风险边界的位置，所以协议不允许继续注入故障。
+它们不是“相应预测故障无害”的证据，也不是可供训练或正式评价的独立诊断 episode。失败样本及资源用量保留在持久盘账本中，
+公开仓库只保存不泄漏私有 oracle 的分子/分母摘要。其余 recipe 尚未运行，不提前填写结果。
 
 每行的执行步骤完全相同：
 

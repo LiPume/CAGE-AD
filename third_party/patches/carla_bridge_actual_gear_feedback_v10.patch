@@ -1,0 +1,13 @@
+diff --git a/carla_bridge/actor/ego_vehicle.py b/carla_bridge/actor/ego_vehicle.py
+--- a/carla_bridge/actor/ego_vehicle.py
++++ b/carla_bridge/actor/ego_vehicle.py
+@@ -120,8 +120,10 @@ class EgoVehicle(Vehicle):
+         if carla_control.hand_brake:
+             vehicle_chassis.gear_location = Chassis.GearPosition.GEAR_PARKING
+-        elif carla_control.reverse:
++        elif carla_control.reverse or carla_control.gear < 0:
+             vehicle_chassis.gear_location = Chassis.GearPosition.GEAR_REVERSE
++        elif carla_control.gear == 0:
++            vehicle_chassis.gear_location = Chassis.GearPosition.GEAR_NEUTRAL
+         else:
+             vehicle_chassis.gear_location = Chassis.GearPosition.GEAR_DRIVE

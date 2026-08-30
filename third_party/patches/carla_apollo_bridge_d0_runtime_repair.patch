@@ -1,0 +1,24 @@
+diff --git a/carla_bridge/actor/ego_vehicle.py b/carla_bridge/actor/ego_vehicle.py
+--- a/carla_bridge/actor/ego_vehicle.py
++++ b/carla_bridge/actor/ego_vehicle.py
+@@ -117,12 +117,21 @@ class EgoVehicle(Vehicle):
+         vehicle_chassis.header.frame_id = 'ego_vehicle'
+         vehicle_chassis.engine_started = True
+         vehicle_chassis.speed_mps = self.get_vehicle_speed_abs(self.carla_actor)
+-        vehicle_chassis.throttle_percentage = self.carla_actor.get_control().throttle * 100.0
+-        vehicle_chassis.brake_percentage = self.carla_actor.get_control().brake * 100.0
+-        vehicle_chassis.steering_percentage = -self.carla_actor.get_control().steer * 100.0
+-        vehicle_chassis.parking_brake = self.carla_actor.get_control().hand_brake
++        carla_control = self.carla_actor.get_control()
++        vehicle_chassis.throttle_percentage = carla_control.throttle * 100.0
++        vehicle_chassis.brake_percentage = carla_control.brake * 100.0
++        vehicle_chassis.steering_percentage = -carla_control.steer * 100.0
++        vehicle_chassis.parking_brake = carla_control.hand_brake
++        if carla_control.hand_brake:
++            vehicle_chassis.gear_location = Chassis.GearPosition.GEAR_PARKING
++        elif carla_control.reverse:
++            vehicle_chassis.gear_location = Chassis.GearPosition.GEAR_REVERSE
++        else:
++            vehicle_chassis.gear_location = Chassis.GearPosition.GEAR_DRIVE
+         vehicle_chassis.driving_mode = Chassis.DrivingMode.COMPLETE_AUTO_DRIVE
+         self.vehicle_chassis_writer.write(vehicle_chassis)

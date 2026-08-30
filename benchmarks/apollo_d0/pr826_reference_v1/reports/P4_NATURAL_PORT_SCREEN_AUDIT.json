@@ -1,0 +1,239 @@
+{
+  "admission_evidence": false,
+  "analysis_type": "P4_NATURAL_PR826_PORT_L0_L4_SCREEN",
+  "causal_order_valid": false,
+  "classification": "CANDIDATE_SEMANTIC_DELTA_ABSENT",
+  "contract_sha256": "4f0ddab4ee437969c49dc3cae2c9a605d35d37df57230caa5fea565438536268",
+  "levels": {
+    "L0_fault_activation": true,
+    "L1_candidate_semantic_delta": false,
+    "L2_native_prediction_phenotype": true,
+    "L3_planning_consumption": true,
+    "L3_planning_response": true,
+    "L4_vehicle_failure": false
+  },
+  "matched_manifest": {
+    "checks": {
+      "active_switch_enabled": true,
+      "exact_diff_paths": true,
+      "fixed_switch_disabled": true,
+      "trace_matched": true
+    },
+    "expected_diff_paths": [
+      "arm",
+      "private_prediction_runtime.domain_active",
+      "screening_id"
+    ],
+    "observed_diff_paths": [
+      "arm",
+      "private_prediction_runtime.domain_active",
+      "screening_id"
+    ],
+    "only_behavioral_diff_path": "private_prediction_runtime.domain_active",
+    "schema_version": 1,
+    "status": "PASS"
+  },
+  "native_output": {
+    "active": {
+      "clock_range_s": [
+        46.9500007,
+        50.050000746
+      ],
+      "delta_range_m": [
+        2.010992011389062,
+        5.017459105038314
+      ],
+      "frames": 45,
+      "sequence_numbers": [
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246
+      ]
+    },
+    "fixed": {
+      "clock_range_s": [
+        47.500000708,
+        50.500000753
+      ],
+      "delta_range_m": [
+        2.0180406740785344,
+        5.016171945098579
+      ],
+      "frames": 43,
+      "sequence_numbers": [
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246
+      ]
+    }
+  },
+  "non_claim": "One screening PASS requires frozen formal repeats before admission.",
+  "planning": {
+    "changed_sequences_consumed": 43,
+    "elapsed_range_s": [
+      8.950000133520703,
+      11.950000178520703
+    ],
+    "lane_change_path_frames": 25,
+    "planning_frames": 43,
+    "response_delta_definition": "valid/lane-change/main-decision categorical delta or frozen planned-horizon delta",
+    "response_delta_elapsed_range_s": [
+      9.800000146520702,
+      11.900000177520702
+    ],
+    "response_delta_frames": 12,
+    "target_debug_frames": 0
+  },
+  "private_mechanism": {
+    "active": {
+      "domain_1_events": 4588,
+      "eligibility_events": 4588,
+      "expanded_eligibility_events": 1535,
+      "expanded_overlap_events": 43
+    },
+    "fixed": {
+      "domain_0_events": 4534,
+      "eligibility_events": 4534
+    }
+  },
+  "schema_version": 1,
+  "status": "REJECT",
+  "validity": {
+    "active": {
+      "behavior_checks": {
+        "collision_free": true,
+        "expected_overtake": false,
+        "illegal_lane_invasion_free": true,
+        "pass_margin_below_gate": false,
+        "success_region_not_reached": false
+      },
+      "behavior_valid": false,
+      "outcome": {
+        "max_pass_margin_m": 23.879846755424182,
+        "overtake_success": true,
+        "planning_valid_ratio": 0.9365179132620993,
+        "prediction_trajectory_coverage": 0.9502487562189055,
+        "success_region_reached": true
+      },
+      "runtime_checks": {
+        "runtime_exception_absent": true
+      },
+      "runtime_valid": true,
+      "transport_checks": {
+        "control_coverage": true,
+        "planning_coverage": true,
+        "prediction_coverage": true,
+        "route_accepted": true
+      },
+      "transport_valid": true
+    },
+    "fixed": {
+      "behavior_checks": {
+        "collision_free": true,
+        "expected_overtake": true,
+        "illegal_lane_invasion_free": true
+      },
+      "behavior_valid": true,
+      "outcome": {
+        "max_pass_margin_m": 12.089032185400455,
+        "overtake_success": true,
+        "planning_valid_ratio": 0.9258328095537398,
+        "prediction_trajectory_coverage": 0.9390547263681592,
+        "success_region_reached": true
+      },
+      "runtime_checks": {
+        "runtime_exception_absent": true
+      },
+      "runtime_valid": true,
+      "transport_checks": {
+        "control_coverage": true,
+        "planning_coverage": true,
+        "prediction_coverage": true,
+        "route_accepted": true
+      },
+      "transport_valid": true
+    }
+  }
+}

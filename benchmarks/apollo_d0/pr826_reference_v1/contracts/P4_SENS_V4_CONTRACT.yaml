@@ -1,0 +1,117 @@
+schema_version: 1
+contract_version: p4-sens-boundary-v4-persistent-screen
+status: FROZEN_BEFORE_FIRST_V4_RESULT
+classification: NON_ADMISSION_CAUSAL_SENSITIVITY_PROBE
+admission_evidence: false
+supersedes_for_temporal_coverage_only: p4-sens-boundary-v3
+scientific_reason: >-
+  V3 transformed Prediction only through route elapsed 40 s, whereas all S1 +6 m pass outcomes
+  occurred from 58.75 to 63.10 s. V4 tests continuous left-lane occupancy through the decision
+  deadline without changing lateral dose, relative trajectory timing, scene, Planning, or Control.
+source_scene:
+  source_run_id: SN_N01_A
+  source_manifest: /root/autodl_apollo10_g0_bundle/runtime/runs/pr826_greybox_demo_v1/SN_N01_A/manifest.json
+  source_disposition: REJECT_MINIMUM_CLEARANCE_GATE
+  scientific_reason_for_use: INTERFACE_SENSITIVITY_ONLY_NOT_ADMISSION
+target:
+  obstacle_id: 1001
+  active_elapsed_s: [12.0, 75.0]
+semantics:
+  S0_STRAIGHT:
+    transform: IDENTITY_BYTE_EXACT
+  S1_LEFT_MERGE_OCCUPANCY:
+    transform: LEFT_NORMAL_SMOOTHSTEP
+    lateral_offset_m: 3.5
+    relative_start_s: 2.0
+    relative_end_s: 4.0
+    preserved_fields:
+      - message_header
+      - message_obstacle_count
+      - non_target_obstacles
+      - target_perception_obstacle
+      - target_timestamp
+      - target_predicted_period
+      - target_is_static
+      - target_trajectory_count
+      - target_trajectory_probabilities
+      - target_trajectory_point_count
+      - target_point_relative_time
+      - target_point_v
+      - target_point_a
+run_schedule:
+  initial_screen_ids:
+    S0_STRAIGHT: PY0_A
+    S1_LEFT_MERGE_OCCUPANCY: PY1_A
+  conditional_confirmation_ids:
+    S0_STRAIGHT: []
+    S1_LEFT_MERGE_OCCUPANCY: []
+  execution_order: [PY0_A, PY1_A]
+matching:
+  only_allowed_manifest_difference:
+    - private_sensitivity_semantic
+    - opaque_run_id
+  unchanged:
+    - carla_version
+    - map
+    - configured_map
+    - ego_spawn
+    - npc_spawn
+    - npc_policy
+    - npc_speed
+    - route
+    - seed
+    - weather
+    - deterministic_timing
+    - bridge
+    - prediction_binary
+    - planning
+    - control
+    - camera
+    - startup_order
+transport_gates:
+  route_accepted_required: true
+  target_raw_prediction_messages_min: 20
+  interposer_output_coverage_min: 0.95
+  planning_channel_coverage_min: 0.95
+  control_channel_coverage_min: 0.95
+  runtime_exception_absent_required: true
+  interposer_exception_absent_required: true
+  collision_count_max: 0
+  illegal_lane_invasion_count_max: 0
+response_metrics_not_transport_gates:
+  - planning_valid_ratio
+  - planning_optimizer_failure_count
+  - planning_fallback_count
+semantic_gates:
+  s0_identity_mismatch_max: 0
+  s1_field_preservation_mismatch_max: 0
+  s1_minimum_lateral_endpoint_delta_m: 3.4
+  s1_maximum_lateral_endpoint_delta_m: 3.6
+screen_gate:
+  s0_overtake_success_required: true
+  s1_overtake_success_required: false
+  s1_maximum_pass_margin_m: 6.0
+  observation_deadline_s: 80.0
+  if_s1_overtakes: CLOSE_SCENE_NO_NATURAL_PR826_RUN
+  if_s1_does_not_overtake: FREEZE_THREE_PAIR_CONFIRMATION_BEFORE_NATURAL_PR826_RUN
+forbidden_claims:
+  - GOLDEN_CASE
+  - NATURAL_PR826_FAULT
+  - ADMISSION_EVIDENCE
+  - DIAGNOSIS_AGENT_RESULT
+frozen_hashes:
+  source_manifest_sha256: 2bce7337fddf904ef476a02b6584bc87f304253f6886210895acb97077ed462b
+  v3_scene_kill_sha256: 8224ac27659275133a666427c840cc4f311434249381791fd753265fc374a131
+frozen_artifacts:
+  - path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/p4_sensitivity_interposer.py
+    sha256: a56fd9d93a584b199c22f6bfd61175bb3a45f6aab4f8baef1392e53565c20042
+  - path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/prepare_p4_sensitivity_probe.py
+    sha256: 56b7433a9561961250001f0d44cdb1dd3d492e023ad44fdc97ee42e7dc4cc70a
+  - path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/render_reference_launch.py
+    sha256: d5fe3d31d3f362ba2a506456bf2951a68d9569078226ccd7b456ffa922ce1daa
+  - path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/run_reference_screen.sh
+    sha256: 157c49debedf98550370b7bc9d067ca04d9c857222c8a17af5bc6116023d2cd8
+  - path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/scripts/d0/pr826/analyze_p4_sensitivity.py
+    sha256: 51ed30ac1de8ce70072880cb77d7912b926ebd631aefab5625680f7ea7141c10
+  - path: /root/autodl_apollo10_g0_bundle/project/CAGE-AD/tests/d0/test_p4_sensitivity_transform.py
+    sha256: 955ce13f6e6d4bc8d0bb4ef209c5a96f21685bdd5ec19a1b4d03300dc1691887
