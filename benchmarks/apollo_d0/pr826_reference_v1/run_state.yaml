@@ -3,8 +3,8 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T16:30:00Z"
-current_gate: NORMAL_ONLY_SPEED_BOUNDARY_SEARCH_AFTER_SPEED150_REJECTED
+last_updated_at: "2026-08-30T17:01:00Z"
+current_gate: SPEED130_FIXED_REPEAT_FROZEN_ACTIVE_PROHIBITED
 
 phases:
   p1_prediction_bringup: PASS
@@ -118,14 +118,24 @@ p4b_speed130_normal_screen:
   run_id: RN_V130_S1
   active_fault_domain: false
   target_speed_mps: 1.30
-  status: FROZEN_PENDING_SCREEN
+  prediction_trajectory_coverage: 0.9425216316440049
+  planning_channel_coverage: 0.9913473423980222
+  control_channel_coverage: 0.9951792336217552
+  planning_valid_ratio_response_metric: 0.9420199501246883
+  maximum_pass_margin_m: 11.911970854471605
+  minimum_bbox_clearance_2d_m: 0.5357503362355731
+  success_region_reached: true
+  overtake_success: true
+  status: SCREENING_PASS_FIXED_REPEATS_FROZEN
   active_run_authorized: false
-  contract: contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml
+  screen_contract: contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml
+  repeat_contract: contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml
   manifest: configs/NATURAL_MATCH_GAP1225_SPEED130_NORMAL_MANIFEST.json
+  screen_audit: reports/P4B_SPEED130_NORMAL_SCREEN_AUDIT.json
 
 next_action: >-
-  Execute the frozen RN_V130_S1 normal-only screen. If it passes, freeze three fixed repeats before
-  any active run; if it fails, reject it without active execution. Keep fault and oracle unchanged.
+  Run RN_V130_F1, RN_V130_F2 and RN_V130_F3 sequentially under the frozen normal repeat contract,
+  then audit 3/3 before authorizing any active run. Keep fault, geometry and oracle unchanged.
 
 non_claims:
   - privileged_s1_is_not_natural_pr826

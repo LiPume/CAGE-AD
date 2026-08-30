@@ -36,12 +36,15 @@ Updated: 2026-08-30 UTC
 - A normal-only 1.50 m/s temporal-persistence candidate was rejected before any active run. It was
   runtime/route/channel valid and safe, but its +5.556 m maximum pass margin missed the unchanged
   +6.0 m normal gate. The result is a normal-reference capability boundary, not PR826 evidence.
+- The bracketed 1.30 m/s normal screen passed at +11.912 m with 0.9425 Prediction trajectory
+  coverage and no collision/illegal lane invasion. Its 0.536 m minimum clearance is explicitly
+  retained as a response metric. Active execution remains prohibited pending fixed 3/3.
 - No PR826 L0→L4 causal chain or golden case is admitted.
 - No diagnosis Agent, probability claim, repair, or animation is in scope yet.
 
 ## Current gate
 
-`NORMAL_ONLY_SPEED_BOUNDARY_SEARCH_AFTER_SPEED150_REJECTED`
+`SPEED130_FIXED_REPEAT_FROZEN_ACTIVE_PROHIBITED`
 
 The v5 sensitivity contract is closed without further tuning. Two native-port scene pairs are
 closed without changing the fault: the first missed L1; the second reached L3 but recovered before
@@ -50,13 +53,14 @@ active result exists for it. None is golden-case admission.
 
 ## Only next action
 
-Test one bracketed normal-only candidate at 1.30 m/s, between the stable 1.10 m/s reference and the
-rejected 1.50 m/s capability boundary, while retaining the admitted 12.25 m geometry. Freeze and
-validate the normal arm before any active result. Do not change the semantic port or failure oracle.
+Run the frozen `RN_V130_F1/F2/F3` fixed repeats sequentially and audit the unchanged normal gate.
+Any failed repeat rejects the candidate without active execution. Do not change the semantic port,
+geometry, timing or failure oracle.
 
 ## Active contract and canonical reports
 
-- Active contract: `contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml`
+- Active contract: `contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml`
+- Completed screen contract: `contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml`
 - Closed persistent-sensitivity contract: `P4_SENS_V5_CONFIRMATION_CONTRACT.yaml`
 - Canonical configured-reference report: `reports/FINAL_REFERENCE_REPORT.md`
 - Canonical persistent-sensitivity report: `reports/P4_PERSISTENT_SENSITIVITY_REPORT.md`
@@ -64,6 +68,7 @@ validate the normal arm before any active result. Do not change the semantic por
 - Latest native-port screen: `reports/P4_NATURAL_PORT_SCREEN_REPORT.md`
 - Latest L0→L3 native screen: `reports/P4B_GAP1225_NATURAL_SCREEN_REPORT.md`
 - Latest normal-only boundary screen: `reports/P4B_SPEED150_NORMAL_SCREEN_AUDIT.json`
+- Current normal screen: `reports/P4B_SPEED130_NORMAL_SCREEN_AUDIT.json`
 - Canonical machine state: `run_state.yaml`
 
 ## Explicit non-claim
