@@ -1,9 +1,9 @@
 schema_version: 1
 protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
-current_gate: SCENE_FAULT_COMPATIBILITY_ANALYSIS
+current_gate: SCENE_FAULT_COMPATIBILITY_ANALYSIS_AFTER_P2M
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-30T04:28:00Z"
+last_updated_at: "2026-08-30T05:15:00Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -16,7 +16,7 @@ gates:
   p1_prediction_bringup: PASS
   p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_port_fixture: PASS_P3_SEMANTIC_FIXTURE
-  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2K_FORMAL_TIMING_REJECTED
+  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2M_REJECT_FIXED_AND_LATE_INTERACTION
   p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
   p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
   p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
@@ -117,7 +117,7 @@ reference_scene_result:
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
 terminal_reason: null
-next_action: Analyze a distinct time-separated interaction in which route Planning is stably initialized before a continuously moving target enters the shared lane sequence; do not continue close-gap, lateral-offset, blueprint, or stop-and-go sweeps.
+next_action: Use measured P2M closure kinematics to preregister one normal-only forward-offset P2N candidate whose physical merge occurs before the pass outcome and within the frozen nearby semantic domain; do not run active fault until 3/3 fixed admission.
 p3_semantic_port:
   started_at: "2026-08-29T11:20:00Z"
   pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
@@ -303,6 +303,15 @@ p2k_narrow_target_continuous:
   formal_repeats_2_and_3: NOT_RUN_EARLY_STOP
   formal_status: REJECT_EARLY_STOP_MECHANISM_TIMING_GATE
   status: FAMILY_CLOSED_NO_ACTIVE_RUN
+  active_fault_runs: 0
+p2l_time_separated_merge:
+  screening_id: SL_N01_A
+  candidate_id: RF04_P2L_MICROLINO_LANE3_TO_LANE2_T6D2_ROUTE1072Y70_SLOW110_80S_V1
+  contract_sha256: 1e83ff89961045ba9d599fd9483e653d38c0b8a9750c5b7d36ef0a359494cba1
+  merge_window_s: [6.0, 8.0]
+  source_target_lanes: [-3, -2]
+  policy_trigger: SIMULATION_ELAPSED_ONLY
+  status: PENDING_FIXED_SCREEN
   active_fault_runs: 0
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17

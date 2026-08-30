@@ -1635,3 +1635,136 @@ candidates:
       the 3.5 m lane with about 0.11 m geometric margin. The design seeks an early fixed lane-change
       path without changing fault dose or Planning. It was selected before any active result for
       this blueprint/geometry; normal-only screening and 3/3 admission remain mandatory.
+    screening_disposition: REJECT_FORMAL_FIRST_OVERLAP_TIMING_GATE
+  - candidate_id: RF04_P2L_MICROLINO_LANE3_TO_LANE2_T6D2_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2L_TIME_SEPARATED_MERGE_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    initial_npc_lane_id: -3
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_blueprint: vehicle.micro.microlino
+    npc_spawn_carla: {x: 12.856113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 0.0
+    npc_policy:
+      type: CARLA_TIMED_ADJACENT_LANE_MERGE_LOCAL_VELOCITY
+      speed_mps: 1.10
+      traffic_manager_used: false
+      source_lane_id: -3
+      target_lane_id: -2
+      lane_change_start_s: 6.0
+      lane_change_duration_s: 2.0
+      release_trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      position_source: CURRENT_ADJACENT_LANE_CENTERS_AND_SMOOTHSTEP
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      apollo_output_used: false
+      ego_state_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: false
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2l_time_separated_merge_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact Microlino, initial lane -3 pose, 1.10 m/s
+      velocity, 6.0--8.0 s smoothstep merge into lane -2, route, map, Control, timing, startup order
+      and oracle. Only the frozen Prediction semantic switch may differ after a separate 3/3 fixed
+      admission. The NPC policy reads simulation time and current adjacent lane centers only.
+    selection_basis: >-
+      P2K formally rejected a scene whose mechanism depended on a sub-second race between fault
+      proximity and Apollo route initialization. An offline translation of all three admitted P2B
+      trajectories also showed that increasing the gap to 8--10 m never re-enters the <10 m
+      trigger while ego remains on lane -2. This distinct design separates initialization from
+      interaction physically: the narrow target starts alongside ego in lane -3, moves continuously
+      at 1.10 m/s, then changes into lane -2 from 6.0 to 8.0 s using a fixed CARLA-time smoothstep
+      between current adjacent lane centers. At merge completion, admitted P2B kinematics predict
+      the target is roughly 6 m ahead while Planning is already initialized. There is no teleport,
+      hidden actor, ego control, Apollo/ego-state trigger or future GT. The normal arm must first
+      prove safe merge/overtake, real target trajectories and stable post-initialization interaction
+      in 3/3 repeats before any active execution.
+    screening_disposition: REJECT_PREEXECUTION_APPLY_TRANSFORM_VIOLATES_NO_TELEPORT_CONTRACT
+  - candidate_id: RF04_P2M_MICROLINO_ACKERMANN_LANE3_TO_LANE2_T6D4_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2M_PHYSICS_CONTROLLED_MERGE_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    initial_npc_lane_id: -3
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_blueprint: vehicle.micro.microlino
+    npc_spawn_carla: {x: 12.856113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 0.0
+    npc_policy:
+      type: CARLA_TIMED_ACKERMANN_LANE_MERGE
+      speed_mps: 1.10
+      traffic_manager_used: false
+      source_lane_id: -3
+      target_lane_id: -2
+      lane_change_start_s: 6.0
+      lane_change_duration_s: 4.0
+      trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      path_reference: CURRENT_CARLA_SOURCE_AND_TARGET_LANE_CENTERS
+      command_transport: VEHICLE_APPLY_ACKERMANN_CONTROL
+      lookahead_m: 3.0
+      wheelbase_m: 1.50
+      maximum_steer_rad: 0.50
+      steer_speed_rad_s: 0.50
+      acceleration_mps2: 1.0
+      jerk_mps3: 1.0
+      pose_or_velocity_override_used: false
+      apollo_output_used: false
+      ego_state_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2m_physics_controller_probe: P2M_CONTROLLER_PROBE_AUDIT.json
+    fixed_future_faulty_arm_constraint: >-
+      Any fixed and later active arms must use this exact native Ackermann controller and parameters,
+      Microlino, source/target lanes, route, map, Control, timing, startup order and oracle. Only the
+      already frozen Prediction semantic switch may differ after a separate 3/3 fixed admission.
+    selection_basis: >-
+      P2L was rejected before execution because smooth per-frame ApplyTransform still violated its
+      no-teleport invariant. P2M replaces only that invalid transport with CARLA's native Ackermann
+      physics controller. Three standalone deterministic probes produced a lane -3 to -2 transition
+      at exactly 11.0 s, median speed range 0.002861 m/s, maximum per-frame physical displacement
+      0.05643 m and zero collisions. The controller uses only simulation elapsed time, the NPC's
+      current pose and current CARLA lane centers; it reads no ego state, Apollo output or future GT.
+      This controller evidence was obtained before any Apollo-integrated P2M result.
+    screening_disposition: REJECT_FIXED_GATE_AND_INTERACTION_AFTER_PASS_OUTCOME

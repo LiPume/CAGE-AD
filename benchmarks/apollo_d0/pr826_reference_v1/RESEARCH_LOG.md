@@ -2797,3 +2797,106 @@ so Planning is stably initialized before a continuously moving target enters the
 shared with the ADC. Any such design must use a fixed CARLA-time actor policy, remain visible and
 physical, avoid teleportation/future GT/Apollo state, and pass a new normal-only 3/3 contract before
 the frozen fault is executed.
+
+## Issue P2L-001 — time-separated physical merge candidate
+
+Offline translation of all three admitted P2B sample trajectories showed that gaps 8.0–10.0 m
+never re-enter the `<10 m` trigger while ego remains on lane -2; only the first 0.8 s can qualify.
+This excludes another gap sweep. P2L instead starts a visible Microlino alongside ego in lane -3,
+moves continuously at 1.10 m/s, and uses a fixed 6.0–8.0 s CARLA-time smoothstep into adjacent lane
+-2. The policy interpolates current adjacent lane centers, reads no Apollo/ego state or future GT,
+and never controls ego. P2B kinematics predict roughly 6 m longitudinal lead at merge completion,
+after route Planning initialization.
+
+The policy implementation, null-safe mechanism analyzer/test, candidate and fixed-only contract
+were frozen before results. Screening requires source lane -3 before 5.5 s, target lane -2 from
+8.5–13.0 s, at least 10 trajectory-bearing lane-change Planning frames from 8–15 s, and every
+unchanged reference gate. Any failure rejects this distinct family before formal/active runs.
+
+## Issue P2L-002 — pre-execution teleportation invariant
+
+现象：The final pre-execution code audit found that P2L's visually smooth lane transition was
+implemented with `carla.command.ApplyTransform` once per synchronous frame. The frozen contract
+explicitly forbids `teleport_npc`; no P2L run had been prepared or started.
+
+证据：`reference_screen_runtime.py` called `ApplyTransform` in the timed-merge branch.
+`P2L_PREEXECUTION_REJECTION_AUDIT.json` records the command/contract conflict and
+`run_started=false`; the P2L ledger contains no manifest or runtime result.
+
+当前假设：H1, interpolation step size does not change the command's kinematic semantics. H2,
+CARLA's native `VehicleControl` or `VehicleAckermannControl` can generate the same maneuver through
+vehicle physics without reading Apollo, ego state, or future GT.
+
+联网检索：
+
+- Query: `site:carla.readthedocs.io/en/0.9.15 vehicle apply_control steering throttle physics`
+- URL: https://carla.readthedocs.io/en/0.9.15/core_actors/
+- Source/access: CARLA 0.9.15 official documentation, 2026-08-30.
+- 关键结论: CARLA vehicles have wheel physics and accept throttle/steering/brake through
+  `VehicleControl`; confidence HIGH; Apollo 10 applicability direct at the scene boundary.
+- Query: `VehicleAckermannControl apply_ackermann_control deterministic synchronous lane change`
+- URL: https://github.com/carla-simulator/ros-bridge/blob/master/carla_ackermann_control/src/carla_ackermann_control/carla_ackermann_control_node.py
+- Source/access: official CARLA ROS bridge source, 2026-08-30.
+- 关键结论: the official controller converts simulation-time Ackermann targets through PID into
+  CARLA vehicle commands; confidence HIGH; shipped 0.9.15 examples locally confirm the API.
+- Query: `CARLA deterministic synchronous VehicleControl`
+- URL: https://github.com/carla-simulator/carla/discussions/6082
+- Source/access: CARLA GitHub discussion, 2026-08-30.
+- 关键结论: synchronous fixed-step execution and open-loop controls are the relevant baseline,
+  but repetition is still required; confidence MEDIUM.
+
+设计的实验：Reject P2L before execution. Before opening P2M, run a CARLA-only controller probe on
+the exact Town04 lanes and Microlino. Require wheel control, recorded control/state, source-to-target
+lane transition, and absence of pose/velocity override APIs.
+
+修改：Added the pre-execution rejection audit, closed the ledger, documented the reusable invariant
+in the best-practices file and moved state to a controller probe. No Prediction or scientific scene
+result changed.
+
+运行结果：PASS as a pre-execution audit; the invalid design was prevented from producing evidence.
+
+结论：P2L is `IMPLEMENTATION_INVALID_REJECTED_BEFORE_EXECUTION`. H1 is confirmed by direct
+code/contract comparison; H2 remains to test.
+
+排除的假设：Small per-frame transforms are not permissible merely because they form a continuous
+curve.
+
+新假设与下一步：A simulation-time Ackermann target with lane-center feedback based only on the
+NPC's current pose and CARLA map may preserve low speed and execute a physical merge. Build and run
+the standalone controller probe; freeze no replacement scene until it passes.
+
+P2M controller-probe result:
+
+Three independent CARLA 0.9.15 reloads passed. Source-lane and target-lane fractions were 1.0 in
+every run; first lane -2 association was 11.000000 s in all runs; median speed was 1.089057,
+1.089057 and 1.086196 m/s; maximum frame displacement was 0.05614–0.05643 m; collisions were zero.
+The commanded peak Ackermann angle was 0.218–0.219 rad. Source files contain no pose or velocity
+override call; the controller uses `apply_ackermann_control` only. Raw probes and hashes are frozen
+in `P2M_CONTROLLER_PROBE_AUDIT.json`.
+
+This confirms H2 only at the controller boundary. It does not admit an Apollo scene. The P2M
+normal-only candidate and screening contract were frozen after these three probes and before any
+Apollo-integrated result. Next action is exactly one `SM_N01_A` screen; an unchanged gate failure
+closes the family before formal or active runs.
+
+P2M Apollo-integrated screening result:
+
+`SM_N01_A` was implementation-valid and used native Ackermann physics only. Prediction trajectory
+coverage was `0.937961`; post-merge trajectory-bearing lane-change Planning overlap was 140 frames;
+body clearance was `1.692 m`; collision and illegal invasion were zero; success region was reached.
+The screen nevertheless failed two frozen gates. The target remained lane -3 through 10.95 s and
+first associated with lane -2 at 11.00 s, so the preregistered target-lane-from-10.5-s check failed.
+Planning valid ratio was `0.841388 < 0.90`. The ratio loss included zero-length stop/fallback
+clusters at 52.75–59.80 s and sub-1-m mission-complete trajectories after 70.25 s; this observation
+does not authorize changing the frozen metric.
+
+The decisive temporal audit found a deeper scene mismatch: ego reached the frozen 6 m pass margin
+at 6.90 s, while NPC did not enter lane -2 until 11.00 s. Pass margin was already 10.425 m at lane
+entry. Thus the measured channel overlap was real but occurred after the pass outcome; it cannot
+support a causal failed-overtake case. `P2M_FIXED_SCREENING_AUDIT.json` freezes the evidence.
+
+Conclusion: no formal fixed repeats and no active run. The same-longitudinal-origin timed-merge
+family is closed. A distinct candidate may place the NPC ahead by a distance derived from the
+measured approximately 0.97 m/s closure rate, so lane entry occurs while NPC is still ahead and
+within the existing `<10 m` nearby semantic domain. This is a normal-only mechanism correction,
+not a fault-dose change; it must be frozen before its first result.

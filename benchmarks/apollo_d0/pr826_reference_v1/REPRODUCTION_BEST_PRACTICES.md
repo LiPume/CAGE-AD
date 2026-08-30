@@ -72,6 +72,32 @@ after spawn and the exact frozen pose after one synchronous tick.
 - P2K: narrow continuous target passed screening, but first overlap shifted from 3.40 s to 4.20 s
   on Formal Repeat 1 and failed the frozen 3.5 s mechanism gate. Startup-subsecond interaction
   timing is not a reproducible recipe.
+- P2L: rejected before execution. Smooth per-frame `ApplyTransform` is still kinematic
+  teleportation and violates the frozen no-teleport invariant. A visually continuous trajectory is
+  not evidence of a physics-generated maneuver. Require a standalone `VehicleControl` or
+`VehicleAckermannControl` probe before freezing a replacement candidate.
+- P2M: the physical controller itself repeated 3/3, but the same-longitudinal-origin Apollo screen
+  is not a recipe. Ego reached the 6 m pass gate at 6.9 s; NPC entered lane -2 only at 11.0 s, when
+  pass margin was already 10.425 m. Post-merge channel overlap cannot establish causal relevance
+  after the system outcome. Planning valid also missed its unchanged 0.90 gate.
+
+## Pre-execution invariant audit
+
+Before preparing any run, inspect the exact transport used by each actor policy. Treat
+`set_transform`, `ApplyTransform`, `set_location`, and `ApplyLocation` as teleportation regardless
+of step size or interpolation smoothness. A contradiction between implementation and a frozen
+forbidden-action list is an implementation-invalid rejection, not a reason to reinterpret the
+contract. Reject it before consuming simulation time, preserve the frozen contract and hashes, and
+open a new candidate only after a lower-level physical-control probe passes.
+
+## Verified NPC physical-control probe recipe
+
+`P2M_CONTROLLER_PROBE_AUDIT.json` records a 3/3 CARLA-only controller PASS on the exact Town04
+road/lane and Microlino geometry. Use native `VehicleAckermannControl` at 1.10 m/s with a 3.0 m
+lookahead, 1.50 m wheelbase model, 0.50 rad steering limit/rate, and a simulation-time 6.0–10.0 s
+lane-center blend. The three probes entered lane -2 at exactly 11.0 s, had zero collisions, and
+kept median speed within 1.086–1.089 m/s. This is a verified controller recipe, not yet an admitted
+Apollo reference. Never substitute pose or velocity overrides if the controller fails downstream.
 
 Future entries must distinguish `VERIFIED`, `SCREEN_ONLY`, `REJECTED`, and
 `IMPLEMENTATION_INVALID` explicitly.

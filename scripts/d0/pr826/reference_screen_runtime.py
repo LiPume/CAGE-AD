@@ -40,6 +40,22 @@ def actor_speed(actor) -> float:
     return math.hypot(velocity.x, velocity.y)
 
 
+def smoothstep(value: float) -> float:
+    value = min(1.0, max(0.0, value))
+    return value * value * (3.0 - 2.0 * value)
+
+
+def pure_pursuit_steer(transform, target, wheelbase_m: float,
+                       maximum_steer_rad: float) -> float:
+    yaw = math.radians(float(transform.rotation.yaw))
+    dx = float(target.x - transform.location.x)
+    dy = float(target.y - transform.location.y)
+    local_y = dx * -math.sin(yaw) + dy * math.cos(yaw)
+    distance_sq = max(0.25, dx * dx + dy * dy)
+    angle = math.atan2(2.0 * wheelbase_m * local_y, distance_sq)
+    return min(maximum_steer_rad, max(-maximum_steer_rad, angle))
+
+
 def proto_sha256(message) -> str:
     return hashlib.sha256(message.SerializeToString(deterministic=True)).hexdigest()
 
@@ -241,14 +257,14 @@ class ReferenceScreen:
         ]
         return actors[0] if len(actors) == 1 else None
 
-    def target_lane_waypoint(self, location):
-        """Resolve the target's declared lane through current-waypoint adjacency only."""
+    def lane_waypoint(self, location, desired_lane_id: int):
+        """Resolve one declared lane through current-waypoint adjacency only."""
         seed = self.map.get_waypoint(
             location, project_to_road=True, lane_type=carla.LaneType.Driving
         )
         if seed is None:
             return None
-        desired_lane_id = int(self.candidate["carla_lane_id"])
+        desired_lane_id = int(desired_lane_id)
         queue = [seed]
         visited: set[tuple[int, int]] = set()
         while queue and len(visited) < 8:
@@ -266,6 +282,19 @@ class ReferenceScreen:
             "current waypoint adjacency does not contain declared target lane "
             f"{desired_lane_id}; seed road/lane={seed.road_id}/{seed.lane_id}"
         )
+
+    def target_lane_waypoint(self, location):
+        return self.lane_waypoint(location, int(self.candidate["carla_lane_id"]))
+
+    @staticmethod
+    def next_same_lane_waypoint(waypoint, distance_m: float):
+        options = waypoint.next(distance_m)
+        if not options:
+            raise RuntimeError(
+                f"lane {waypoint.road_id}/{waypoint.lane_id} has no next waypoint"
+            )
+        same_lane = [item for item in options if item.lane_id == waypoint.lane_id]
+        return (same_lane or options)[0]
 
     def spawn_npc(self):
         spec = self.candidate["npc_spawn_carla"]
@@ -539,6 +568,73 @@ class ReferenceScreen:
                 "controller": "CARLA_TIMED_HOLD_THEN_LOCAL_VELOCITY_WITH_CURRENT_LANE_HEADING",
                 "release_command_elapsed_s": None,
                 "release_command_carla_frame": None,
+            }
+        elif policy_type == "CARLA_TIMED_ACKERMANN_LANE_MERGE":
+            if speed_mps <= 0.0 or policy.get("traffic_manager_used", False):
+                raise RuntimeError("Ackermann merge requires positive speed and no TrafficManager")
+            start_s = float(policy["lane_change_start_s"])
+            duration_s = float(policy["lane_change_duration_s"])
+            source_lane_id = int(policy["source_lane_id"])
+            target_lane_id = int(policy["target_lane_id"])
+            if not (0.0 < start_s < start_s + duration_s < float(
+                self.candidate.get("observation_window_s", self.fixed["observation_window_s"])
+            )):
+                raise RuntimeError("Ackermann merge window is outside observation")
+            if policy.get("trigger") != "SIMULATION_ELAPSED_SINCE_OBSERVATION_START":
+                raise RuntimeError("Ackermann merge must use simulation elapsed time")
+            pre_materialization_frame = int(self.world.get_snapshot().frame)
+            materialized_snapshot = self.world.wait_for_tick(5.0)
+            actor_location = actor.get_location()
+            spawn_xy_error_m = math.hypot(
+                float(actor_location.x) - float(spec["x"]),
+                float(actor_location.y) - float(spec["y"]),
+            )
+            initial_waypoint = self.lane_waypoint(actor_location, source_lane_id)
+            if (
+                spawn_xy_error_m > 0.25
+                or int(initial_waypoint.road_id) != int(self.candidate["carla_road_id"])
+                or int(initial_waypoint.lane_id) != source_lane_id
+            ):
+                raise RuntimeError(
+                    "Ackermann NPC did not materialize at frozen source lane: "
+                    f"xy_error={spawn_xy_error_m:.6f}, "
+                    f"road/lane={initial_waypoint.road_id}/{initial_waypoint.lane_id}"
+                )
+            actor.set_simulate_physics(True)
+            actor.disable_constant_velocity()
+            actor.apply_control(carla.VehicleControl(brake=1.0, hand_brake=False))
+            self.npc_policy_record = {
+                "type": policy_type,
+                "simulate_physics": True,
+                "speed_mps": speed_mps,
+                "source_lane_id": source_lane_id,
+                "target_lane_id": target_lane_id,
+                "lane_change_start_s": start_s,
+                "lane_change_duration_s": duration_s,
+                "trigger": "SIMULATION_ELAPSED_SINCE_OBSERVATION_START",
+                "lookahead_m": float(policy["lookahead_m"]),
+                "wheelbase_m": float(policy["wheelbase_m"]),
+                "maximum_steer_rad": float(policy["maximum_steer_rad"]),
+                "steer_speed_rad_s": float(policy["steer_speed_rad_s"]),
+                "acceleration_mps2": float(policy["acceleration_mps2"]),
+                "jerk_mps3": float(policy["jerk_mps3"]),
+                "traffic_manager_used": False,
+                "future_ground_truth_used": False,
+                "apollo_output_used": False,
+                "ego_state_used": False,
+                "pose_or_velocity_override_used": False,
+                "command_transport": "VEHICLE_APPLY_ACKERMANN_CONTROL",
+                "path_reference": "CURRENT_CARLA_SOURCE_AND_TARGET_LANE_CENTERS",
+                "controller": "CARLA_NATIVE_ACKERMANN_PHYSICS_PURE_PURSUIT",
+                "spawn_transform_materialization": {
+                    "pre_frame": pre_materialization_frame,
+                    "materialized_frame": int(materialized_snapshot.frame),
+                    "xy_error_m": spawn_xy_error_m,
+                    "maximum_xy_error_m": 0.25,
+                    "road_id": int(initial_waypoint.road_id),
+                    "lane_id": int(initial_waypoint.lane_id),
+                },
+                "last_ackermann_command": None,
             }
         else:
             actor.destroy()
@@ -981,7 +1077,7 @@ class ReferenceScreen:
             success_region_distance = math.hypot(
                 ego_location.x - float(center_x), ego_location.y - float(center_y)
             )
-        return {
+        record = {
             "elapsed_s": elapsed,
             "simulation_elapsed_seconds": float(
                 self.world.get_snapshot().timestamp.elapsed_seconds
@@ -1008,6 +1104,17 @@ class ReferenceScreen:
             "success_region_distance_m": success_region_distance,
             "carla_frame": int(self.world.get_snapshot().frame),
         }
+        if self.npc_policy_record.get("type") == "CARLA_TIMED_ACKERMANN_LANE_MERGE":
+            applied = self.npc.get_control()
+            record["npc_ackermann_command"] = dict(
+                self.npc_policy_record.get("last_ackermann_command") or {}
+            )
+            record["npc_applied_vehicle_control"] = {
+                "throttle": float(applied.throttle),
+                "steer": float(applied.steer),
+                "brake": float(applied.brake),
+            }
+        return record
 
     @staticmethod
     def carla_settings_record(settings) -> dict:
@@ -1066,6 +1173,49 @@ class ReferenceScreen:
                 self.npc.enable_constant_velocity(carla.Vector3D(
                     x=float(self.npc_policy_record["speed_mps"]), y=0.0, z=0.0
                 ))
+            elif self.npc_policy_record["type"] == "CARLA_TIMED_ACKERMANN_LANE_MERGE":
+                transform = self.npc.get_transform()
+                source = self.lane_waypoint(
+                    transform.location, int(self.npc_policy_record["source_lane_id"])
+                )
+                target = self.lane_waypoint(
+                    transform.location, int(self.npc_policy_record["target_lane_id"])
+                )
+                lookahead_m = float(self.npc_policy_record["lookahead_m"])
+                source_ahead = self.next_same_lane_waypoint(source, lookahead_m)
+                target_ahead = self.next_same_lane_waypoint(target, lookahead_m)
+                linear = (
+                    elapsed - float(self.npc_policy_record["lane_change_start_s"])
+                ) / float(self.npc_policy_record["lane_change_duration_s"])
+                alpha = smoothstep(linear)
+                aim = carla.Location(
+                    x=(1.0 - alpha) * source_ahead.transform.location.x
+                    + alpha * target_ahead.transform.location.x,
+                    y=(1.0 - alpha) * source_ahead.transform.location.y
+                    + alpha * target_ahead.transform.location.y,
+                    z=(1.0 - alpha) * source_ahead.transform.location.z
+                    + alpha * target_ahead.transform.location.z,
+                )
+                steer = pure_pursuit_steer(
+                    transform,
+                    aim,
+                    float(self.npc_policy_record["wheelbase_m"]),
+                    float(self.npc_policy_record["maximum_steer_rad"]),
+                )
+                command = carla.VehicleAckermannControl(
+                    steer=steer,
+                    steer_speed=float(self.npc_policy_record["steer_speed_rad_s"]),
+                    speed=float(self.npc_policy_record["speed_mps"]),
+                    acceleration=float(self.npc_policy_record["acceleration_mps2"]),
+                    jerk=float(self.npc_policy_record["jerk_mps3"]),
+                )
+                self.npc.apply_ackermann_control(command)
+                self.npc_policy_record["last_ackermann_command"] = {
+                    "elapsed_s": float(elapsed),
+                    "steer_rad": float(steer),
+                    "blend_alpha": float(alpha),
+                    "aim_xy": [float(aim.x), float(aim.y)],
+                }
             elif self.npc_policy_record["type"] in (
                 "CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT",
                 "CARLA_HOLD_THEN_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT",
