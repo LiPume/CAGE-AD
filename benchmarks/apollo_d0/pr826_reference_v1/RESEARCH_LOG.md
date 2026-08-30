@@ -3024,3 +3024,34 @@ Three host-mode protobuf controls passed: S0 serialized identity, S1 field prese
 syntax, YAML/JSON/JSONL validation and `git diff --check` passed. Contract
 `P4_SENS_CONTRACT.yaml` was frozen before any canonical P4-SENS manifest or result, SHA256
 `ccf059b34196cabfeab7fbfe8f5f70cd1efb2c0d8931f18a3b22f5045fa0bcec`.
+
+## Issue P4-SENS-002 — v1 three-semantic screen and gate conflation
+
+运行：`PS0_A`, `PS1_A`, and `PS2_A` completed the full 80 s scene. All interposers had no
+exception, forwarded at least 1615 raw messages, observed the target in all 560 active messages,
+and recorded zero preservation mismatches. S0 had zero identity mismatches. S1 transformed 560
+messages with endpoint displacement `[3.4999999999999996, 3.5] m`.
+
+结果：S0 Planning valid was `0.945`, lane -1 entry `32.40 s`, +6 m pass `52.45 s` and final
+overtake succeeded. S1 Planning valid fell to `0.890`, lane -1 entry was delayed to `34.70 s`,
++6 m pass was delayed to `60.85 s`, and final overtake still succeeded. S2 Planning valid was
+`0.914573`, lane -1 entry `32.35 s`, and +6 m pass `53.95 s`.
+
+First aligned Planning state divergence was at observation elapsed `12.40 s`: S0 exposed
+`regular/lane_change` with a stop main decision, while S1 exposed `regular/self` with cruise. The
+longest continuous interval where S0 had a lane-change path and S1 did not was `25.05–26.05 s`,
+exactly the frozen 1.0 s gate. The fixed 5 s planned-horizon comparison also exceeded its unchanged
+5 m drop gate. Thus an interface-sensitivity signal exists, but stability is not established.
+
+错误排查：v1 required the generic summary's `infrastructure_valid=true`. That field includes the
+normal-reference `planning_valid_ratio >= 0.90` test. S1 reached `0.890` because the changed input
+coincided with additional empty/fallback Planning cycles; the runner therefore exited 3 even though
+route, Prediction relay, Planning/Control channel coverage, collision, lane legality, and
+interposer health were valid. The gate circularly rejects a Planning response in an experiment
+whose subject is Planning response.
+
+结论：Preserve `P4_SENS_V1_AUDIT.json` as
+`INCONCLUSIVE_V1_GATE_CONFLATES_PLANNING_RESPONSE_WITH_INFRASTRUCTURE`; do not count any v1 run
+toward stable sensitivity. Open v2 before new results, changing only measurement classification:
+transport/runtime health remains a gate, while Planning validity/optimizer/fallback become response
+metrics. S0/S1 semantics and every delta threshold remain unchanged.
