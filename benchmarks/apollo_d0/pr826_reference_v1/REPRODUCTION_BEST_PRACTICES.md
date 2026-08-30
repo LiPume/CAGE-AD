@@ -120,3 +120,20 @@ message identity/timing fields that are not the target semantic, and never repor
 fault runs. If an explicit left-merge prediction does not reproducibly change Planning, close the
 scene–mechanism pair. Only after sensitivity is established should candidate-level fault telemetry
 be checked for a natural route from the historical predicate to the same output semantic.
+
+The verified P4-SENS v3 result adds a second, separate kill criterion. Stable low-level response is
+not sufficient: all three S1 runs changed Planning and delayed the +6 m pass point, yet all three
+still overtook. Therefore:
+
+- audit matched manifests independently of behavior;
+- separate transport validity from Planning-valid/fallback response metrics;
+- require the predeclared system outcome (here, overtake cancellation) in addition to a path/speed
+  delta;
+- never relabel a latency increase or smaller pass margin as `FAILED_OVERTAKE` after seeing it;
+- require response direction consistency when a directional timing effect is part of the claim;
+- do not authorize a natural historical-fault run on a scene that fails the explicit semantic
+  system-level kill criterion.
+
+P4-SENS v3 is a verified sensitivity-probe recipe and a verified negative scene–fault result, not
+golden-case admission. Authoritative artifacts are `P4_SENS_V3_STABILITY_AUDIT.json`,
+`P4_SENS_V3_MATCHED_MANIFEST_AUDIT.json`, and `P4_SENS_V3_SCENE_KILL_AUDIT.json`.

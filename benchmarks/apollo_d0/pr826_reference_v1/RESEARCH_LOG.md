@@ -3074,3 +3074,47 @@ frozen contract and declared `PW0_A`, verified every artifact hash, rendered the
 Prediction output to `/apollo/prediction_raw`. The retained isolated directory is
 `/tmp/cage-p4sens-v3-preflight.uVa5V3`. V3 contract SHA256 is
 `d8f30052e1c1005762e2e3ac1a945938e240a1b9c1fdfd0c1304fb9f3e5ba31b`.
+
+## Issue P4-SENS-003 — v3 matched repeats establish interface sensitivity but kill the scene
+
+现象：The frozen v3 contract executed three matched `S0_STRAIGHT` / three
+`S1_LEFT_MERGE_OCCUPANCY` runs (`PW0_A/PW1_A`, `PW0_B/PW1_B`, and
+`PW0_C/PW1_C`). All six runs passed the transport/runtime checks and the boundary semantic checks.
+The matched-manifest audit found exactly the permitted S0/S1 transform fields plus the opaque run
+ID within each pair; repeats differed only in creation time and opaque run ID.
+
+证据：Every pair exhibited a Planning response under the unchanged v3 response gates. The longest
+continuous S0-lane-change/S1-not interval was `2.55 s`, `1.85 s`, and `0.75 s`; pair C instead met
+the frozen lane-entry-delay response. All three pairs also met the planned-progress-drop response.
+S1 delayed the +6 m longitudinal pass point by `5.80 s`, `4.65 s`, and `20.50 s`. This establishes
+stable boundary-level Planning sensitivity, not a failed-overtake outcome.
+
+错误排查：The system-level kill criterion was evaluated separately from low-level Planning
+sensitivity. S1 still completed the overtake in all three repeats. Lane -1 entry changed by
+`-6.50 s`, `-23.35 s`, and `+9.30 s`, so even the lane-entry effect direction was not stable.
+Generic runner exits of 3 for `PW1_B` and `PW1_C` came from the normal-reference Planning-valid
+threshold; the dedicated audit correctly classifies that metric as downstream response while
+retaining route/channel/relay/runtime/collision/legality as infrastructure gates.
+
+结论：`P4_SENS_V3_STABILITY_AUDIT.json` is
+`STABLE_PLANNING_SENSITIVITY_PASS`, while the independent
+`P4_SENS_V3_SCENE_KILL_AUDIT.json` is `SCENE_CLOSED_FOR_GOLDEN_CASE`. The P2N scene is sensitive to
+Prediction trajectory semantics but is not a stable failed-overtake amplifier. A pass delay cannot
+be promoted after the fact to the frozen `FAILED_OVERTAKE` oracle. No natural PR826 active run is
+authorized on this scene.
+
+排除的假设：H2 in P4-SENS-001 (complete Planning insensitivity) is rejected. The stronger
+hypothesis that explicit left-lane occupancy reliably cancels the overtake is also rejected for
+this route-driven geometry.
+
+下一步：Preserve P2N and all P4-SENS runs as negative/compatibility evidence. If scene–fault
+matching continues, design a new normal-only configured reference in which the route remains in
+the ego lane and the only legal adjacent borrow lane is the one occupied by S1. Freeze and prove
+the normal reference first, then apply the same S0/S1 kill criterion before any natural PR826 run.
+
+P4-SENS post-audit validation note: invoking the protobuf unit test directly from the active Conda
+Python failed with `ModuleNotFoundError: modules`. This was an environment-selection error, not a
+transform failure: Apollo-generated `*_pb2.py` packages live in the AEM host environment. Re-running
+the unchanged test through `scripts/apollo_host_exec.sh` with the repository `src` path produced
+`3/3 PASS`. The verified recipe is to execute Apollo/Cyber protobuf tests in AEM host mode; Conda
+remains limited to CARLA clients and offline analyzers.

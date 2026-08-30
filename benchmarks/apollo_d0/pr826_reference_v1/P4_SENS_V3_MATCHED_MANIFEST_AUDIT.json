@@ -1,0 +1,116 @@
+{
+  "admission_evidence": false,
+  "analysis_type": "P4_SENS_MATCHED_MANIFEST",
+  "pair_checks": [
+    {
+      "expected": [
+        "p4_sensitivity_probe.lateral_offset_m",
+        "p4_sensitivity_probe.relative_end_s",
+        "p4_sensitivity_probe.relative_start_s",
+        "p4_sensitivity_probe.semantic",
+        "screening_id"
+      ],
+      "observed": [
+        "p4_sensitivity_probe.lateral_offset_m",
+        "p4_sensitivity_probe.relative_end_s",
+        "p4_sensitivity_probe.relative_start_s",
+        "p4_sensitivity_probe.semantic",
+        "screening_id"
+      ],
+      "pair": "A",
+      "pass": true
+    },
+    {
+      "expected": [
+        "p4_sensitivity_probe.lateral_offset_m",
+        "p4_sensitivity_probe.relative_end_s",
+        "p4_sensitivity_probe.relative_start_s",
+        "p4_sensitivity_probe.semantic",
+        "screening_id"
+      ],
+      "observed": [
+        "p4_sensitivity_probe.lateral_offset_m",
+        "p4_sensitivity_probe.relative_end_s",
+        "p4_sensitivity_probe.relative_start_s",
+        "p4_sensitivity_probe.semantic",
+        "screening_id"
+      ],
+      "pair": "B",
+      "pass": true
+    },
+    {
+      "expected": [
+        "p4_sensitivity_probe.lateral_offset_m",
+        "p4_sensitivity_probe.relative_end_s",
+        "p4_sensitivity_probe.relative_start_s",
+        "p4_sensitivity_probe.semantic",
+        "screening_id"
+      ],
+      "observed": [
+        "p4_sensitivity_probe.lateral_offset_m",
+        "p4_sensitivity_probe.relative_end_s",
+        "p4_sensitivity_probe.relative_start_s",
+        "p4_sensitivity_probe.semantic",
+        "screening_id"
+      ],
+      "pair": "C",
+      "pass": true
+    }
+  ],
+  "repeat_checks": [
+    {
+      "expected": [
+        "created_at",
+        "screening_id"
+      ],
+      "observed": [
+        "created_at",
+        "screening_id"
+      ],
+      "pass": true,
+      "repeat": "B",
+      "semantic_prefix": "PW0"
+    },
+    {
+      "expected": [
+        "created_at",
+        "screening_id"
+      ],
+      "observed": [
+        "created_at",
+        "screening_id"
+      ],
+      "pass": true,
+      "repeat": "C",
+      "semantic_prefix": "PW0"
+    },
+    {
+      "expected": [
+        "created_at",
+        "screening_id"
+      ],
+      "observed": [
+        "created_at",
+        "screening_id"
+      ],
+      "pass": true,
+      "repeat": "B",
+      "semantic_prefix": "PW1"
+    },
+    {
+      "expected": [
+        "created_at",
+        "screening_id"
+      ],
+      "observed": [
+        "created_at",
+        "screening_id"
+      ],
+      "pass": true,
+      "repeat": "C",
+      "semantic_prefix": "PW1"
+    }
+  ],
+  "schema_version": 1,
+  "status": "PASS"
+}

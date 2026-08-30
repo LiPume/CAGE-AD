@@ -1,9 +1,9 @@
 schema_version: 1
 protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
-current_gate: P4_SENS_SEMANTIC_SENSITIVITY_PROBE_DESIGN
+current_gate: P4_SENS_COMPLETE_SCENE_CLOSED
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-30T05:37:04Z"
+last_updated_at: "2026-08-30T05:59:24Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -16,7 +16,7 @@ gates:
   p1_prediction_bringup: PASS
   p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_port_fixture: PASS_P3_SEMANTIC_FIXTURE
-  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2N_REJECT_CLEARANCE
+  p4_matched_gold_case: SCENE_FAULT_PAIR_NOT_ADMITTED_P4_SENS_S1_OVERTAKE_3_OF_3
   p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
   p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
   p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
@@ -117,7 +117,7 @@ reference_scene_result:
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
 terminal_reason: null
-next_action: Freeze and execute a non-admission Prediction-to-Planning sensitivity probe with matched S0 straight, S1 left-merge occupancy, and S2 no-trajectory semantics; do not resume scene tuning unless Planning sensitivity and a natural PR826 candidate transition are both demonstrated.
+next_action: Design a route-neutral normal-only scene where fixed straight Prediction permits borrowing the only legal adjacent lane and the same frozen S1 occupancy semantic must cancel borrowing before any natural PR826 active run is authorized.
 p3_semantic_port:
   started_at: "2026-08-29T11:20:00Z"
   pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
@@ -327,7 +327,7 @@ p4_sensitivity_probe:
   v1_run_ids: [PS0_A, PS1_A, PS2_A]
   v1_status: INCONCLUSIVE_GATE_CONFLATES_PLANNING_RESPONSE_WITH_INFRASTRUCTURE
   v1_sensitivity_signal_observed: true
-  stable_sensitivity_established: false
+  stable_sensitivity_established: true
   v2_contract_status: FROZEN_BEFORE_FIRST_V2_RESULT
   v2_contract_sha256: e04f314dd151ebacbad17fbf94c3afaec77d036f8118966efe21040ba8a4f559
   v2_status: IMPLEMENTATION_INVALID_PREEXECUTION_PREPARER_STATUS_MISMATCH
@@ -336,9 +336,17 @@ p4_sensitivity_probe:
   v3_contract_sha256: d8f30052e1c1005762e2e3ac1a945938e240a1b9c1fdfd0c1304fb9f3e5ba31b
   v3_prepare_render_preflight: PASS
   v3_retained_preflight_path: /tmp/cage-p4sens-v3-preflight.uVa5V3
-  run_ids: []
+  run_ids: [PW0_A, PW1_A, PW0_B, PW1_B, PW0_C, PW1_C]
   pass_criterion: S1_STABLY_CHANGES_PLANNING_BORROW_OR_OVERTAKE_DECISION_RELATIVE_TO_S0
   pr826_followup_criterion: FAULTY_PREDICATE_NATURALLY_REMOVES_STRAIGHT_WHILE_RETAINING_LATERAL_CANDIDATE
+  v3_status: SCENE_CLOSED_FOR_GOLDEN_CASE
+  stable_overtake_cancellation: false
+  s1_overtake_results: [true, true, true]
+  s1_pass_6m_delay_s: [5.800000086426735, 4.6500000692904, 20.500000305473804]
+  lane_entry_delay_s: [-6.500000096857548, -23.350000347942114, 9.300000138580799]
+  matched_manifest_audit: PASS
+  pr826_active_run_authorized: false
+  disposition: SCENE_REJECTED_S1_DOES_NOT_CANCEL_OVERTAKE
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
   classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE
