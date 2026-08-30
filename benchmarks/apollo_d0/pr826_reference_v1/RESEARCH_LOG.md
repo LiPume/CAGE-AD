@@ -218,6 +218,20 @@ without fault or oracle changes. The next normal-only hypothesis may delay physi
 the unchanged distance and own-lane guards overlap, but it must independently pass fixed screening
 and fixed 3/3 before any active run.
 
+## P4B delayed-merge normal screen — layered validity mismatch
+
+The next normal-only candidate changed only physical merge onset from 6.0 to 9.0 s. The old runner
+returned `REFERENCE_INFRASTRUCTURE_INVALID` because Planning-valid ratio was 0.8470. Direct evidence
+showed runtime/route/channels valid, zero collision/illegal invasion, Prediction coverage 0.9367,
+overtake +16.212 m and success-region reach. The frozen contract had explicitly declared
+Planning-valid ratio a response metric, not a gate, so a layered offline audit classified the
+screen as PASS without changing any threshold.
+
+Minimum bbox clearance was only 0.039 m. This is disclosed as a serious response-risk metric; it is
+not converted into a post-result gate. The contract therefore freezes three fixed repeats, which
+will expose whether the near-contact behavior causes collision or instability before any active
+run. This is a tooling/schema interpretation correction, not a scientific-gate relaxation.
+
 ## Cleanup record
 
 The cleanup removed obsolete P1/P2 candidate runs, closed P4B/v3 runs, duplicate state/report

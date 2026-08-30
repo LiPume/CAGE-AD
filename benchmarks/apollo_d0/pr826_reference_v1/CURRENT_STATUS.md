@@ -50,7 +50,7 @@ Updated: 2026-08-30 UTC
 
 ## Current gate
 
-`DELAY9_NORMAL_SCREEN_FROZEN_ACTIVE_PROHIBITED`
+`DELAY9_FIXED_REPEATS_FROZEN_ACTIVE_PROHIBITED`
 
 The v5 sensitivity contract is closed without further tuning. Three native-port scene pairs are
 closed without changing the fault: QX missed the distance guard at L1; QY reached L3 but recovered
@@ -60,12 +60,14 @@ golden-case admission.
 
 ## Only next action
 
-Execute normal-only `RN_V130_D9_S1`. If it passes, freeze 3 fixed repeats before any active run; if
-it fails, reject without active execution. Do not change the fault or oracle.
+Run frozen `RN_V130_D9_F1/F2/F3` and audit the unchanged layered normal gate. The 0.039 m screening
+clearance remains visible as a risk metric. Any collision, illegal invasion or frozen-gate miss
+rejects the candidate without active execution.
 
 ## Active contract and canonical reports
 
 - Active contract: `contracts/P4B_SPEED130_DELAY9_NORMAL_SCREEN_CONTRACT.yaml`
+- Active repeat contract: `contracts/P4B_SPEED130_DELAY9_NORMAL_REPEAT_CONTRACT.yaml`
 - Latest closed native contract: `contracts/P4B_SPEED130_NATURAL_SCREEN_CONTRACT.yaml`
 - Completed repeat contract: `contracts/P4B_SPEED130_NORMAL_REPEAT_CONTRACT.yaml`
 - Completed screen contract: `contracts/P4B_SPEED130_NORMAL_SCREEN_CONTRACT.yaml`

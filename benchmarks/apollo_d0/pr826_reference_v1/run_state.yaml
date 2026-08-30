@@ -3,8 +3,8 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T17:52:00Z"
-current_gate: DELAY9_NORMAL_SCREEN_FROZEN_ACTIVE_PROHIBITED
+last_updated_at: "2026-08-30T18:02:00Z"
+current_gate: DELAY9_FIXED_REPEATS_FROZEN_ACTIVE_PROHIBITED
 
 phases:
   p1_prediction_bringup: PASS
@@ -165,14 +165,19 @@ p4b_speed130_delay9_normal_screen:
   target_speed_mps: 1.30
   lane_change_start_s: 9.0
   active_fault_domain: false
-  status: FROZEN_PENDING_SCREEN
+  maximum_pass_margin_m: 16.2115447919236
+  planning_valid_ratio_response_metric: 0.8470149253731343
+  minimum_bbox_clearance_response_metric_m: 0.03897091718213364
+  status: SCREENING_PASS_LAYERED_AUDIT_FIXED_REPEATS_FROZEN
   active_run_authorized: false
-  contract: contracts/P4B_SPEED130_DELAY9_NORMAL_SCREEN_CONTRACT.yaml
+  screen_contract: contracts/P4B_SPEED130_DELAY9_NORMAL_SCREEN_CONTRACT.yaml
+  repeat_contract: contracts/P4B_SPEED130_DELAY9_NORMAL_REPEAT_CONTRACT.yaml
   manifest: configs/NATURAL_MATCH_GAP1225_SPEED130_DELAY9_NORMAL_MANIFEST.json
+  screen_audit: reports/P4B_SPEED130_DELAY9_NORMAL_SCREEN_AUDIT.json
 
 next_action: >-
-  Execute RN_V130_D9_S1 normal-only. If it passes, freeze three fixed repeats before active; if it
-  fails, reject without active execution. Keep fault and oracle unchanged.
+  Run RN_V130_D9_F1/F2/F3 sequentially and audit the frozen layered normal gate before any active
+  run. Preserve low-clearance and Planning-valid response metrics; keep fault and oracle unchanged.
 
 non_claims:
   - privileged_s1_is_not_natural_pr826

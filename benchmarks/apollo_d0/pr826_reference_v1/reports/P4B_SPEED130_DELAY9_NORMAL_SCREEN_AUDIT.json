@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "run_id": "RN_V130_D9_S1",
+  "contract_sha256": "372d8f5d0cc7144d643223e2231f20c740808fab2498d755617f0ef973696d14",
+  "raw_summary_sha256": "82bca473a051923da163deadf7c342195636015ad632151a584659da3e9053d2",
+  "validity": {
+    "runtime_valid": true,
+    "transport_valid": true,
+    "behavior_valid": true,
+    "frozen_normal_gate_valid": true,
+    "legacy_runner_admission": "REJECT_REFERENCE_INFRASTRUCTURE_INVALID"
+  },
+  "observed": {
+    "route_accepted": true,
+    "collision_count": 0,
+    "illegal_lane_invasion_count": 0,
+    "prediction_trajectory_coverage": 0.9367321867321867,
+    "planning_channel_coverage": 0.9877149877149877,
+    "control_channel_coverage": 0.9993857493857494,
+    "overtake_success": true,
+    "maximum_pass_margin_m": 16.2115447919236,
+    "success_region_reached": true,
+    "planning_valid_ratio_response_metric": 0.8470149253731343,
+    "minimum_bbox_clearance_response_metric_m": 0.03897091718213364
+  },
+  "status": "SCREENING_PASS_LAYERED_AUDIT",
+  "active_run_authorized": false,
+  "next_gate": "THREE_FIXED_REPEATS",
+  "interpretation": "The legacy runner conflated Planning-valid response quality with infrastructure validity. The frozen contract explicitly excludes that ratio from transport/admission gates. No gate changed after the result. Extremely low clearance remains a disclosed response-risk metric and must be observed across repeats."
+}

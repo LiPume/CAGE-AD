@@ -122,7 +122,15 @@ entries:
   - id: delay9_normal_contract
     path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_SPEED130_DELAY9_NORMAL_SCREEN_CONTRACT.yaml
     status: KEEP_CURRENT
-    canonical_for: P4B_CURRENT_NORMAL_SCREEN_CONTRACT
+    canonical_for: P4B_COMPLETED_NORMAL_SCREEN_CONTRACT
+  - id: delay9_normal_screen_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_SPEED130_DELAY9_NORMAL_SCREEN_AUDIT.json
+    status: KEEP_CURRENT
+    canonical_for: P4B_CURRENT_NORMAL_SCREEN_RESULT
+  - id: delay9_normal_repeat_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_SPEED130_DELAY9_NORMAL_REPEAT_CONTRACT.yaml
+    status: KEEP_CURRENT
+    canonical_for: P4B_CURRENT_FIXED_REPEAT_CONTRACT
   - id: source_scene_manifest
     path: benchmarks/apollo_d0/pr826_reference_v1/configs/SENSITIVITY_SOURCE_MANIFEST.json
     status: KEEP
