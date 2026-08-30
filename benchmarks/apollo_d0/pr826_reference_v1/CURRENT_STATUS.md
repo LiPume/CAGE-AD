@@ -33,7 +33,7 @@ Updated: 2026-08-30 UTC
 
 ## Current gate
 
-`REPOSITORY_CLEANUP_BEFORE_V5_PAIR_C_CONTINUATION`
+`CLEANUP_COMPLETE_AWAITING_PAIR_C_CONFIRMATION`
 
 The v5 contract is frozen and must not change. Pair B passed the version-independent common audit.
 `PZ0_C` finished immediately before the cleanup instruction arrived; it is retained but not yet
@@ -41,16 +41,16 @@ counted. `PZ1_C` has only a prepared manifest and has not run.
 
 ## Only next action
 
-Finish repository cleanup and validation. Then use the common audit core to check `PZ0_C` against
-the frozen S0 arm gate. Only if it passes may `PZ1_C` run. After a 3/3 aggregate, stop sensitivity
-tuning and proceed to the separate natural PR826 L0→L4 mechanism screen.
+After user confirmation of the simplified repository, use the common audit core to check `PZ0_C`
+against the frozen S0 arm gate. Only if it passes may `PZ1_C` run. After a 3/3 aggregate, stop
+sensitivity tuning and proceed to the separate natural PR826 L0→L4 mechanism screen.
 
 ## Active contract and canonical reports
 
 - Active contract: `P4_SENS_V5_CONFIRMATION_CONTRACT.yaml`
 - Canonical configured-reference report: `reports/FINAL_REFERENCE_REPORT.md`
-- Canonical Pair A/B metrics: `P4_SENS_V4_PAIR_A_COMMON_AUDIT.json` and
-  `P4_SENS_V5_PAIR_B_COMMON_AUDIT.json` (to move under `reports/` in the cleanup commit)
+- Canonical Pair A/B metrics: `reports/P4_SENS_PAIR_A.json` and
+  `reports/P4_SENS_PAIR_B.json`
 - Canonical machine state: `run_state.yaml`
 
 ## Explicit non-claim

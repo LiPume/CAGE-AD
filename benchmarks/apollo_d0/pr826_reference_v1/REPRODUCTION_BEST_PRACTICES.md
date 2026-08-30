@@ -1,153 +1,64 @@
-# Reproduction best practices and verified recipes
+# Reproduction best practices
 
-This is a living operational companion to `FINAL_REFERENCE_REPORT.md`, `RESEARCH_LOG.md`, and the
-machine ledgers. It records only practices supported by repeated evidence. A candidate screen is
-not promoted to a verified recipe until its formal gate passes.
+## Stable configured reference
 
-## Verified stable reference recipe
+- Apollo 10 host AEM mode; CARLA 0.9.15 Town04; seed 82601.
+- Synchronous world, fixed delta 0.05 s, substepping 0.01 s ×10, ClearNoon, no background actors
+  or Traffic Manager.
+- Start in this order: CARLA → RPC ready → bridge reload/ego spawn → Apollo stack → 45 s Prediction
+  initialization → route/NPC runtime.
+- Use the frozen configured map, V17 CARLA-Lincoln calibration, bridge settings and current-lane
+  tangent NPC policy from the canonical reference contract/report.
+- NPC speed is 1.10 m/s. It must not read Apollo output or future ground truth. Apollo remains the
+  sole ego controller.
+- Do not call this unmodified stock Apollo: Prediction/Planning behavior is stock, compatibility
+  configuration is not.
 
-The only admitted normal recipe remains P2 `STABLE_REFERENCE_ADMITTED`:
+## Deterministic actor lifecycle
 
-- Apollo 10 host mode, CARLA 0.9.15, Town04, seed 82601.
-- Deterministic reload before every run; synchronous mode, fixed delta 0.05 s, substepping 0.01 s
-  × 10, ClearNoon, no background actors and no Traffic Manager.
-- Start order: CARLA server, RPC readiness, deterministic bridge reload/ego spawn, Apollo stack,
-  45 s Prediction model initialization, then route/NPC runner.
-- Use candidate `RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17`, configured map
-  `carla_town04_road_width_v1`, V17 Control calibration and the 80 s oracle exactly as frozen.
-- NPC speed is 1.10 m/s and yaw follows only the current driving-lane tangent. Position is not
-  projected, ego/Apollo output is not read, and future GT is never read.
-- Before execution, verify `reference_repeat_contract_v2.yaml` SHA256
-  `163f523d2d552cc5627efcce67df01d074db7ea6d52d28c6ea99831f1946dfe2` and all artifact hashes
-  listed in that contract. The ordered admitted manifest SHA256 is
-  `c7c7d8dd90861e994dd5565007b8433a45670f09b1129da5ad6f6a041af3c8de`.
-- Judge every repeat using `FORMAL_REPEAT_V2_AUDIT.json`; do not substitute a later threshold.
+- A successful spawn RPC is command acceptance, not proof that actor state is materialized. Wait
+  for the next synchronous snapshot before validating pose, road/lane and physics state.
+- Validate road ID and lane ID; lane ID alone is not globally unique.
+- Abort invalid transforms rather than projecting actors into a visually plausible scene.
+- Record spawn order, actor IDs, frame/timestamps and resolved road/lane.
+- Keep exactly one synchronous tick owner (the bridge in this setup).
 
-Authoritative evidence: `FINAL_REFERENCE_REPORT.md`, `FORMAL_REPEAT_V2_AUDIT.json`,
-`reference_repeat_contract_v2.yaml`, and the three immutable runtime manifests.
+## Scientific gates
 
-## Proven simulator lifecycle practices
+- Freeze contract, semantic dose, time window, run IDs and oracle before results.
+- Separate implementation validity, runtime/transport validity, semantic validity, arm behavior and
+  admission. A generic legacy `infrastructure_valid` flag is not a substitute.
+- Planning-valid ratio, optimizer failures and fallback can be downstream response or baseline
+  quality metrics. Do not label them infrastructure failures when route/channels/runtime are valid.
+- Preserve unrelated Prediction fields during boundary interventions: header, ID, timestamp,
+  obstacle count/state, probability, point count/time, velocity and acceleration.
+- A sensitivity probe is privileged non-admission evidence. Never present it as a natural PR826
+  run.
+- Never promote pass delay or smaller margin to `FAILED_OVERTAKE` after observing results.
 
-1. Treat a successful spawn RPC as command acceptance, not proof that actor state is already
-   materialized. In synchronous CARLA, wait for a subsequent world snapshot before deriving pose,
-   waypoint, lane-relative offset, velocity, or physics-dependent state.
-2. After materialization, validate the actor XY against the frozen spawn and validate both road ID
-   and lane ID. Lane ID alone is not globally unique.
-3. Abort on an invalid transform instead of projecting or correcting the actor into the scene.
-   Silent projection can create a visually plausible but scientifically different run.
-4. Record the pre-frame, materialized frame, XY error, resolved road/lane, signed offset, actor ID
-   and spawn order in the run summary.
-5. Use the bridge-owned synchronous tick. Do not introduce a second tick owner.
+## Temporal coverage
 
-Evidence: `P2H_IMPLEMENTATION_INVALID_AUDIT.json` and
-`P2I_IMPLEMENTATION_INVALID_AUDIT.json`. The isolated P2I probe observed `(0,0,0)` immediately
-after spawn and the exact frozen pose after one synchronous tick.
+An interface transform that renews a 2–4 s future trajectory is present only while the transform is
+active. Cover the downstream decision/outcome window plus the declared prediction horizon. Record
+first/last transformed message, first Planning consumption and outcome time. Any window correction
+requires a new frozen contract and new runs; the earlier result remains unchanged.
 
-## Gate and debugging discipline
+## Current persistent confirmation
 
-- Freeze contract, candidate canonical hash, environment hash, runtime hash and oracle before a
-  screening run. Use a new opaque run ID for every execution.
-- Preserve every failed and implementation-invalid run. Never overwrite a manifest or reuse its
-  run ID.
-- Separate implementation validity, mechanism validity and behavioral admission. A successful
-  overtake does not compensate for zero Prediction trajectory coverage or a wrong target lane.
-- For any rejection, record the first violated invariant and retain summary, timeline, native logs,
-  bridge telemetry and checksums.
-- Correct an implementation defect only with a new contract. Do not change scientific parameters
-  while repairing instrumentation.
-- Run fixed-only screening first, then freeze a 3-repeat fixed contract. An active fault run is
-  forbidden until the fixed scene passes 3/3.
+- S0: byte-exact straight Prediction.
+- S1: target left-normal smoothstep, 3.5 m over relative 2–4 s, renewed at elapsed 12–75 s.
+- Pair audit requires matched allowed deltas, runtime-valid, transport-valid, semantic-valid,
+  collision/lane-safe behavior, S0 overtake and S1 no overtake.
+- Pair A/B raw payloads may be removed after compact common audits contain final metrics and
+  normalized repeat-manifest hashes.
+- Stop sensitivity tuning after 3/3. The next stage must test the frozen native PR826 port through
+  L0 activation → L1 candidate delta → L2 output phenotype → L3 Planning response → L4 failure.
 
-## Known non-recipes
+## Common errors and fixes
 
-- Static RF01: nonrepeatable and no target trajectories.
-- P2B active pair: semantic output changed but route dominated Planning.
-- P2C: moving target did not satisfy LaneBorrow's long-term blocking gate.
-- P2D/P2E: lateral-offset candidates failed frozen formal gates.
-- P2F: first lane-change path missed its frozen timing gate.
-- P2G: interaction window passed, but fixed Planning-valid and clearance gates failed.
-- P2H/P2I: implementation-invalid waypoint/actor-lifecycle runs; never use as scientific evidence.
-- P2J: lifecycle and interaction valid, but Planning-valid ratio 0.893484 missed the frozen 0.90
-  normal gate; stop-and-go family closed without formal or active runs.
-- P2K: narrow continuous target passed screening, but first overlap shifted from 3.40 s to 4.20 s
-  on Formal Repeat 1 and failed the frozen 3.5 s mechanism gate. Startup-subsecond interaction
-  timing is not a reproducible recipe.
-- P2L: rejected before execution. Smooth per-frame `ApplyTransform` is still kinematic
-  teleportation and violates the frozen no-teleport invariant. A visually continuous trajectory is
-  not evidence of a physics-generated maneuver. Require a standalone `VehicleControl` or
-`VehicleAckermannControl` probe before freezing a replacement candidate.
-- P2M: the physical controller itself repeated 3/3, but the same-longitudinal-origin Apollo screen
-  is not a recipe. Ego reached the 6 m pass gate at 6.9 s; NPC entered lane -2 only at 11.0 s, when
-  pass margin was already 10.425 m. Post-merge channel overlap cannot establish causal relevance
-  after the system outcome. Planning valid also missed its unchanged 0.90 gate.
-- P2N: behavior and mechanism passed, including target lane entry 41.7 s before the pass outcome,
-  but minimum body clearance was 0.794 m versus the frozen 0.90 m gate. The generic runner's
-  `SCREENING_PASS` is not final when a candidate contract adds stricter gates; always run and retain
-  the contract-specific audit before authorizing repeats.
-- P2O: a desired 0.20 m physical target-lane offset did not meet its frozen +/-0.05 m controller
-  tracking gate. Three settled repeats converged to 0.269637 m; 5 m and 7 m lookahead screens were
-  worse and delayed lane association. Do not pass an unverified lateral-offset controller into an
-  Apollo experiment merely because its realized direction appears safer.
-
-## Pre-execution invariant audit
-
-Before preparing any run, inspect the exact transport used by each actor policy. Treat
-`set_transform`, `ApplyTransform`, `set_location`, and `ApplyLocation` as teleportation regardless
-of step size or interpolation smoothness. A contradiction between implementation and a frozen
-forbidden-action list is an implementation-invalid rejection, not a reason to reinterpret the
-contract. Reject it before consuming simulation time, preserve the frozen contract and hashes, and
-open a new candidate only after a lower-level physical-control probe passes.
-
-## Verified NPC physical-control probe recipe
-
-`P2M_CONTROLLER_PROBE_AUDIT.json` records a 3/3 CARLA-only controller PASS on the exact Town04
-road/lane and Microlino geometry. Use native `VehicleAckermannControl` at 1.10 m/s with a 3.0 m
-lookahead, 1.50 m wheelbase model, 0.50 rad steering limit/rate, and a simulation-time 6.0–10.0 s
-lane-center blend. The three probes entered lane -2 at exactly 11.0 s, had zero collisions, and
-kept median speed within 1.086–1.089 m/s. This is a verified controller recipe, not yet an admitted
-Apollo reference. Never substitute pose or velocity overrides if the controller fails downstream.
-
-Future entries must distinguish `VERIFIED`, `SCREEN_ONLY`, `REJECTED`, and
-`IMPLEMENTATION_INVALID` explicitly.
-
-## Interface-sensitivity kill criterion
-
-Before spending additional runs tuning a scene to amplify a historical fault, isolate the relevant
-module boundary and test whether the downstream consumer responds to the required semantic delta.
-For this case, compare matched target predictions for straight motion, left-merge occupancy of the
-overtaking lane, and no trajectory. Classify these as privileged non-admission probes, preserve all
-message identity/timing fields that are not the target semantic, and never report them as natural
-fault runs. If an explicit left-merge prediction does not reproducibly change Planning, close the
-scene–mechanism pair. Only after sensitivity is established should candidate-level fault telemetry
-be checked for a natural route from the historical predicate to the same output semantic.
-
-The verified P4-SENS v3 result adds a second, separate kill criterion. Stable low-level response is
-not sufficient: all three S1 runs changed Planning and delayed the +6 m pass point, yet all three
-still overtook. Therefore:
-
-- audit matched manifests independently of behavior;
-- separate transport validity from Planning-valid/fallback response metrics;
-- require the predeclared system outcome (here, overtake cancellation) in addition to a path/speed
-  delta;
-- never relabel a latency increase or smaller pass margin as `FAILED_OVERTAKE` after seeing it;
-- require response direction consistency when a directional timing effect is part of the claim;
-- do not authorize a natural historical-fault run on a scene that fails the explicit semantic
-  system-level kill criterion.
-
-P4-SENS v3 is a verified sensitivity-probe recipe and a verified negative scene–fault result, not
-golden-case admission. Authoritative artifacts are `P4_SENS_V3_STABILITY_AUDIT.json`,
-`P4_SENS_V3_MATCHED_MANIFEST_AUDIT.json`, and `P4_SENS_V3_SCENE_KILL_AUDIT.json`.
-
-## Prediction-intervention temporal coverage
-
-An intervention that renews a 2–4 s future trajectory on every cycle is only present while the
-boundary transform remains active. The active window must cover the downstream decision/outcome
-window plus the declared prediction horizon. P4-SENS v3 stopped at 40 s, while its S1 pass outcomes
-were at 58.75–63.10 s; it therefore proved temporary sensitivity but could not test persistent
-lane occupancy at the outcome. The frozen v4 screen extended only the active window to 75 s and
-produced S0 overtake versus S1 no-overtake with valid transport and semantic preservation.
-
-Record first/last transformed message time, first Planning consumption time, and outcome time in
-every boundary intervention. Treat a temporal-coverage correction as a new contract and new runs;
-never rewrite the earlier disposition. One positive corrected pair still requires prospective
-repeat confirmation and is not a natural-fault or admission result.
+- Apollo protobuf tests fail under Conda with `ModuleNotFoundError: modules`: run them through
+  `scripts/apollo_host_exec.sh`; Apollo/Cyber remain outside Conda.
+- Version-specific auditor rejects a later contract: do not alter the frozen contract. Use the
+  common schema adapter/core and add a regression test.
+- Runner exits 3 while transport is healthy: inspect layered audit output; the old runner may be
+  enforcing a normal-reference Planning-valid gate that is a response metric for sensitivity runs.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression tests for the common persistent-sensitivity audit core."""
+"""Compact regression tests for the common persistent-sensitivity audit schema."""
 
 from __future__ import annotations
 
@@ -19,33 +19,35 @@ CORE = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 sys.modules[SPEC.name] = CORE
 SPEC.loader.exec_module(CORE)
-BUNDLE = Path("/root/autodl_apollo10_g0_bundle")
 BENCH = ROOT / "benchmarks/apollo_d0/pr826_reference_v1"
-RUNS = BUNDLE / "runtime/runs/pr826_greybox_demo_v1"
 
 
 class PersistentAuditCoreRegressionTest(unittest.TestCase):
-    def test_v4_pair_a_matches_frozen_logical_conclusion(self) -> None:
-        contract_path = BENCH / "P4_SENS_V4_CONTRACT.yaml"
-        contract = yaml.safe_load(contract_path.read_bytes())
-        result = CORE.audit_pair(contract, contract_path, RUNS / "PY0_A", RUNS / "PY1_A")
-        frozen = json.loads((BENCH / "P4_SENS_V4_PERSISTENT_SCREEN_AUDIT.json").read_text())
-        self.assertTrue(frozen["persistent_s1_cancels_overtake"])
-        self.assertTrue(result["persistent_s1_cancels_overtake"])
-        self.assertEqual(result["runs"]["S0"]["outcome"]["overtake_success"], True)
-        self.assertEqual(result["runs"]["S1"]["outcome"]["overtake_success"], False)
-        self.assertFalse(result["runs"]["S0"]["validity"]["admission_valid"])
+    def test_v4_adapter_and_compact_regression_conclusion(self) -> None:
+        contract = yaml.safe_load((BENCH / "contracts/P4_SENS_V4_CONTRACT.yaml").read_bytes())
+        normalized = CORE.adapt_contract(contract)
+        compact = json.loads((BENCH / "reports/P4_SENS_PAIR_A.json").read_text())
+        self.assertEqual(normalized.version, "p4-sens-boundary-v4-persistent-screen")
+        self.assertEqual(compact["contract_version"], normalized.version)
+        self.assertEqual(compact["status"], "PERSISTENT_INTERFACE_PAIR_PASS")
+        self.assertTrue(compact["persistent_s1_cancels_overtake"])
 
-    def test_v5_pair_b_passes_frozen_confirmation_gate(self) -> None:
-        contract_path = BENCH / "P4_SENS_V5_CONFIRMATION_CONTRACT.yaml"
-        contract = yaml.safe_load(contract_path.read_bytes())
-        result = CORE.audit_pair(contract, contract_path, RUNS / "PZ0_B", RUNS / "PZ1_B")
-        self.assertEqual(result["status"], "PERSISTENT_INTERFACE_PAIR_PASS")
-        self.assertTrue(result["runs"]["S0"]["validity"]["transport_valid"])
-        self.assertTrue(result["runs"]["S1"]["validity"]["transport_valid"])
-        self.assertTrue(result["runs"]["S1"]["validity"]["semantic_valid"])
+    def test_v5_pair_b_compact_metrics_and_repeat_hashes(self) -> None:
+        contract = yaml.safe_load((BENCH / "P4_SENS_V5_CONFIRMATION_CONTRACT.yaml").read_bytes())
+        normalized = CORE.adapt_contract(contract)
+        pair_a = json.loads((BENCH / "reports/P4_SENS_PAIR_A.json").read_text())
+        pair_b = json.loads((BENCH / "reports/P4_SENS_PAIR_B.json").read_text())
+        self.assertEqual(normalized.version, "p4-sens-boundary-v5-persistent-confirmation")
+        self.assertEqual(pair_b["status"], "PERSISTENT_INTERFACE_PAIR_PASS")
+        for arm in ("S0", "S1"):
+            self.assertEqual(
+                pair_a["runs"][arm]["files"]["normalized_repeat_manifest_sha256"],
+                pair_b["runs"][arm]["files"]["normalized_repeat_manifest_sha256"],
+            )
+            self.assertTrue(pair_b["runs"][arm]["validity"]["transport_valid"])
+            self.assertTrue(pair_b["runs"][arm]["validity"]["semantic_valid"])
 
-    def test_unfrozen_contract_is_rejected_before_measurement(self) -> None:
+    def test_unfrozen_contract_is_rejected(self) -> None:
         contract = yaml.safe_load((BENCH / "P4_SENS_V5_CONFIRMATION_CONTRACT.yaml").read_bytes())
         contract["status"] = "DRAFT"
         with self.assertRaisesRegex(ValueError, "not frozen"):

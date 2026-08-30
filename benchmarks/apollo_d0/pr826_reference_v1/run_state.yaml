@@ -3,8 +3,8 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T06:35:00Z"
-current_gate: REPOSITORY_CLEANUP_BEFORE_V5_PAIR_C_CONTINUATION
+last_updated_at: "2026-08-30T07:05:00Z"
+current_gate: CLEANUP_COMPLETE_AWAITING_PAIR_C_CONFIRMATION
 
 phases:
   p1_prediction_bringup: PASS
@@ -63,8 +63,8 @@ validity_model:
   legacy_infrastructure_valid: COMPATIBILITY_TELEMETRY_ONLY
 
 next_action: >-
-  Complete repository cleanup and validation; audit PZ0_C S0 with the common core; only if the
-  frozen normal-arm gate passes, execute PZ1_C and aggregate all three pairs.
+  After user confirmation of the simplified repository, audit PZ0_C S0 with the common core;
+  only if the frozen normal-arm gate passes, execute PZ1_C and aggregate all three pairs.
 
 non_claims:
   - persistent_sensitivity_not_yet_3_of_3

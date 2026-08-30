@@ -140,7 +140,7 @@ perception publishes only the target's current CARLA pose/velocity, intentionall
 Perception module from this Prediction-focused reference. The credential-pattern scan found zero
 workspace hits, and cleanup left no CARLA/Apollo/reference-runner process.
 
-## Rejected candidates retained in the ledger
+## Rejected candidate summary
 
 1. Town01 RF01 static case: one provisional pass did not repeat; first formal repeat stayed behind,
    and both runs had zero target predicted trajectories. Rejected as nonrepeatable/static-Planning.
@@ -169,8 +169,10 @@ workspace hits, and cleanup left no CARLA/Apollo/reference-runner process.
 11. Corrected 45 s V17 screen: legally passed by 6.721 m but had not reached the unchanged route
     region. It motivated only a pre-frozen duration extension, not an oracle change.
 
-Every planned/result event remains append-only in `reference_screening_ledger.jsonl`; every change
-and failed attempt remains in `FIX_LEDGER.jsonl` and `RESEARCH_LOG.md`.
+Closed candidate raw runs and their per-candidate ledgers were removed during the 2026-08-30
+repository cleanup. Their mechanisms and rejection reasons are consolidated above and in
+`RESEARCH_LOG.md`; this report and `FORMAL_REPEAT_V2_AUDIT.json` remain the canonical admitted
+reference result.
 
 ## Suitability for later Prediction → Planning work
 
@@ -183,4 +185,3 @@ the world, actor policy, route, map, Planning, Control, bridge and oracle consta
 This report does **not** claim that a future PR826 semantic fault will necessarily suppress this
 route-driven overtake; that remains a separate fault-admission experiment explicitly outside the
 current authorized scope.
-

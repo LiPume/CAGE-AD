@@ -59,3 +59,15 @@ audits parse, regression passes, and normalized repeat-manifest hashes match acr
 
 No file is deleted merely to make a result look cleaner. Deletion changes storage only, never the
 frozen v5 contract, run data interpretation, or gate.
+
+## Execution result
+
+Executed 2026-08-30 UTC after validating canonical copies and common Pair A/B audits.
+
+- Removed 80 closed runtime run directories: 1,431,233,126 bytes.
+- Removed the duplicate PR826 runtime-state tree: 4,699,319 bytes.
+- Removed 86 obsolete root-level benchmark artifacts and 20 one-off P2/debug scripts from Git.
+- Removed four P4-SENS temporary render/preflight directories and Python caches.
+- Retained exactly two runtime run directories: full `PZ0_C` pending S0 audit and manifest-only
+  `PZ1_C` pending authorization.
+- Reduced the benchmark directory to 25 files before final validation.
