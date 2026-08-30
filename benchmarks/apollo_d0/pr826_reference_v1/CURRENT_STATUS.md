@@ -55,8 +55,9 @@ active result exists for it. None is golden-case admission.
 
 ## Only next action
 
-Execute fixed `QZ0_A`. Authorize active `QZ1_A` only if fixed passes the frozen normal/transport
-checks. Do not change the semantic port, geometry, timing or failure oracle.
+Fixed `QZ0_A` passed at +14.272 m with valid runtime/transport/safety gates. Execute the now
+authorized active `QZ1_A`, then audit L0→L4 without changing the semantic port, geometry, timing or
+failure oracle.
 
 ## Active contract and canonical reports
 
