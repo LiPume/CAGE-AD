@@ -44,7 +44,9 @@ def main() -> None:
     args = parser.parse_args()
 
     contract = yaml.safe_load(args.contract.read_bytes())
-    if contract["status"] != "FROZEN_BEFORE_FIRST_RESULT":
+    if not contract.get("contract_version", "").startswith("p4-sens-boundary-v"):
+        raise SystemExit("not a P4-SENS contract")
+    if not contract.get("status", "").startswith("FROZEN_BEFORE_FIRST_"):
         raise SystemExit("P4-SENS contract is not frozen")
     if contract["classification"] != "NON_ADMISSION_CAUSAL_SENSITIVITY_PROBE":
         raise SystemExit("P4-SENS classification mismatch")

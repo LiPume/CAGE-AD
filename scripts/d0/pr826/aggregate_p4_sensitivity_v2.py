@@ -32,14 +32,22 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     contract = yaml.safe_load(args.contract.read_bytes())
-    if contract["status"] != "FROZEN_BEFORE_FIRST_V2_RESULT":
-        raise SystemExit("v2 contract is not frozen")
+    if not contract.get("contract_version", "").startswith("p4-sens-boundary-v"):
+        raise SystemExit("not a P4-SENS contract")
+    if not contract.get("status", "").startswith("FROZEN_BEFORE_FIRST_"):
+        raise SystemExit("sensitivity contract is not frozen")
     paths = [args.pair_a, args.pair_b, args.pair_c]
     audits = [json.loads(path.read_text()) for path in paths]
+    schedule = contract["run_schedule"]
     expected_pairs = [
-        ("PV0_A", "PV1_A"),
-        ("PV0_B", "PV1_B"),
-        ("PV0_C", "PV1_C"),
+        (
+            schedule["initial_screen_ids"]["S0_STRAIGHT"],
+            schedule["initial_screen_ids"]["S1_LEFT_MERGE_OCCUPANCY"],
+        ),
+        *zip(
+            schedule["conditional_confirmation_ids"]["S0_STRAIGHT"],
+            schedule["conditional_confirmation_ids"]["S1_LEFT_MERGE_OCCUPANCY"],
+        ),
     ]
     checks = []
     for expected, audit in zip(expected_pairs, audits):

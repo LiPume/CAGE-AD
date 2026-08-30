@@ -3055,3 +3055,22 @@ whose subject is Planning response.
 toward stable sensitivity. Open v2 before new results, changing only measurement classification:
 transport/runtime health remains a gate, while Planning validity/optimizer/fallback become response
 metrics. S0/S1 semantics and every delta threshold remain unchanged.
+
+P4-SENS v2 pre-execution result:
+
+The first isolated v2 preparer invocation exited before creating a manifest with
+`P4-SENS contract is not frozen`. Root cause was an implementation check that accepted only the
+literal v1 status `FROZEN_BEFORE_FIRST_RESULT`; the correctly frozen v2 status was
+`FROZEN_BEFORE_FIRST_V2_RESULT`. The retained preflight directory is
+`/tmp/cage-p4sens-v2-preflight.t0a1U2`; it contains no canonical run.
+
+Disposition: v2 is `IMPLEMENTATION_INVALID_PREEXECUTION`. No v2 experiment ID was consumed and no
+CARLA/Apollo run started. The successor preparer validates the P4-SENS contract family plus a
+`FROZEN_BEFORE_FIRST_` prefix, and the aggregate analyzer derives pair IDs from the frozen schedule
+instead of hard-coding a version. V3 retains v2's scene, semantics, dose and every response gate.
+
+V3 pre-execution control passed before any canonical manifest: the preparer accepted the exact
+frozen contract and declared `PW0_A`, verified every artifact hash, rendered the launch, and remapped
+Prediction output to `/apollo/prediction_raw`. The retained isolated directory is
+`/tmp/cage-p4sens-v3-preflight.uVa5V3`. V3 contract SHA256 is
+`d8f30052e1c1005762e2e3ac1a945938e240a1b9c1fdfd0c1304fb9f3e5ba31b`.

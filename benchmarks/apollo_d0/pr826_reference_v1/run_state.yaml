@@ -3,7 +3,7 @@ protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
 current_gate: P4_SENS_SEMANTIC_SENSITIVITY_PROBE_DESIGN
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-30T05:29:34Z"
+last_updated_at: "2026-08-30T05:37:04Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -330,6 +330,12 @@ p4_sensitivity_probe:
   stable_sensitivity_established: false
   v2_contract_status: FROZEN_BEFORE_FIRST_V2_RESULT
   v2_contract_sha256: e04f314dd151ebacbad17fbf94c3afaec77d036f8118966efe21040ba8a4f559
+  v2_status: IMPLEMENTATION_INVALID_PREEXECUTION_PREPARER_STATUS_MISMATCH
+  v2_run_ids: []
+  v3_contract_status: FROZEN_BEFORE_FIRST_V3_RESULT
+  v3_contract_sha256: d8f30052e1c1005762e2e3ac1a945938e240a1b9c1fdfd0c1304fb9f3e5ba31b
+  v3_prepare_render_preflight: PASS
+  v3_retained_preflight_path: /tmp/cage-p4sens-v3-preflight.uVa5V3
   run_ids: []
   pass_criterion: S1_STABLY_CHANGES_PLANNING_BORROW_OR_OVERTAKE_DECISION_RELATIVE_TO_S0
   pr826_followup_criterion: FAULTY_PREDICATE_NATURALLY_REMOVES_STRAIGHT_WHILE_RETAINING_LATERAL_CANDIDATE
