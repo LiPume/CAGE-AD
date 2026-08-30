@@ -59,10 +59,34 @@ entries:
     path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_NATURAL_PORT_SCREEN_REPORT.md
     status: KEEP
     canonical_for: P4_NATIVE_PORT_SCREEN_01
+  - id: gap1225_normal_repeat_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_GAP1225_NORMAL_REPEAT_CONTRACT.yaml
+    status: KEEP
+    canonical_for: P4B_GAP1225_FIXED_REFERENCE_CONTRACT
+  - id: gap1225_normal_repeat_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_GAP1225_NORMAL_REPEAT_AUDIT.json
+    status: KEEP
+    canonical_for: P4B_GAP1225_FIXED_REFERENCE
+  - id: gap1225_natural_contract
+    path: benchmarks/apollo_d0/pr826_reference_v1/contracts/P4B_GAP1225_NATURAL_SCREEN_CONTRACT.yaml
+    status: KEEP_CLOSED_CONTRACT
+    canonical_for: P4B_NATIVE_PORT_SCREEN_02_CONTRACT
+  - id: gap1225_natural_audit
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_GAP1225_NATURAL_SCREEN_AUDIT.json
+    status: KEEP
+    canonical_for: P4B_NATIVE_PORT_SCREEN_02_MACHINE_RESULT
+  - id: gap1225_natural_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4B_GAP1225_NATURAL_SCREEN_REPORT.md
+    status: KEEP
+    canonical_for: P4B_NATIVE_PORT_SCREEN_02
   - id: source_scene_manifest
     path: benchmarks/apollo_d0/pr826_reference_v1/configs/SENSITIVITY_SOURCE_MANIFEST.json
     status: KEEP
     canonical_for: P4_SCENE_CONFIGURATION
+  - id: gap1225_scene_manifest
+    path: benchmarks/apollo_d0/pr826_reference_v1/configs/NATURAL_MATCH_GAP1225_NORMAL_MANIFEST.json
+    status: KEEP
+    canonical_for: P4B_CURRENT_SCENE_CONFIGURATION_BASE
   - id: fix_ledger
     path: benchmarks/apollo_d0/pr826_reference_v1/ledgers/fix_ledger.jsonl
     status: KEEP

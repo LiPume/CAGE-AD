@@ -80,3 +80,5 @@ Pair C follow-up on 2026-08-30 UTC:
   test consumed them. Compact metrics, hashes and the aggregate remain canonical.
 - Removed the rejected QX0_A/QX1_A native-screen raw directories (about 54 MB) and their temporary
   audit views after the compact L0/L1 report and machine audit validated.
+- Removed the gap-12.25 screening, three fixed repeats, QY matched pair and temporary audit views
+  (about 160 MB) after the compact 3/3 reference audit and L0→L3/L4 report validated.

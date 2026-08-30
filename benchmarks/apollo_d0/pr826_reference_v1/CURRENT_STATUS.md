@@ -30,22 +30,25 @@ Updated: 2026-08-30 UTC
 - The first natural-port screen on the physical-merge scene reached L0 but not L1: 43 expanded
   overlap events remained at 12.326–14.341 m, outside the unchanged `(0,10 m)` guard. The active arm
   still overtook. This scene–fault pair is rejected.
+- A mechanism-derived 12.25 m-gap scene then passed fixed reference 3/3. Its native active screen
+  reached L0→L3 (24 candidates disabled, 59 changed sequences consumed, 28 Planning response
+  deltas) but recovered and overtook at +18.501 m. L4 failed; this pair is also rejected.
 - No PR826 L0→L4 causal chain or golden case is admitted.
 - No diagnosis Agent, probability claim, repair, or animation is in scope yet.
 
 ## Current gate
 
-`NORMAL_ONLY_SCENE_FAULT_MATCHING_AFTER_L1_MISS`
+`NORMAL_ONLY_TEMPORAL_PERSISTENCE_MATCHING_AFTER_L0_TO_L3_PASS_L4_MISS`
 
-The v5 sensitivity contract is closed without further tuning. The first native-port screen is also
-closed without changing the fault: L0 passed, L1/L4 failed. Its result is a scene geometry mismatch,
-not permission to broaden the predicate.
+The v5 sensitivity contract is closed without further tuning. Two native-port scene pairs are
+closed without changing the fault: the first missed L1; the second reached L3 but recovered before
+L4. Neither is golden-case admission.
 
 ## Only next action
 
-Create one mechanism-derived, closer normal-only candidate that can enter the existing 10 m nearby
-guard. Freeze and validate its fixed arm before any active run. Keep the semantic port, Planning,
-Control, map, route, NPC policy and all failure gates unchanged.
+Create one normal-only candidate that reduces ego–target relative speed while retaining the admitted
+12.25 m geometry, so the unchanged nearby guard can remain active longer. Validate and freeze the
+normal arm before any active result. Do not change the semantic port or failure oracle.
 
 ## Active contract and canonical reports
 
@@ -54,6 +57,7 @@ Control, map, route, NPC policy and all failure gates unchanged.
 - Canonical persistent-sensitivity report: `reports/P4_PERSISTENT_SENSITIVITY_REPORT.md`
 - Canonical persistent-sensitivity aggregate: `reports/aggregate.json`
 - Latest native-port screen: `reports/P4_NATURAL_PORT_SCREEN_REPORT.md`
+- Latest L0→L3 native screen: `reports/P4B_GAP1225_NATURAL_SCREEN_REPORT.md`
 - Canonical machine state: `run_state.yaml`
 
 ## Explicit non-claim

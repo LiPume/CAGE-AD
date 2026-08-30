@@ -149,6 +149,23 @@ fault. The next permitted search is normal-only and mechanism-derived: move the 
 geometry closer enough to exercise the existing historical nearby guard, validate the fixed arm
 first, then freeze any active screening.
 
+## P4B gap-12.25 screen 02 — native propagation recovered before L4
+
+One normal-only candidate moved the same physical NPC exactly 4.0 m closer, from 16.25 m to
+12.25 m nominal gap, based solely on the prior measured distance-guard miss. Screening passed and
+three formal fixed repeats passed with margins +18.861/+12.843/+20.353 m, matched normalized
+manifests, valid channels and no safety event.
+
+Only after that 3/3 admission, a matched native pair was run. The frozen fault reached L0→L3:
+1513 expanded STRAIGHT eligibility events, 24 erroneous candidate disables, 67 active lateral
+output frames versus 43 fixed, 59 changed headers consumed by Planning and 28 response-delta
+frames. Nevertheless the active arm recovered and overtook at +18.501 m.
+
+Outcome: `SCENE_FAULT_PAIR_NOT_ADMITTED`. The native fault is causal through Planning but transient
+at roughly elapsed 8.9–14.7 s and does not create L4 in this scene. No faulty repeats were run. The
+next mechanism-derived normal-only search may reduce relative speed to extend time inside the same
+guard; the fault predicate and oracle remain unchanged.
+
 ## Cleanup record
 
 The cleanup removed obsolete P1/P2 candidate runs, closed P4B/v3 runs, duplicate state/report

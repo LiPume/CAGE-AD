@@ -3,15 +3,15 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T15:40:00Z"
-current_gate: NORMAL_ONLY_SCENE_FAULT_MATCHING_AFTER_L1_MISS
+last_updated_at: "2026-08-30T16:15:00Z"
+current_gate: NORMAL_ONLY_TEMPORAL_PERSISTENCE_MATCHING_AFTER_L0_TO_L3_PASS_L4_MISS
 
 phases:
   p1_prediction_bringup: PASS
   p2_configured_reference: STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_fixture: P3_SEMANTIC_FIXTURE_PASS
   p4_persistent_sensitivity: STABLE_PERSISTENT_S1_CANCELLATION_3_OF_3
-  p4_natural_pr826_chain: SCREEN_01_REJECTED_L0_PASS_L1_ABSENT
+  p4_natural_pr826_chain: SCREEN_02_REJECTED_L0_TO_L3_PASS_L4_FAIL
   diagnosis_agent_and_animation: OUT_OF_SCOPE
 
 configured_reference:
@@ -80,9 +80,28 @@ p4_natural_port_screen_01:
   report: reports/P4_NATURAL_PORT_SCREEN_REPORT.md
   audit: reports/P4_NATURAL_PORT_SCREEN_AUDIT.json
 
+p4b_gap1225_normal_reference:
+  status: STABLE_NORMAL_REFERENCE_3_OF_3
+  run_ids: [RN_G1225_F1, RN_G1225_F2, RN_G1225_F3]
+  margins_m: [18.86109343763468, 12.843381576916101, 20.353403661134564]
+  audit: reports/P4B_GAP1225_NORMAL_REPEAT_AUDIT.json
+
+p4b_gap1225_natural_screen:
+  contract: contracts/P4B_GAP1225_NATURAL_SCREEN_CONTRACT.yaml
+  contract_sha256: b8e36d2505c1ecc6178020c6001d19a245af1213cc727f8d4440cfe426a6364d
+  run_ids: [QY0_A, QY1_A]
+  l0_fault_activation: PASS
+  l1_candidate_semantic_delta: PASS_24_DISABLED
+  l2_native_prediction_phenotype: PASS
+  l3_planning_response: PASS
+  l4_vehicle_failure: FAIL_ACTIVE_OVERTAKES
+  status: SCENE_FAULT_PAIR_NOT_ADMITTED
+  report: reports/P4B_GAP1225_NATURAL_SCREEN_REPORT.md
+  audit: reports/P4B_GAP1225_NATURAL_SCREEN_AUDIT.json
+
 next_action: >-
-  Derive one closer normal-only candidate from the measured L1 distance miss, then freeze and
-  validate the fixed arm before any active run; do not modify the semantic predicate.
+  Derive one normal-only lower-relative-speed candidate to extend the unchanged guard's native
+  activation window; validate fixed behavior before any active run and keep the fault unchanged.
 
 non_claims:
   - privileged_s1_is_not_natural_pr826
