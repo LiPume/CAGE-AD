@@ -2160,52 +2160,96 @@ Timestamp: 2026-08-29T13:00:00Z
 
 现象：
 
-The 6.5 m bracket again passed but missed the old destination. Topology-matched road-1072 designs
-then produced one rejected early-goal screen, one admitted 3/3 fixed reference, and a fault-active
-run whose Prediction changed without a categorical Planning or system outcome change.
+The final 6.5 m bracket again passed the vehicle but missed the old road-47 destination.  A
+topology query showed that all close-gap runs remain on road 1072, so the next normal-only designs
+changed only the route endpoint to observed road-1072/lane--1 points.  The first endpoint at y=90 m
+completed too early and failed the immutable 0.90 Planning-valid gate; the y=70 m endpoint passed
+screening and three newly frozen formal repeats.  The subsequent one-shot active arm changed the
+target Prediction but did not prevent the pass.
 
 证据：
 
-- `SB4B_N03_A`: margin 29.339 m and coverage 0.991337, rejected because the old success region was
-  not reached.
-- `SB4B_N04_A`: pass/destination succeeded but Planning-valid 0.895690 < frozen 0.90.
-- `SB4B_N05_A`: screen PASS; coverage 0.991342, Planning-valid 0.904642, margin 15.368 m.
-- `SB4B_F01_A/F02_A/F03_A`: 3/3 PASS; Planning-valid 0.908525/0.915370/0.903023,
-  margins 18.970/20.664/20.533 m, zero collisions and illegal invasions.
-- `SB4B_S01_B`: 35 active-only STRAIGHT candidates were disabled; target output changed from a
-  straight trajectory (probability about 0.829, terminal x about 9.28 m) to a lane-change trajectory
-  (probability about 0.024, terminal x about 5.78 m). Planning consumed 34 changed headers, yet ego
-  passed at 53.90 s and reached success at 69.40 s.
+- `SB4B_N03_A` (6.5 m): safe pass, margin 29.339 m, trajectory coverage 0.991337, but
+  `SUCCESS_REGION_NOT_REACHED` on the old route.
+- `SB4B_N04_A` (road-1072 y=90): pass and destination succeeded, but Planning-valid ratio
+  0.895690 < 0.90, therefore `REFERENCE_INFRASTRUCTURE_INVALID`.
+- `SB4B_N05_A` (road-1072 y=70): screen PASS, trajectory coverage 0.991342, Planning-valid ratio
+  0.904642, margin 15.368 m, success at 72.65 s.
+- Formal fixed repeats `SB4B_F01_A/F02_A/F03_A` all passed.  Planning-valid ratios were
+  0.908525/0.915370/0.903023; margins 18.970/20.664/20.533 m; all collision and illegal-invasion
+  counts were zero.
+- Active `SB4B_S01_B`: 35 active-only STRAIGHT candidates passed all frozen guards and were
+  disabled.  Published output changed from the fixed straight trajectory (probability about 0.829,
+  terminal x about 9.28 m) to a lane-change trajectory (probability about 0.024, terminal x about
+  5.78 m). Planning consumed 34 changed headers, first age 0.0397 s.  Nevertheless it passed at
+  53.90 s, margin 18.928 m, success at 69.40 s.
+- P3 semantic patch SHA256 remained
+  `f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6`.
+
+当前假设：
+
+- H-P4B-1 supported: the semantic mechanism and published Prediction delta are real.
+- H-P4B-2 supported: this route-commanded lane change is behaviorally dominant; the active run is
+  inside the fixed timing/margin envelope and has no categorical Planning change.
+- H-P4B-3: a mechanism-designed scene must separate the fixed straight obstacle path from the ego
+  lane-change corridor while making the erroneous lane-change prediction enter that corridor.
 
 联网检索：
 
-- Query: `Apollo Prediction predictor lane sequence architecture`; URL:
-  https://github.com/ApolloAuto/apollo/blob/master/docs/07_Prediction/prediction_predictor.md;
-  Source: official documentation; Access time: 2026-08-29; conclusion: predictor publishes
-  trajectories from evaluated lane sequences; applicability: architectural, pinned source controls.
-- Query: `Apollo Planning lane change obstacle predicted trajectory ST boundary`; URL:
-  https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/lane_change_path/lane_change_path.cc;
-  Source: official source; Access time: 2026-08-29; conclusion: route lane-change path selection and
-  downstream dynamic/ST response are distinct; applicability: direct after pinned comparison.
-- Query: `Apollo Planning ST obstacles predicted trajectory speed bounds`; URL:
-  https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/st_bounds_decider/st_obstacles_processor.h;
-  Source: official source; Access time: 2026-08-29; conclusion: a changed published trajectory alone
-  does not prove a changed final path/speed decision; applicability: direct after pinned comparison.
+- Query: `Apollo Prediction predictor lane sequence architecture`
+  - URL: https://github.com/ApolloAuto/apollo/blob/master/docs/07_Prediction/prediction_predictor.md
+  - Source: ApolloAuto official documentation
+  - Access time: 2026-08-29
+  - 关键结论: predictor converts evaluated lane-sequence state into published obstacle trajectories.
+  - 可信度: HIGH
+  - Apollo 10 applicability: architectural; pinned source controls exact logic.
+- Query: `Apollo Planning lane change obstacle predicted trajectory ST boundary`
+  - URL: https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/lane_change_path/lane_change_path.cc
+  - Source: ApolloAuto official source
+  - Access time: 2026-08-29
+  - 关键结论: lane-change path logic and obstacle clearance are distinct from downstream dynamic
+    trajectory/ST processing; a route lane-change may remain selected even when Prediction changes.
+  - 可信度: HIGH
+  - Apollo 10 applicability: DIRECT after pinned-source comparison.
+- Query: `Apollo Planning ST obstacles predicted trajectory speed bounds`
+  - URL: https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/st_bounds_decider/st_obstacles_processor.h
+  - Source: ApolloAuto official source
+  - Access time: 2026-08-29
+  - 关键结论: Planning represents obstacle occupancy in ST for speed decisions; published semantic
+    change alone does not prove a changed final path/speed decision.
+  - 可信度: HIGH
+  - Apollo 10 applicability: DIRECT after pinned-source comparison.
+
+设计的实验：
+
+Admit the normal route before any active result, execute one active screening, and classify
+mechanism, Prediction, Planning and vehicle outcome separately.  Do not change the frozen patch.
+
+修改：
+
+Added topology-screen/fixed-repeat/P4B contracts, append-only ledgers, matched-manifest checking and
+private semantic timing analysis.  No P3 behavior source or failure oracle changed.
 
 运行结果：
 
-P2B fixed reference PASS 3/3. P4B pairing REJECT `ROUTE_DOMINATED_RESPONSE` /
-`SCENE_FAULT_PAIR_NOT_ADMITTED`. Patch SHA remained `f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6`.
+P2B fixed reference: PASS 3/3. P4B pairing: REJECT `ROUTE_DOMINATED_RESPONSE` /
+`SCENE_FAULT_PAIR_NOT_ADMITTED`.
 
 结论：
 
-Mechanism activation and Prediction propagation were proven, but the required Planning behavioral
-change and system failure were absent. The route-driven scene is not a golden pairing.
+This is stronger than `FAULT_NOT_ACTIVATED`: the mechanism activated and Planning consumed changed
+Prediction, but the required Planning behavioral change and system failure did not occur.
+
+排除的假设：
+
+- Excluded missing activation, missing published delta, stale Planning input, infrastructure loss,
+  collision and optimizer anomaly as explanations.
+- Excluded this route-driven scene as a golden fixed/faulty pairing.
 
 下一步：
 
-Verify a same-lane LaneBorrow design against Apollo 10's actual static/dynamic gate before any
-active run.
+Test a normal-only non-route LaneBorrow design, while verifying the actual Apollo 10 static/dynamic
+gate before treating a threshold override as sufficient.
 
 ## Issue P2C-001 — dynamic Prediction target cannot accumulate Apollo LaneBorrow's static blocker gate
 
@@ -2213,93 +2257,451 @@ Timestamp: 2026-08-29T13:20:00Z
 
 现象：
 
-The same-lane, 1.10 m/s fixed-only target with Planning
-`static_obstacle_speed_threshold=1.2` never entered LaneBorrow or overtook. Source analysis showed
-that the numeric flag does not override `PredictionObstacle.is_static`.
+The preregistered same-lane route with a 1.10 m/s target and Planning
+`static_obstacle_speed_threshold=1.2` never entered LaneBorrow and never overtook.  Source and trace
+analysis showed that the threshold does not override `PredictionObstacle.is_static`.
 
 证据：
 
-- `SC_N01_A`: coverage 0.987005, Planning coverage 0.996289, Control 1.0, zero collision/illegal
-  invasion, but Planning-valid 0.878336, lateral excursion 0.533 m and margin -15.063 m.
-- Audit: 1613 target frames, 1586 dynamic trajectory frames, 10 PathDecider blocker frames,
-  maximum consecutive blockers 1 versus required 3. Timeline SHA256
-  `39ea37a431900385e2fe8a9bb938477002ea688ccf4d042c5a3be0ed00f740b2`.
-- Pinned Prediction sets `is_static` from `Obstacle::IsStill()` and pinned Planning copies that field
-  into `Obstacle::is_static_`; the Planning speed flag is only an additional condition.
+- Run `SC_N01_A`: trajectory coverage 0.987005, Planning coverage 0.996289, Control coverage 1.0,
+  collision/illegal invasion 0, but Planning-valid ratio 0.878336, lateral excursion 0.533 m and
+  pass margin -15.063 m. Only `regular/self` paths were emitted.
+- Pinned `predictor_manager.cc` sets output `is_static` from `obstacle->IsStill()`; pinned
+  `Obstacle::CreateObstacles` passes that field into Planning's `Obstacle`, whose constructor sets
+  `is_static_` directly. Planning's numeric static-speed flag is an additional check, not a
+  replacement for this semantic field.
+- Machine audit `P2C_LANEBORROW_GATE_AUDIT.json`: 1613 Planning frames with target, 1586 dynamic
+  trajectory frames, only 10 PathDecider blocking frames, and maximum consecutive blocking frames
+  1. LaneBorrow requires 3 cycles. Blocking sequence numbers were
+  32,46,48,52,54,70,72,76,78,84.
+- Timeline and summary SHA256 are respectively
+  `39ea37a431900385e2fe8a9bb938477002ea688ccf4d042c5a3be0ed00f740b2` and
+  `1eb06bb5fbf8dd5aaa731ed03e707795a9cee4ba8a60a1fd5f06b5e4fc9aba10`.
+
+当前假设：
+
+- H-P2C-1 supported: Prediction's still/dynamic classification, not the Planning numeric threshold
+  alone, prevents a stable LaneBorrow blocker.
+- H-P2C-2 supported: making the moving target static to Planning would discard the very trajectory
+  semantics the benchmark must test, so this is not a sound configured-reference route.
+- H-P2C-3 rejected: raising only `static_obstacle_speed_threshold` makes a moving Prediction target
+  eligible for LaneBorrow.
 
 联网检索：
 
-- Query: `Apollo planning obstacle is_static PredictionObstacles lane borrow`; URL:
-  https://github.com/ApolloAuto/apollo/blob/master/modules/planning/planning_base/common/obstacle.cc;
-  Source: official source; Access time: 2026-08-29; conclusion: Planning consumes Prediction
-  `is_static`; applicability: direct and pinned-source verified.
-- Query: `Apollo lane borrow long term blocking obstacle cycle threshold`; URL:
-  https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/lane_borrow_path/lane_borrow_path.cc;
-  Source: official source; Access time: 2026-08-29; conclusion: LaneBorrow requires the long-term
-  static-blocker counter; applicability: direct, pinned default threshold is 3.
-- Query: `Apollo planning static obstacle ahead SimControl lane borrow issue`; URL:
-  https://github.com/ApolloAuto/apollo/issues/5915; Source: official issue; Access time: 2026-08-29;
-  conclusion: static-obstacle outcomes depend on full Planning state; applicability: contextual.
+- Query: `Apollo planning obstacle is_static PredictionObstacles lane borrow`
+  - URL: https://github.com/ApolloAuto/apollo/blob/master/modules/planning/planning_base/common/obstacle.cc
+  - Source: ApolloAuto official source
+  - Access time: 2026-08-29
+  - 关键结论: Planning obstacle construction consumes Prediction `is_static`; dynamic trajectories
+    create trajectory-specific obstacle instances.
+  - 可信度: HIGH
+  - Apollo 10 applicability: DIRECT; locally pinned source is identical on the relevant path.
+- Query: `Apollo lane borrow long term blocking obstacle cycle threshold`
+  - URL: https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/lane_borrow_path/lane_borrow_path.cc
+  - Source: ApolloAuto official source
+  - Access time: 2026-08-29
+  - 关键结论: LaneBorrow requires a single reference line, speed gate, intersection gate and a
+    long-term `front_static_obstacle_cycle_counter` before side-passability checks.
+  - 可信度: HIGH
+  - Apollo 10 applicability: DIRECT; threshold 3 verified in pinned default config.
+- Query: `Apollo planning static obstacle ahead SimControl lane borrow issue`
+  - URL: https://github.com/ApolloAuto/apollo/issues/5915
+  - Source: ApolloAuto GitHub issue
+  - Access time: 2026-08-29
+  - 关键结论: historical reports corroborate that a front static-obstacle outcome depends on the
+    full Planning task/config state, but the issue does not establish Apollo 10 behavior.
+  - 可信度: MEDIUM
+  - Apollo 10 applicability: contextual only.
+
+设计的实验：
+
+Run one fixed-only same-lane screen, then audit the first LaneBorrow gate from captured Planning
+frames and pinned source.  Do not run an active arm if the normal mechanism is absent.
 
 修改：
 
-Added a read-only LaneBorrow gate analyzer and machine audit. No Prediction, fault patch, Planning
-source, ego control or oracle changed.
+The screen used the preregistered Planning threshold only. Added a read-only gate analyzer and a
+machine-readable audit. No Prediction, fault patch, Planning source, ego control or oracle changed.
 
 运行结果：
 
-REJECT — `REFERENCE_INFRASTRUCTURE_INVALID` and `LONG_TERM_BLOCKING_GATE_NOT_REACHED`; no active arm.
+REJECT — `REFERENCE_INFRASTRUCTURE_INVALID` and `LONG_TERM_BLOCKING_GATE_NOT_REACHED`. No active arm
+was run.
 
 结论：
 
-Close this P2C family. Making the moving target static to Planning would discard the trajectory
-semantics under study. Next use mechanism-driven lateral separation, with normal-only freeze first.
+Close the P2C LaneBorrow family. Treating a real-trajectory moving target as a static blocker would
+require a Planning semantic change that makes the reference mechanism inconsistent with the
+Prediction-to-Planning objective.
 
-## Issue P2D-001 — 0.60 m lateral-separation candidate fails first formal clearance gate
+排除的假设：
+
+- Excluded route rejection, missing Prediction trajectory and channel loss as the primary reason.
+- Excluded a one-number Planning threshold adjustment as a valid solution.
+
+新假设：
+
+Use the admitted route-driven reference as a base but increase lateral separation inside the
+target's own lane. Fixed straight Prediction should then remain outside the ego corridor while the
+fixture-proven erroneous lane-change Prediction enters it. This changes scene geometry, not fault
+dose, and must pass normal-only admission before another active run.
+
+下一步：
+
+Freeze one lateral-separation normal-only candidate, screen it fixed-only, and proceed to 3/3 fixed
+admission only if all original gates and a positive fixed clearance margin pass.
+
+## Issue P2D-001 — 0.60 m lateral-separation candidate passes screen but fails first formal clearance gate
 
 Timestamp: 2026-08-29T13:37:00Z
 
-现象与证据：
+现象：
 
-- `SD_N01_A` normal-only screen passed: target lane -2 throughout, trajectory coverage 0.983292,
-  Planning valid 0.937107, margin 23.285 m, clearance 1.210439 m, no collision/illegal invasion.
-- A separately frozen formal contract required clearance >=0.90 m before any formal result.
-- `SD_F01_A` passed generic gates but clearance was 0.8985751835 m, 1.425 mm below the gate.
-  Contract SHA256: `9e895c1a66de1cdb99ce0aa493dc07a47f540294116e961ad3014273d69bc113`;
-  summary SHA256: `69b8c5dc4ac99d0f0ea23fd0360ea32cd6ffb43befbee55abd04cf5a7dbe5bee`.
-- Private fixed trace contains 1594 STRAIGHT candidates and has SHA256
-  `f0a085e4a7ca8fcb09ce8ee6d8ba665b2e0f76c47857af5b3dcd711d18016162`.
+The mechanism-derived 0.60 m target offset passed its normal-only screen with a materially larger
+clearance, so a new three-repeat contract froze a 0.90 m minimum body-clearance gate before any
+formal result. Formal Repeat 1 passed every generic evaluator gate but missed the additional frozen
+clearance gate by 1.425 mm.
 
-设计与结果：
+证据：
 
-The active fault was never run. The formal set is REJECT; `SD_F02_A/SD_F03_A` remain unrun under
-the preregistered early-stop rule. The 0.90 m threshold was not changed.
+- Screen `SD_N01_A`: target lane -2 for 1599/1599 samples; lane-center offset 0.612--0.639 m;
+  trajectory coverage 0.983292; Planning valid 0.937107; pass margin 23.285 m; bbox clearance
+  1.210439 m; success 64.95 s; no collision/illegal invasion.
+- Private fixed trace SHA256 `f0a085e4a7ca8fcb09ce8ee6d8ba665b2e0f76c47857af5b3dcd711d18016162`
+  contains 1594 STRAIGHT candidates with probability range 0.463335--0.764260.
+- Formal contract SHA256 `9e895c1a66de1cdb99ce0aa493dc07a47f540294116e961ad3014273d69bc113`
+  froze `minimum_bbox_clearance_2d_m >= 0.90` before `SD_F01_A`.
+- `SD_F01_A`: coverage 0.983302, Planning valid 0.909938, margin 20.280 m, collision/illegal 0,
+  but bbox clearance 0.8985751835 m. Summary SHA256
+  `69b8c5dc4ac99d0f0ea23fd0360ea32cd6ffb43befbee55abd04cf5a7dbe5bee`.
 
-结论与下一步：
+当前假设：
 
-The lateral-separation mechanism is supported but 0.60 m lacks formal margin. Permit one final
-0.70 m normal-only bracket with the same gate and complete restart; otherwise close this sweep.
+- H-P2D-1 supported: shifting the target away from lane -1 increases fixed physical and predicted
+  corridor separation while preserving target lane association and straight candidates.
+- H-P2D-2 rejected: 0.60 m has enough repeat margin for the predeclared 0.90 m clearance floor.
+- H-P2D-3: one final 0.70 m normal-only bracket is justified by the same lateral-separation
+  mechanism and leaves the target associated with lane -2; it must restart screening and admission.
 
-## Issue P2E-001 — final 0.70 m lateral bracket rejected
+设计的实验：
 
-现象与证据：
+Screen fixed-only, freeze a separate 3-repeat contract after screen PASS, and early-stop on the
+first valid formal failure. Do not run the active fault.
 
-- `SE_N01_A` fixed-only screen passed with Prediction coverage 0.985130, Planning valid 0.928304,
-  margin 19.996 m and bbox clearance 1.285894 m.
-- Frozen contract SHA256 `704fb7079974e8172646bc00e5bbc759a445fea97eca2ab88861dfebed732471`
-  required Planning-valid ratio >=0.90 and bbox clearance >=0.90 m before formal results.
-- `SE_F01_A` completed a safe overtake with coverage 0.985158, margin 20.899 m and clearance
-  1.870652 m, but Planning-valid ratio 0.897132 failed the frozen gate. Target stayed lane -2 in
-  1599/1599 samples. Summary SHA256:
+修改：
+
+Added the P2D candidate, normal screen contract, formal repeat contract and private fixed semantic
+trace. No fault, Planning, Control, bridge, map, route or oracle code changed.
+
+运行结果：
+
+Screen PASS; formal set REJECT. `SD_F02_A` and `SD_F03_A` were intentionally not run under the
+contract's early-stop policy. The 0.90 m threshold was not changed.
+
+结论：
+
+P2D is preserved as a scientifically valid failed reference admission. It cannot authorize an
+active run despite its successful screen.
+
+下一步：
+
+Create one new 0.70 m normal-only candidate with the same 0.90 m gate and full restart; if it does
+not admit, stop lateral-offset sweeping and reassess scene-fault compatibility.
+
+## Issue P2E-001 — final 0.70 m lateral bracket fails the frozen Planning-valid gate
+
+Timestamp: 2026-08-29T13:53:00Z
+
+现象：
+
+The preregistered final 0.70 m target offset passed its normal-only screen with 1.286 m body
+clearance. The first formal repeat completed the route and overtake safely with 1.871 m clearance,
+but its Planning-valid ratio was 0.897132, below the 0.90 gate frozen before formal results.
+
+证据：
+
+- Screen `SE_N01_A`: trajectory coverage 0.985130, Planning-valid ratio 0.928304, pass margin
+  19.996 m, bbox clearance 1.285894 m, success 68.45 s, collision/illegal invasion zero, and target
+  lane -2 in 1599/1599 samples.
+- Formal contract SHA256 `704fb7079974e8172646bc00e5bbc759a445fea97eca2ab88861dfebed732471`
+  froze Planning-valid ratio >= 0.90, bbox clearance >= 0.90 m and early stop before `SE_F01_A`.
+- `SE_F01_A`: Prediction trajectory coverage 0.985158; Planning channel coverage 0.991960;
+  Control coverage 0.999753; pass margin 20.899 m; bbox clearance 1.870652 m; success region reached;
+  collision/illegal invasion zero; target lane -2 in 1599/1599 samples; Planning-valid ratio
+  0.8971321696.
+- The run had no runtime exception, route was accepted and message coverage remained above the
+  frozen channel gates. Summary SHA256 is
   `2da2339c5844ade60432484316b4b61596c86e2d82cc54263709a338387d3c0f`.
 
-设计与结果：
+当前假设：
 
-The formal set is REJECT. `SE_F02_A/SE_F03_A` remain unrun under early stop; no active run exists
-on this geometry. Thresholds were not changed and the lateral-offset sweep is closed.
+- H-P2E-1 supported: a 0.70 m offset provides ample physical separation in this realization.
+- H-P2E-2 rejected: that geometry is a stable formal reference under all frozen gates.
+- H-P2E-3 supported: continuing a result-driven lateral-offset sweep would no longer be a bounded
+  mechanism test and would risk optimizing the scene for a desired faulty outcome.
+
+设计的实验：
+
+Execute the frozen fixed repeat contract sequentially. Stop after the first valid failure and do
+not execute an active arm on a geometry that lacks 3/3 fixed admission.
+
+修改：
+
+Added the P2E candidate, fixed-only screen and formal contracts, append-only ledgers and audit. No
+Prediction fault, Planning, Control, bridge, map, route or success threshold changed.
+
+运行结果：
+
+Screen PASS; formal set REJECT. `SE_F02_A` and `SE_F03_A` were intentionally not run. No active
+fault run exists for this geometry.
+
+结论：
+
+The 0.70 m candidate cannot authorize P4C. The frozen 0.90 Planning-valid gate was not changed even
+though the miss was only 0.002868. Close the lateral-offset family as preregistered.
+
+排除的假设：
+
+- Excluded insufficient body clearance, missing Prediction trajectories, route rejection,
+  collision, illegal invasion and channel dropout as this repeat's failing gate.
+- Excluded P2E as an admitted fixed baseline; there is therefore no scientifically valid reason to
+  run the active semantic arm on this geometry.
+
+新假设：
+
+The next scene design must follow from an offline interaction audit of the already captured P4B
+active trace: determine whether the changed target trajectory ever intersects the selected
+Planning path/ST occupancy while the target is ahead. This separates route dominance, spatial
+non-interaction and temporal non-interaction without another fault run.
+
+下一步：
+
+Enter `SCENE_FAULT_COMPATIBILITY_ANALYSIS`. Build a read-only Prediction-to-Planning interaction
+analyzer over the P4B fixed/active artifacts, freeze its metrics, and only then propose a distinct
+normal-only scene family.
++
+## Issue P2F-001 — closer-gap timing probe delays rather than overlaps the selected maneuver
+
+Timestamp: 2026-08-29T14:12:00Z
+
+现象：
+
+The fixed-only 5.5 m gap / 0.70 m offset candidate passed all generic behavior gates, but Planning
+first exposed a lane-change path at 5.25 s. The mechanism gate had been frozen at <=3.5 s, so the
+scene was rejected before formal repeats or an active run.
+
+证据：
+
+- Run `SF_N01_A`: Prediction coverage 0.990099, Planning valid 0.930175, pass margin 23.814 m,
+  bbox clearance 1.246716 m, success 65.35 s, collision/illegal invasion zero.
+- Target remained lane -2 for 1599/1599 samples.
+- First `regular/lane_change` path: 5.250000078 s versus frozen maximum 3.5 s.
+- Contract SHA256 `f9a2d19533c92d5a2687a09f4b1a646e496f81f2413e4606aa8ecc37b5164678`;
+  summary SHA256 `9b81fea1a6923799e1d6c0e6e6a9978573c5aa47eb8b0e49f45bc8c1770fed61`.
+
+当前假设与结论：
+
+H-P2F-1 rejected: reducing initial gap alone does not reliably carry the frozen Prediction trigger
+into the selected lane-change path. In this fixed run it delayed that path. Close the gap/offset
+combination; do not run active.
+
+下一步：
+
+Use deterministic simulation-time scheduling of NPC motion to create trajectory-bearing Prediction
+after Planning has selected a lane-change path, without reading Apollo or ego state.
+
+## Issue P2G-001 — stop-and-go timing creates the required interaction window but fixed admission fails
+
+Timestamp: 2026-08-29T14:28:00Z
+
+现象：
+
+A 3.5 s simulation-time hold followed by 1.10 m/s motion produced sustained fixed-arm overlap
+between target trajectories and lane-change Planning paths. The fixed behavior still failed the
+frozen Planning-valid and clearance gates.
+
+证据：
+
+- Run `SG_N01_A`: release command 3.500000052 s; held speed max 1.47e-7 m/s; moving-speed median
+  1.093789 m/s.
+- First trajectory-bearing lane-change Planning frame 4.950000073 s; 571 overlap frames through
+  40.30 s. Every interaction analyzer check passed.
+- Prediction coverage 0.942450; Planning channel 0.991337; Control 0.999381; safe overtake and
+  success region reached; no collision/illegal invasion.
+- Planning-valid ratio 0.865793 <0.90 and bbox clearance 0.651297 m <0.90.
+- At minimum clearance the target lane-center distance had drifted to 0.347 m, compared with about
+  1.01 m at the same road position in the prior continuously moving 0.70 m-offset screen.
+
+联网检索：
+
+- Query: `CARLA 0.9.15 enable_constant_velocity disable_constant_velocity VehicleControl hand_brake`
+  - URL: https://github.com/carla-simulator/carla/blob/ue5-dev/PythonAPI/docs/actor.yml
+  - Source: CARLA official Python API source
+  - Access time: 2026-08-29
+  - 关键结论: constant velocity is a local-space m/s command and can be explicitly disabled;
+    Vehicle physics remains an independent actor property.
+  - 可信度: HIGH
+  - CARLA 0.9.15 applicability: API semantics corroborated by the installed 0.9.15 bindings.
+- Query: `CARLA 0.9.15 VehicleControl hand_brake signature`
+  - URL: https://github.com/carla-simulator/carla/issues/7614
+  - Source: CARLA official GitHub issue
+  - Access time: 2026-08-29
+  - 关键结论: the 0.9.15 binding exposes brake and hand_brake as typed VehicleControl fields.
+  - 可信度: MEDIUM
+  - CARLA 0.9.15 applicability: DIRECT for binding signature; issue is not a determinism claim.
+
+修改与结果：
+
+Added a time-only hold/release NPC policy and a read-only fixed interaction analyzer. The policy
+records release frame/time and declares Apollo/future-GT access false. Mechanism PASS; fixed
+reference REJECT. No active run.
 
 结论与下一步：
 
-Enter `SCENE_FAULT_COMPATIBILITY_ANALYSIS`. Use the captured P4B active/fixed evidence to determine
-whether the faulty target trajectory ever interacts with Planning's selected path/ST domain before
-proposing a distinct, mechanism-derived normal-only scene family.
+H-P2G-1 supported: temporal alignment is achievable without changing fault semantics.
+H-P2G-2 rejected: the unprojected stop-and-go NPC is an admissible fixed reference.
+Investigate measured current-lane lateral drift with a matched current-waypoint offset controller;
+keep hold, gap, speed and all gates unchanged.
+
+## Issue P2H-001 — current-lane projection implementation selected the wrong adjacent lane
+
+Timestamp: 2026-08-29T14:47:00Z
+
+现象：
+
+The first projected-offset run did not execute the declared lane -2 scene. CARLA's unconstrained
+nearest-waypoint query selected adjacent lane -1 when the initial signed offset was computed.
+
+证据：
+
+- Run `SH_N01_A` computed `frozen_current_lane_lateral_offset_m=-4.9384498`, an immediate
+  invariant violation for a declared 0.70 m within-lane offset.
+- NPC lane counts were lane -1 in 1598/1599 samples and lane -2 once.
+- Target Prediction trajectory coverage was 0.0. The frozen lane/coverage gates rejected the run.
+- Manifest SHA256 `d17400d62e608f9b10b09a3a478759cfa51d0d0d2bf3cb8ff5a6eb67d20a5f5b`;
+  summary SHA256 `13c943cde57c7fb2ac5f214ac50135294b7e1682701534e91c6834d9d8ddf8c2`.
+
+根因：
+
+The projection initializer trusted a geometrically nearest driving waypoint without constraining
+the declared target lane. On this overlapping/adjacent Town04 geometry that seed was lane -1.
+The -4.94 m value was then faithfully, but incorrectly, preserved.
+
+修复方式：
+
+Resolve the candidate's declared lane -2 by a bounded breadth-first walk over only the current
+waypoint's left/right driving-lane adjacency. Record the resolved road/lane before calculating the
+signed offset. Do not alter any numeric scene parameter, gate, Apollo module or fault semantic.
+
+运行结果：
+
+`SH_N01_A` is preserved as `IMPLEMENTATION_INVALID`, not reclassified as a scientific negative.
+The corrected implementation uses a new opaque run ID and a separately frozen P2I contract.
+
+结论与下一步：
+
+Verify the resolver with P2I fixed-only screening. Admission additionally requires resolved lane -2,
+1599/1599 target lane stability, coverage >=0.90, lane-center offset >=0.60 m and every unchanged
+behavior/interaction gate.
+
+## Issue P2I-001 — synchronous actor transform read before snapshot materialization
+
+现象：
+
+`SI_N01_A` exited with the frozen reference evaluator's rejection code. The ego completed the
+route, but the target had zero trajectory-bearing Prediction frames and moved to lane -1 on the
+first observed update.
+
+证据：
+
+- Manifest SHA256 `db5f1b7f40ab96ac1249bd0d5d5f7149fb0673d103aedab2101f37a705736b99`;
+  summary SHA256 `80688c88c2472d09bdf779dd8e3929462310059d0defe018634b958bcd1a6fc1`.
+- The initializer recorded road/lane `47/-2` and offset `-8.438450 m`, while the frozen spawn is
+  road/lane `46/-2`.
+- Samples contain one `46/-2` frame followed by 1598 `46/-1` frames; trajectory coverage is 0.
+- A clean CARLA 0.9.15 Town04 probe at the frozen coordinates resolves `46/-2` with about 0.70 m
+  signed lateral displacement.
+- The same probe reproduced the lifecycle boundary: immediately after `try_spawn_actor`,
+  `get_location()` returned `(0,0,0)`; after one synchronous `world.tick()`, it returned the exact
+  frozen XY and resolved `46/-2`.
+
+当前假设：
+
+H1 actor transform is read before the spawn command is materialized in a synchronous snapshot;
+H2 road/lane adjacency traversal is still incorrect; H3 the frozen Town04 coordinates are wrong.
+
+联网检索：
+
+- Query: `CARLA apply_batch_sync synchronous actor transform spawn next tick`
+- Source: CARLA Python API actor command documentation
+- URL: https://github.com/carla-simulator/carla/blob/ue5-dev/PythonAPI/docs/actor.yml
+- 关键结论: CARLA exposes spawn/transform operations through simulator commands whose effects
+  are synchronized with world updates; current actor state must be tied to a snapshot boundary.
+- 可信度: high for API semantics; current 0.9.15 behavior was additionally reproduced locally.
+- Apollo 10 applicability: indirect; this is CARLA fixture lifecycle, not an Apollo change.
+
+设计的实验：
+
+Query Town04 at the exact frozen spawn, then spawn an Audi TT in synchronous mode and compare the
+immediate transform with the transform after one tick. This distinguishes lifecycle timing from
+map geometry without changing Apollo or the scientific scene.
+
+修改与解决方式：
+
+Preserve P2I as implementation-invalid. For P2J, wait for the next bridge-owned synchronous
+snapshot before capturing the lane-relative offset; require XY error <=0.25 m and exact initial
+road/lane `46/-2`; abort rather than project if either check fails. No scene value, gate, Apollo
+module or frozen Prediction semantic changes.
+
+运行结果：
+
+P2I is `IMPLEMENTATION_INVALID_PRE_SNAPSHOT_ACTOR_TRANSFORM_READ`. H2 and H3 are excluded by the
+standalone exact-coordinate probe. P2J is frozen before result under a new candidate, contract and
+opaque run ID.
+
+下一步：
+
+Run exactly one fixed-only P2J screening. Require materialization attestation, road/lane stability,
+Prediction trajectory coverage, interaction overlap and all unchanged behavior gates before any
+formal contract or active arm.
+
+## Issue P2J-001 — implementation valid, fixed reference misses Planning-valid gate
+
+现象与证据：
+
+`SJ_N01_A` validates the corrected lifecycle but is rejected by one unchanged normal gate.
+Materialization occurred from frame 773 to 774 with XY error `0.000002722 m`; initial road/lane is
+`46/-2`, frozen offset is `0.699965 m`, and all 1600 samples remain lane -2 with measured
+lane-center distance `0.699851–0.722478 m`. Prediction trajectory coverage is `0.949596`.
+
+The mechanism audit passes: first trajectory-bearing/lane-change Planning overlap is at 4.50 s,
+there are 358 overlap frames through 22.35 s, held speed is below `3e-7 m/s`, and moving median is
+`1.099286 m/s`. No Apollo output or future GT is used by the NPC policy.
+
+The ego safely passes and reaches the success region with 7.673 m pass margin, 2.011 m minimum
+body clearance, no collision and no illegal invasion. Nevertheless, Planning valid is
+`0.893483709 < 0.90`; therefore infrastructure validity is false under the frozen oracle.
+
+当前假设：
+
+H1 the stop-and-go interaction itself produces an early Planning recovery burden that cannot
+reliably clear the already frozen 0.90 valid-ratio threshold; H2 the lifecycle fix introduced the
+failure. H2 is excluded because materialization, lane, offset, speed and channel evidence all pass,
+while the same low Planning-valid pattern was already present in P2G (`0.865793`).
+
+修改：
+
+None after result. No gate, fault, scene parameter or success oracle was changed.
+
+运行结果与结论：
+
+`REJECT_PLANNING_VALID_GATE`; this is a valid scientific negative, not an implementation error.
+Per the pre-frozen contract, formal repeats and active fault runs are forbidden and the projected
+stop-and-go family is closed.
+
+下一步：
+
+Return to scene–fault compatibility analysis. Use captured fixed/active distance and timing traces
+to preregister a distinct continuous-motion geometry whose frozen fault trigger occurs after the
+normal route lane-change path exists, instead of further tuning hold duration or projection.

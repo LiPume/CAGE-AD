@@ -1,0 +1,30 @@
+{
+  "active_fault_runs": 0,
+  "candidate_id": "RF04_P2G_HOLD3500_GAP700_LATERALRIGHT070_ROUTE1072Y70_SLOW110_80S_V1",
+  "contract_sha256": "8bd1d5c9d06365661d9b41e3a60526c5c38cb02516fac486a47ceb7f1396efae",
+  "interaction_audit_status": "PASS",
+  "interaction_metrics": {
+    "first_trajectory_lane_change_overlap_elapsed_s": 4.950000073366638,
+    "release_command_elapsed_s": 3.500000052154064,
+    "trajectory_lane_change_overlap_frames": 571
+  },
+  "reason": "FIXED_REFERENCE_PLANNING_VALID_AND_CLEARANCE_GATES_FAILED",
+  "schema_version": 1,
+  "screen": {
+    "collision_count": 0,
+    "control_channel_coverage": 0.9993811881188119,
+    "illegal_lane_invasion_count": 0,
+    "manifest_sha256": "76cc401519b86a88577ebfb4225b8036c5dad919adc8cacfa273ba81fd643919",
+    "max_pass_margin_m": 19.97066094257643,
+    "minimum_bbox_clearance_2d_m": 0.6512973767623489,
+    "planning_channel_coverage": 0.9913366336633663,
+    "planning_valid_ratio": 0.865792759051186,
+    "prediction_trajectory_coverage": 0.942450495049505,
+    "private_prediction_trace_sha256": "f17b0bedc0623e24cca0b62a3584a4bb077a1071015ff1fe6583e7e4683f41a6",
+    "run_id": "SG_N01_A",
+    "success_region_reached": true,
+    "summary_sha256": "d07c160f8638d8fb2ebb2400b9d04c00fdc7461d5fbf4aa7fafbefe47b207d5f"
+  },
+  "screening_status": "REJECT",
+  "threshold_changed_after_result": false
+}

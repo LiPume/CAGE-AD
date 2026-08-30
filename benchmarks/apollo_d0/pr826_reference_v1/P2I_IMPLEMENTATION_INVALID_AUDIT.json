@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "screening_id": "SI_N01_A",
+  "candidate_id": "RF04_P2I_HOLD3500_RESOLVEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1",
+  "status": "IMPLEMENTATION_INVALID_PRE_SNAPSHOT_ACTOR_TRANSFORM_READ",
+  "scientific_result_valid": false,
+  "active_fault_runs": 0,
+  "manifest_sha256": "db5f1b7f40ab96ac1249bd0d5d5f7149fb0673d103aedab2101f37a705736b99",
+  "summary_sha256": "80688c88c2472d09bdf779dd8e3929462310059d0defe018634b958bcd1a6fc1",
+  "timeline_sha256": "c172ecd090be0828ecbfd98fd6172b8d2f8625b80b1c8dcf5dc009db96a4b3bd",
+  "frozen_expectation": {
+    "initial_road_id": 46,
+    "initial_lane_id": -2,
+    "minimum_lane_center_offset_m": 0.6,
+    "minimum_prediction_trajectory_coverage": 0.9
+  },
+  "observed": {
+    "initial_resolved_road_id": 47,
+    "initial_resolved_lane_id": -2,
+    "frozen_lateral_offset_m": -8.438450066618005,
+    "sample_road_lane_counts": {
+      "46/-2": 1,
+      "46/-1": 1598
+    },
+    "target_prediction_trajectory_coverage": 0.0,
+    "planning_valid_ratio": 0.8710691823899371,
+    "infrastructure_valid": false,
+    "route_accepted": true,
+    "collision_count": 0,
+    "illegal_lane_invasion_count": 0
+  },
+  "root_cause": "The lane-relative offset was captured immediately after try_spawn_actor and before the actor transform was materialized in a synchronous world snapshot. A standalone CARLA probe reproduced an immediate origin transform followed by the exact frozen spawn after one tick.",
+  "resolution": "Preserve SI_N01_A, require the next bridge-owned synchronous snapshot before offset capture, validate XY error and exact frozen road/lane, and use a new candidate/contract/run ID without changing scientific parameters."
+}

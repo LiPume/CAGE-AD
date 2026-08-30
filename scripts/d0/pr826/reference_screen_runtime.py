@@ -241,6 +241,32 @@ class ReferenceScreen:
         ]
         return actors[0] if len(actors) == 1 else None
 
+    def target_lane_waypoint(self, location):
+        """Resolve the target's declared lane through current-waypoint adjacency only."""
+        seed = self.map.get_waypoint(
+            location, project_to_road=True, lane_type=carla.LaneType.Driving
+        )
+        if seed is None:
+            return None
+        desired_lane_id = int(self.candidate["carla_lane_id"])
+        queue = [seed]
+        visited: set[tuple[int, int]] = set()
+        while queue and len(visited) < 8:
+            waypoint = queue.pop(0)
+            key = (int(waypoint.road_id), int(waypoint.lane_id))
+            if key in visited:
+                continue
+            visited.add(key)
+            if int(waypoint.lane_id) == desired_lane_id:
+                return waypoint
+            for neighbor in (waypoint.get_left_lane(), waypoint.get_right_lane()):
+                if neighbor is not None and neighbor.lane_type == carla.LaneType.Driving:
+                    queue.append(neighbor)
+        raise RuntimeError(
+            "current waypoint adjacency does not contain declared target lane "
+            f"{desired_lane_id}; seed road/lane={seed.road_id}/{seed.lane_id}"
+        )
+
     def spawn_npc(self):
         spec = self.candidate["npc_spawn_carla"]
         transform = carla.Transform(
@@ -425,6 +451,91 @@ class ReferenceScreen:
                 "command_transport": "APPLY_BATCH_SYNC_NO_TICK",
                 "position_projection": False,
                 "controller": "CARLA_LOCAL_VELOCITY_WITH_CURRENT_LANE_HEADING",
+            }
+        elif policy_type == "CARLA_HOLD_THEN_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT":
+            if speed_mps <= 0.0:
+                raise RuntimeError("hold-then-move NPC policy requires positive speed_mps")
+            if policy.get("traffic_manager_used", False):
+                raise RuntimeError("hold-then-move NPC policy must not use TrafficManager")
+            initial_hold_s = float(policy.get("initial_hold_s", 0.0))
+            if not 0.0 < initial_hold_s < float(
+                self.candidate.get("observation_window_s", self.fixed["observation_window_s"])
+            ):
+                raise RuntimeError("hold-then-move initial_hold_s is outside the observation window")
+            position_projection = policy.get("position_projection", False)
+            if position_projection not in (False, "CURRENT_LANE_FROZEN_OFFSET"):
+                raise RuntimeError("unsupported hold-then-move position_projection")
+            # In synchronous mode, try_spawn_actor() may return before the new actor's transform
+            # is materialized in a world snapshot.  Reading get_location() immediately can yield
+            # the origin or another stale transform and therefore resolve a completely unrelated
+            # road.  Wait for the bridge-owned next tick, then prove that the actor is at the
+            # frozen XY spawn before deriving any lane-relative quantity.
+            pre_materialization_frame = int(self.world.get_snapshot().frame)
+            materialized_snapshot = self.world.wait_for_tick(5.0)
+            actor_location = actor.get_location()
+            spawn_xy_error_m = math.hypot(
+                float(actor_location.x) - float(spec["x"]),
+                float(actor_location.y) - float(spec["y"]),
+            )
+            if spawn_xy_error_m > 0.25:
+                raise RuntimeError(
+                    "NPC transform did not materialize at frozen spawn: "
+                    f"xy_error_m={spawn_xy_error_m:.6f}"
+                )
+            initial_waypoint = self.target_lane_waypoint(actor.get_location())
+            if initial_waypoint is None:
+                raise RuntimeError("cannot establish initial NPC lane offset")
+            if (
+                int(initial_waypoint.road_id) != int(self.candidate["carla_road_id"])
+                or int(initial_waypoint.lane_id) != int(self.candidate["carla_lane_id"])
+            ):
+                raise RuntimeError(
+                    "materialized NPC waypoint does not match frozen spawn road/lane: "
+                    f"observed={initial_waypoint.road_id}/{initial_waypoint.lane_id} "
+                    f"expected={self.candidate['carla_road_id']}/"
+                    f"{self.candidate['carla_lane_id']}"
+                )
+            lane_right = initial_waypoint.transform.get_right_vector()
+            lane_center = initial_waypoint.transform.location
+            frozen_lateral_offset_m = (
+                (actor_location.x - lane_center.x) * lane_right.x
+                + (actor_location.y - lane_center.y) * lane_right.y
+            )
+            # Keep normal vehicle physics active and hold the NPC with ordinary vehicle controls.
+            # Release is keyed only to the frozen simulation elapsed time in run(); neither this
+            # policy nor its transition reads Apollo output, ego state, or future ground truth.
+            actor.set_simulate_physics(True)
+            actor.disable_constant_velocity()
+            actor.set_target_velocity(carla.Vector3D())
+            actor.apply_control(carla.VehicleControl(brake=1.0, hand_brake=True))
+            self.npc_policy_record = {
+                "type": policy_type,
+                "simulate_physics": True,
+                "speed_mps": speed_mps,
+                "initial_hold_s": initial_hold_s,
+                "hold_control": {"brake": 1.0, "hand_brake": True},
+                "constant_velocity_local_mps_after_release": [speed_mps, 0.0, 0.0],
+                "traffic_manager_used": False,
+                "heading_source": "CURRENT_NEAREST_DRIVING_LANE_TANGENT",
+                "release_trigger": "SIMULATION_ELAPSED_SINCE_OBSERVATION_START",
+                "future_ground_truth_used": False,
+                "apollo_output_used": False,
+                "command_transport": "APPLY_BATCH_SYNC_NO_TICK",
+                "position_projection": position_projection,
+                "frozen_current_lane_lateral_offset_m": frozen_lateral_offset_m,
+                "initial_resolved_waypoint": {
+                    "road_id": int(initial_waypoint.road_id),
+                    "lane_id": int(initial_waypoint.lane_id),
+                },
+                "spawn_transform_materialization": {
+                    "pre_frame": pre_materialization_frame,
+                    "materialized_frame": int(materialized_snapshot.frame),
+                    "xy_error_m": spawn_xy_error_m,
+                    "maximum_xy_error_m": 0.25,
+                },
+                "controller": "CARLA_TIMED_HOLD_THEN_LOCAL_VELOCITY_WITH_CURRENT_LANE_HEADING",
+                "release_command_elapsed_s": None,
+                "release_command_carla_frame": None,
             }
         else:
             actor.destroy()
@@ -952,15 +1063,12 @@ class ReferenceScreen:
                 self.npc.enable_constant_velocity(carla.Vector3D(
                     x=float(self.npc_policy_record["speed_mps"]), y=0.0, z=0.0
                 ))
-            elif self.npc_policy_record["type"] == (
-                "CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT"
+            elif self.npc_policy_record["type"] in (
+                "CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT",
+                "CARLA_HOLD_THEN_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT",
             ):
                 transform = self.npc.get_transform()
-                waypoint = self.map.get_waypoint(
-                    transform.location,
-                    project_to_road=True,
-                    lane_type=carla.LaneType.Driving,
-                )
+                waypoint = self.target_lane_waypoint(transform.location)
                 if waypoint is None:
                     raise RuntimeError("lane-tangent policy lost nearest driving waypoint")
                 # Normalize equivalent accumulated CARLA map headings (for example -450 deg)
@@ -969,6 +1077,16 @@ class ReferenceScreen:
                 transform.rotation.yaw = (
                     (float(waypoint.transform.rotation.yaw) + 180.0) % 360.0
                 ) - 180.0
+                if self.npc_policy_record.get("position_projection") == (
+                    "CURRENT_LANE_FROZEN_OFFSET"
+                ):
+                    lane_right = waypoint.transform.get_right_vector()
+                    lane_center = waypoint.transform.location
+                    lateral_offset = float(
+                        self.npc_policy_record["frozen_current_lane_lateral_offset_m"]
+                    )
+                    transform.location.x = lane_center.x + lane_right.x * lateral_offset
+                    transform.location.y = lane_center.y + lane_right.y * lateral_offset
                 responses = self.client.apply_batch_sync([
                     carla.command.ApplyTransform(int(self.npc.id), transform)
                 ], False)
@@ -979,6 +1097,30 @@ class ReferenceScreen:
                     raise RuntimeError(
                         "lane-tangent batch command failed: " + "; ".join(errors)
                     )
+                if self.npc_policy_record["type"] == (
+                    "CARLA_HOLD_THEN_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT"
+                ):
+                    hold_s = float(self.npc_policy_record["initial_hold_s"])
+                    if elapsed < hold_s:
+                        self.npc.disable_constant_velocity()
+                        self.npc.set_target_velocity(carla.Vector3D())
+                        self.npc.apply_control(
+                            carla.VehicleControl(brake=1.0, hand_brake=True)
+                        )
+                    else:
+                        if self.npc_policy_record["release_command_elapsed_s"] is None:
+                            self.npc.apply_control(
+                                carla.VehicleControl(brake=0.0, hand_brake=False)
+                            )
+                            self.npc.enable_constant_velocity(carla.Vector3D(
+                                x=float(self.npc_policy_record["speed_mps"]),
+                                y=0.0,
+                                z=0.0,
+                            ))
+                            self.npc_policy_record["release_command_elapsed_s"] = float(elapsed)
+                            self.npc_policy_record["release_command_carla_frame"] = int(
+                                snapshot.frame
+                            )
             samples.append(self.sample(elapsed, origin, forward, right))
             if elapsed >= duration:
                 break

@@ -1,0 +1,59 @@
+{
+  "analysis_type": "FIXED_ARM_INTERACTION_WINDOW",
+  "checks": {
+    "first_overlap_within_window": true,
+    "held_speed_max_at_most_0_10_mps": true,
+    "moving_speed_median_in_1_05_to_1_15_mps": true,
+    "no_apollo_output_used": true,
+    "no_future_ground_truth_used": true,
+    "policy_type": true,
+    "release_trigger_simulation_time": true,
+    "trajectory_lane_change_overlap_frames": true
+  },
+  "frozen_gate": {
+    "maximum_first_overlap_elapsed_s": 10.0,
+    "minimum_overlap_frames": 10
+  },
+  "inputs": {
+    "summary": "/root/autodl_apollo10_g0_bundle/runtime/runs/pr826_greybox_demo_v1/SG_N01_A/summary.json",
+    "summary_sha256": "d07c160f8638d8fb2ebb2400b9d04c00fdc7461d5fbf4aa7fafbefe47b207d5f",
+    "timeline": "/root/autodl_apollo10_g0_bundle/runtime/runs/pr826_greybox_demo_v1/SG_N01_A/planning_input_timeline.jsonl",
+    "timeline_sha256": "cb0bbd8d4ab5731821f2d2e6de01880dd25effc243cba68d46e568f616b69170"
+  },
+  "metrics": {
+    "first_overlap_elapsed_s": 4.950000073366638,
+    "held_speed_max_mps": 1.4696163327815073e-07,
+    "lane_change_planning_frames": 585,
+    "last_overlap_elapsed_s": 40.30000060036663,
+    "moving_speed_median_mps": 1.0937886371342875,
+    "release_command_elapsed_s": 3.500000052154064,
+    "trajectory_bearing_planning_frames": 1513,
+    "trajectory_lane_change_overlap_frames": 571
+  },
+  "policy": {
+    "apollo_output_used": false,
+    "command_transport": "APPLY_BATCH_SYNC_NO_TICK",
+    "constant_velocity_local_mps_after_release": [
+      1.1,
+      0.0,
+      0.0
+    ],
+    "controller": "CARLA_TIMED_HOLD_THEN_LOCAL_VELOCITY_WITH_CURRENT_LANE_HEADING",
+    "future_ground_truth_used": false,
+    "heading_source": "CURRENT_NEAREST_DRIVING_LANE_TANGENT",
+    "hold_control": {
+      "brake": 1.0,
+      "hand_brake": true
+    },
+    "initial_hold_s": 3.5,
+    "release_command_carla_frame": 1032,
+    "release_command_elapsed_s": 3.500000052154064,
+    "release_trigger": "SIMULATION_ELAPSED_SINCE_OBSERVATION_START",
+    "simulate_physics": true,
+    "speed_mps": 1.1,
+    "traffic_manager_used": false,
+    "type": "CARLA_HOLD_THEN_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT"
+  },
+  "schema_version": 1,
+  "status": "PASS"
+}

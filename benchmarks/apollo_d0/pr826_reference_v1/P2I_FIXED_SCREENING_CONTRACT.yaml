@@ -1,0 +1,74 @@
+schema_version: 1
+contract_version: p2i-resolved-projected-stop-and-go-normal-screen-v1
+status: FROZEN_BEFORE_SCREENING_RESULT
+frozen_at: "2026-08-29T14:50:00Z"
+research_scope: P2I_IMPLEMENTATION_CORRECTED_PROJECTED_STOP_AND_GO_NORMAL_ONLY
+screening_id: SI_N01_A
+candidate_id: RF04_P2I_HOLD3500_RESOLVEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1
+design_contract:
+  p2h_run_disposition: IMPLEMENTATION_INVALID_WRONG_ADJACENT_LANE_WAYPOINT
+  prior_active_fault_result_on_this_exact_policy_geometry: 0
+  active_fault_run_authorized: false
+  scientific_parameter_change_from_p2h: NONE
+  implementation_correction: resolve_declared_lane_minus_2_via_current_waypoint_adjacency
+  position_projection: CURRENT_LANE_FROZEN_OFFSET
+  initial_hold_s: 3.5
+  release_trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+  retained_target_gap_m: 7.0
+  route_lane_intent: [-2, -1]
+  required_target_lane: -2
+  required_overtake_lane: -1
+  authorization_condition: SCREEN_PASS_THEN_SEPARATELY_FROZEN_3_OF_3_FIXED_PASS
+prediction_runtime:
+  library_dir: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction
+  component_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libprediction_component.so
+  component_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
+  behavior_library: /root/autodl_apollo10_g0_bundle/runtime/apollo/p3_semantic_port/workspace_candidate_01/bazel-bin/external/apollo_src/modules/prediction/libapollo_prediction.so
+  behavior_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
+  domain_active: false
+  trace_active: true
+frozen_hashes:
+  registry_sha256: 3eb3ddc3f53528718f9c8f692ef5695fbf4de3f85b38113d610150259e66ed9b
+  candidate_canonical_sha256: 93105cb180ae9526f4c080e6f3c20801f77fedd712f28e154d1ab2bae10b75fc
+  fixed_environment_canonical_sha256: 5b7845d336079dd6b38d99ab56f8d5beb9ce55a2a6af51b79c2c9355c017b6d2
+  reference_screen_runtime_sha256: 1f08f04807d27f638e69ae4f09bdc48778c7c2bfb809de4ade84aac9ce8277a7
+  interaction_analyzer_sha256: 573d7e5f30e5cd11ed9eedf30813e4ce8301b584d7831851d57f9e7021e9e10d
+  prepare_screen_sha256: d9ee6e376e79f0d09b37c0d323324a9925fef631bcd4ead545d7ebe8c927f8a3
+fixed_screening_gate:
+  observation_deadline_s: 80.0
+  infrastructure_valid_required: true
+  route_accepted_required: true
+  collision_count_max: 0
+  illegal_lane_invasion_count_max: 0
+  target_npc_present_required: true
+  minimum_target_prediction_messages: 20
+  minimum_target_prediction_trajectory_coverage: 0.90
+  minimum_planning_channel_coverage: 0.95
+  minimum_control_channel_coverage: 0.95
+  minimum_planning_valid_ratio: 0.90
+  minimum_pass_margin_m: 6.0
+  minimum_lateral_excursion_m: 2.0
+  minimum_bbox_clearance_2d_m: 0.90
+  success_region_reached_required: true
+  bridge_or_runtime_exception_allowed: false
+mechanism_screening_requirements:
+  initial_resolved_waypoint_lane_id: -2
+  target_must_remain_on_lane_minus_2: true
+  ego_must_enter_lane_minus_1: true
+  held_npc_speed_max_mps: 0.10
+  moving_npc_speed_median_range_mps: [1.05, 1.15]
+  target_prediction_trajectory_coverage_min: 0.90
+  target_lane_association_stability_required: true
+  minimum_trajectory_lane_change_overlap_planning_frames: 10
+  maximum_first_trajectory_lane_change_overlap_elapsed_s: 10.0
+  release_must_use_simulation_time_only: true
+  apollo_output_used_by_npc_policy: false
+  future_ground_truth_used_by_npc_policy: false
+  measured_lane_center_offset_min_m: 0.60
+formal_repeat_policy:
+  screening_passes_are_not_admission_evidence: true
+  required_fixed_repeats_after_screen_pass: 3
+  repeat_contract_must_be_frozen_before_first_repeat: true
+  no_active_fault_run_before_fixed_admission: true
+  close_stop_and_go_family_if_valid_run_rejected: true
+forbidden: [modify_success_oracle_after_result, modify_clearance_gate_after_result, modify_fault_semantics, run_active_fault_before_fixed_admission, external_ego_control, future_ground_truth_to_planning, release_triggered_by_apollo_or_ego_state, future_lane_waypoint_projection]

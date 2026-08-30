@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "screening_id": "SJ_N01_A",
+  "candidate_id": "RF04_P2J_HOLD3500_MATERIALIZEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1",
+  "status": "REJECT_PLANNING_VALID_GATE",
+  "implementation_valid": true,
+  "interaction_gate": "PASS",
+  "fixed_reference_gate": "REJECT",
+  "formal_repeat_authorized": false,
+  "active_fault_run_authorized": false,
+  "family_disposition": "CLOSED_VALID_FIXED_REJECTION",
+  "hashes": {
+    "contract": "032e5ae8be37fd1d899d1da612d9fd70f4c507af173671ca99bb7a8048e47593",
+    "manifest": "029cefed03278161fc7a4ce3de7e98bf20d9bb98693b15d9aa4c55e61df5c7bb",
+    "summary": "44017fc7974cce05570773e482aa78096ae1f98f7a44d3ecef6cccc097bd11fb",
+    "timeline": "9755bcaf0957d8aae6f13cf820a38c70fe7058ffb7e4bc134b907af7044845bf",
+    "interaction_audit": "7f1abc398c227b0f3b1c05f252ad9bd03da5c31f7affba5d472011d032f99f3c"
+  },
+  "implementation_evidence": {
+    "pre_materialization_frame": 773,
+    "materialized_frame": 774,
+    "spawn_xy_error_m": 2.7222108244107685e-06,
+    "initial_resolved_road_id": 46,
+    "initial_resolved_lane_id": -2,
+    "frozen_lateral_offset_m": 0.699964579798916,
+    "target_lane_ids": [-2],
+    "minimum_lane_center_distance_m": 0.6998512909007619,
+    "maximum_lane_center_distance_m": 0.7224779076603317
+  },
+  "metrics": {
+    "target_prediction_messages": 1607,
+    "target_prediction_with_trajectory": 1526,
+    "target_prediction_trajectory_coverage": 0.9495955196017424,
+    "planning_channel_coverage": 0.9931549471064095,
+    "control_channel_coverage": 0.998755444928438,
+    "planning_valid_ratio": 0.893483709273183,
+    "max_pass_margin_m": 7.673422604303937,
+    "max_lateral_excursion_m": 3.6678594332823877,
+    "minimum_bbox_clearance_2d_m": 2.0107599741510147,
+    "success_region_first_reached_elapsed_s": 53.90000080317259,
+    "collision_count": 0,
+    "illegal_lane_invasion_count": 0,
+    "route_accepted": true,
+    "success_region_reached": true
+  },
+  "failed_gate": {
+    "name": "minimum_planning_valid_ratio",
+    "required": 0.9,
+    "observed": 0.893483709273183
+  },
+  "interaction_metrics": {
+    "first_overlap_elapsed_s": 4.500000067087846,
+    "overlap_frames": 358,
+    "required_maximum_first_overlap_elapsed_s": 10.0,
+    "required_minimum_overlap_frames": 10
+  }
+}

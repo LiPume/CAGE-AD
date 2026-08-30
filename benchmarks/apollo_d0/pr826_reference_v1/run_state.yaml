@@ -3,7 +3,7 @@ protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
 current_gate: SCENE_FAULT_COMPATIBILITY_ANALYSIS
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-29T13:53:00Z"
+last_updated_at: "2026-08-30T03:45:00Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -16,7 +16,7 @@ gates:
   p1_prediction_bringup: PASS
   p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_port_fixture: PASS_P3_SEMANTIC_FIXTURE
-  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2D_P2E_REFERENCE_CANDIDATES_REJECTED
+  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_STOP_GO_FAMILY_CLOSED
   p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
   p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
   p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
@@ -117,7 +117,7 @@ reference_scene_result:
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
 terminal_reason: null
-next_action: Audit the captured P4B fixed/active Prediction-to-Planning spatial and temporal interaction before defining a distinct normal-only scene family; do not continue lateral-offset sweeping.
+next_action: Use captured P4B/P2F/P2J traces to preregister a distinct continuous-motion gap/timing family whose semantic trigger overlaps an already selected lane-change path; do not tune the closed stop-and-go family.
 p3_semantic_port:
   started_at: "2026-08-29T11:20:00Z"
   pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
@@ -213,6 +213,70 @@ p2e_lateral_separation:
   formal_repeat_3: NOT_RUN_EARLY_STOP
   active_fault_runs: 0
   family_disposition: CLOSED_NO_MORE_OFFSET_SWEEP
+p2f_earlier_interaction_gap:
+  candidate_gap_m: 5.5
+  candidate_offset_m: 0.70
+  screen_run: SF_N01_A
+  behavior_screen_status: PASS
+  prediction_trajectory_coverage: 0.9900990099009901
+  planning_valid_ratio: 0.9301745635910224
+  pass_margin_m: 23.814
+  minimum_bbox_clearance_m: 1.246716
+  first_lane_change_path_elapsed_s: 5.25
+  frozen_maximum_first_lane_change_path_elapsed_s: 3.5
+  status: REJECT_MECHANISM_TIMING_GATE
+  active_fault_runs: 0
+p2g_stop_and_go:
+  candidate_hold_s: 3.5
+  candidate_gap_m: 7.0
+  candidate_offset_m: 0.70
+  screen_run: SG_N01_A
+  mechanism_interaction_status: PASS
+  first_trajectory_lane_change_overlap_elapsed_s: 4.950000073
+  trajectory_lane_change_overlap_frames: 571
+  prediction_trajectory_coverage: 0.942450495049505
+  planning_valid_ratio: 0.865793
+  minimum_bbox_clearance_m: 0.651297
+  status: REJECT_FIXED_REFERENCE_GATES
+  active_fault_runs: 0
+p2h_projected_stop_and_go:
+  screen_run: SH_N01_A
+  intended_target_lane_id: -2
+  resolved_target_lane_id: -1
+  calculated_frozen_offset_m: -4.93845
+  target_prediction_trajectory_coverage: 0.0
+  status: IMPLEMENTATION_INVALID_WRONG_ADJACENT_LANE_WAYPOINT
+  scientific_result_valid: false
+  active_fault_runs: 0
+p2i_resolved_projected_stop_and_go:
+  screening_id: SI_N01_A
+  candidate_id: RF04_P2I_HOLD3500_RESOLVEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1
+  contract_status: FROZEN_BEFORE_SCREENING_RESULT
+  contract_sha256: 58782a6d8d8e0f02d4ac1f7886221f8f515974bd545b6c76598a8571933409f4
+  reference_screen_runtime_sha256: 1f08f04807d27f638e69ae4f09bdc48778c7c2bfb809de4ade84aac9ce8277a7
+  intended_target_lane_id: -2
+  run_id: SI_N01_A
+  observed_initial_road_lane: 47/-2
+  observed_frozen_offset_m: -8.438450066618005
+  observed_target_prediction_trajectory_coverage: 0.0
+  status: IMPLEMENTATION_INVALID_PRE_SNAPSHOT_ACTOR_TRANSFORM_READ
+  active_fault_runs: 0
+p2j_snapshot_materialized_stop_and_go:
+  screening_id: SJ_N01_A
+  candidate_id: RF04_P2J_HOLD3500_MATERIALIZEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1
+  contract_status: FROZEN_BEFORE_SCREENING_RESULT
+  reference_screen_runtime_sha256: 26901bce196d63a44b10a782d4fa9b78963c3414c3ed3bfdf24533253f599f2d
+  required_initial_road_lane: 46/-2
+  maximum_spawn_xy_materialization_error_m: 0.25
+  run_id: SJ_N01_A
+  implementation_status: PASS
+  interaction_status: PASS_358_OVERLAP_FRAMES_FIRST_AT_4_50S
+  prediction_trajectory_coverage: 0.9495955196017424
+  planning_valid_ratio: 0.893483709273183
+  frozen_planning_valid_gate: 0.90
+  status: REJECT_PLANNING_VALID_GATE
+  family_disposition: CLOSED_VALID_FIXED_REJECTION
+  active_fault_runs: 0
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
   classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE

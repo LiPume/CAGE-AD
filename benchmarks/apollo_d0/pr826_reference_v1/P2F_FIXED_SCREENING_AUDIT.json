@@ -1,0 +1,35 @@
+{
+  "active_fault_runs": 0,
+  "candidate_id": "RF04_P2F_TIMING_GAP550_LATERALRIGHT070_ROUTE1072Y70_SLOW110_80S_V1",
+  "contract_sha256": "f9a2d19533c92d5a2687a09f4b1a646e496f81f2413e4606aa8ecc37b5164678",
+  "formal_repeats_run": 0,
+  "mechanism_gate": {
+    "first_lane_change_path_elapsed_s": 5.250000078463437,
+    "required_maximum_s": 3.5,
+    "status": "REJECT"
+  },
+  "reason": "NORMAL_SELECTED_MANEUVER_OUTSIDE_FROZEN_TIMING_GATE",
+  "schema_version": 1,
+  "screen": {
+    "collision_count": 0,
+    "control_channel_coverage": 0.9985148514851485,
+    "generic_admission": "SCREENING_PASS",
+    "illegal_lane_invasion_count": 0,
+    "manifest_sha256": "91830a6b3d86d63c7cd28553b1e5082e0ead8f04b019761c761bb85b9374d49f",
+    "max_pass_margin_m": 23.813937030199043,
+    "minimum_bbox_clearance_2d_m": 1.2467156978759373,
+    "npc_lane_id_counts": {
+      "-2": 1599
+    },
+    "planning_channel_coverage": 0.9925742574257426,
+    "planning_valid_ratio": 0.9301745635910225,
+    "prediction_trajectory_coverage": 0.9900990099009901,
+    "private_prediction_trace_sha256": "515ac80d56eb075a02178c7c44984f50f32314f4f26113ac311373981019cfcd",
+    "run_id": "SF_N01_A",
+    "success_region_first_reached_elapsed_s": 65.35000097379088,
+    "success_region_reached": true,
+    "summary_sha256": "9b81fea1a6923799e1d6c0e6e6a9978573c5aa47eb8b0e49f45bc8c1770fed61"
+  },
+  "screening_status": "REJECT",
+  "threshold_changed_after_result": false
+}
