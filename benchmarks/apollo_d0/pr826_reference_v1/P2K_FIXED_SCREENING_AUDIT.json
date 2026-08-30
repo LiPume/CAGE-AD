@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "screening_id": "SK_N01_A",
+  "candidate_id": "RF04_P2K_MICROLINO_GAP550_LATERALRIGHT090_ROUTE1072Y70_SLOW110_80S_V1",
+  "status": "SCREENING_PASS",
+  "admission_evidence": false,
+  "formal_repeat_authorized": true,
+  "active_fault_run_authorized": false,
+  "manifest_sha256": "2128d49ff7e5d421c20459ba1a2f5f76344a29a41cf87ec39ab2d6645df1ee01",
+  "summary_sha256": "f2378dab58d87d1bf433acfa12b308f99b247dfcc455ee6d67015a07b9ab889b",
+  "mechanism_audit_sha256": "f9fe4c85cf303806a4ff6d4772e86dabb859af9d7dd64643bd8f303524f3fa15",
+  "metrics": {
+    "target_prediction_trajectory_coverage": 0.9931592039800995,
+    "planning_channel_coverage": 0.9912935323383084,
+    "control_channel_coverage": 0.9990049751243781,
+    "planning_valid_ratio": 0.9209535759096612,
+    "max_pass_margin_m": 26.90866427976283,
+    "max_lateral_excursion_m": 3.604930048150152,
+    "minimum_bbox_clearance_2d_m": 1.1639788951469534,
+    "success_region_first_reached_elapsed_s": 62.30000092834234,
+    "collision_count": 0,
+    "illegal_lane_invasion_count": 0,
+    "first_trajectory_lane_change_overlap_elapsed_s": 3.400000050874482,
+    "trajectory_lane_change_overlap_frames": 388,
+    "minimum_early_lane_center_distance_m": 0.9099768581541045,
+    "target_lane_ids": [-2]
+  }
+}

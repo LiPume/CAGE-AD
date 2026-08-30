@@ -69,6 +69,9 @@ after spawn and the exact frozen pose after one synchronous tick.
 - P2H/P2I: implementation-invalid waypoint/actor-lifecycle runs; never use as scientific evidence.
 - P2J: lifecycle and interaction valid, but Planning-valid ratio 0.893484 missed the frozen 0.90
   normal gate; stop-and-go family closed without formal or active runs.
+- P2K: narrow continuous target passed screening, but first overlap shifted from 3.40 s to 4.20 s
+  on Formal Repeat 1 and failed the frozen 3.5 s mechanism gate. Startup-subsecond interaction
+  timing is not a reproducible recipe.
 
 Future entries must distinguish `VERIFIED`, `SCREEN_ONLY`, `REJECTED`, and
 `IMPLEMENTATION_INVALID` explicitly.

@@ -1,0 +1,42 @@
+{
+  "analysis_type": "NARROW_TARGET_FIXED_SCREEN",
+  "checks": {
+    "actor_blueprint": true,
+    "actor_length_2_19_to_2_22_m": true,
+    "actor_width_1_47_to_1_49_m": true,
+    "continuous_lane_tangent_policy": true,
+    "early_offset": true,
+    "first_trajectory_lane_change_overlap": true,
+    "no_future_ground_truth_used": true,
+    "prediction_trajectory_coverage": true,
+    "target_lane_stable": true
+  },
+  "frozen_gate": {
+    "early_window_s": 3.5,
+    "expected_blueprint": "vehicle.micro.microlino",
+    "expected_lane_id": -2,
+    "maximum_first_lane_change_s": 3.5,
+    "minimum_early_offset_m": 0.8
+  },
+  "inputs": {
+    "summary": "/root/autodl_apollo10_g0_bundle/runtime/runs/pr826_greybox_demo_v1/SK_N01_A/summary.json",
+    "summary_sha256": "f2378dab58d87d1bf433acfa12b308f99b247dfcc455ee6d67015a07b9ab889b",
+    "timeline": "/root/autodl_apollo10_g0_bundle/runtime/runs/pr826_greybox_demo_v1/SK_N01_A/planning_input_timeline.jsonl",
+    "timeline_sha256": "c7bb9a64c4402e5018dfcbff9f76f504876a0f17bc36e4aaa3bac256f5ff31c2"
+  },
+  "metrics": {
+    "first_overlap_elapsed_s": 3.400000050874482,
+    "full_length_m": 2.2072951793670654,
+    "full_width_m": 1.4809197187423706,
+    "lane_change_planning_frames": 388,
+    "lane_ids": [
+      -2
+    ],
+    "last_overlap_elapsed_s": 26.100000388874477,
+    "minimum_early_offset_m": 0.9099768581541045,
+    "prediction_trajectory_coverage": 0.9931592039800995,
+    "trajectory_lane_change_overlap_frames": 388
+  },
+  "schema_version": 1,
+  "status": "PASS"
+}

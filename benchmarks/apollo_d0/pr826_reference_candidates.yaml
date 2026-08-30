@@ -1574,3 +1574,64 @@ candidates:
       for the next bridge-owned snapshot, requires XY spawn error <=0.25 m and exact frozen
       road/lane 46/-2, then derives the offset. Any failed validation aborts instead of moving the
       target. This is an instrumentation-lifecycle correction, not result-driven fault tuning.
+  - candidate_id: RF04_P2K_MICROLINO_GAP550_LATERALRIGHT090_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2K_NARROW_TARGET_CONTINUOUS_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_blueprint: vehicle.micro.microlino
+    npc_spawn_carla: {x: 10.220791, y: 180.951319, z: 0.281942, yaw_deg: -90.289116}
+    nominal_npc_gap_m: 5.5
+    npc_lateral_offset_from_p2b_m: 0.90
+    npc_lateral_offset_direction: AWAY_FROM_OVERTAKE_LANE_MINUS_1
+    npc_measured_full_width_m: 1.4809197187423706
+    npc_measured_full_length_m: 2.2072951793670654
+    npc_policy:
+      type: CARLA_CONSTANT_LOCAL_VELOCITY_LANE_TANGENT
+      speed_mps: 1.10
+      traffic_manager_used: false
+      heading_source: CURRENT_NEAREST_DRIVING_LANE_TANGENT
+      command_transport: APPLY_BATCH_SYNC_NO_TICK
+      position_projection: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2k_narrow_vehicle_interaction_probe: true
+    fixed_future_faulty_arm_constraint: >-
+      Fixed and any later active arm must use this exact Microlino blueprint, 5.5 m gap, 0.90 m
+      within-lane offset, continuous 1.10 m/s policy, route, map, Control, timing, startup order and
+      oracle. Only the frozen Prediction semantic switch may differ after a separate 3/3 fixed
+      admission. Vehicle dimensions and blueprint ID are part of the matched manifest.
+    selection_basis: >-
+      P4B proved that the frozen fault changes output only while the straight candidate overlaps
+      the ADC lane sequence and is within 10 m, but its delta ended 1.15 s before the selected
+      lane-change path. P2F extended timing with a 5.5 m gap, yet the Audi TT's 1.994 m body still
+      delayed the fixed lane-change path to 5.25 s. P2J showed that stop-and-go timing creates the
+      desired overlap but fails the fixed Planning-valid gate, so that family is closed. A local
+      CARLA 0.9.15 probe measured the four-wheel car-class Microlino at 1.481 m wide versus the Audi
+      at 1.994 m. This distinct continuous-motion candidate uses the previously tested 5.5 m gap
+      and moves the narrower body center 0.90 m away from lane -1 while keeping its full body inside
+      the 3.5 m lane with about 0.11 m geometric margin. The design seeks an early fixed lane-change
+      path without changing fault dose or Planning. It was selected before any active result for
+      this blueprint/geometry; normal-only screening and 3/3 admission remain mandatory.

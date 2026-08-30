@@ -273,7 +273,10 @@ class ReferenceScreen:
             carla.Location(x=float(spec["x"]), y=float(spec["y"]), z=float(spec["z"]) + 0.3),
             carla.Rotation(yaw=float(spec["yaw_deg"])),
         )
-        blueprint = self.world.get_blueprint_library().find(self.fixed["npc_blueprint"])
+        npc_blueprint = str(
+            self.candidate.get("npc_blueprint", self.fixed["npc_blueprint"])
+        )
+        blueprint = self.world.get_blueprint_library().find(npc_blueprint)
         blueprint.set_attribute("role_name", "pr826_reference_lead")
         actor = self.world.try_spawn_actor(blueprint, transform)
         if actor is None:

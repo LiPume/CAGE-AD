@@ -2705,3 +2705,95 @@ stop-and-go family is closed.
 Return to scene–fault compatibility analysis. Use captured fixed/active distance and timing traces
 to preregister a distinct continuous-motion geometry whose frozen fault trigger occurs after the
 normal route lane-change path exists, instead of further tuning hold duration or projection.
+
+## Issue P2K-001 — narrow continuous target as a mechanism-derived interaction geometry
+
+现象：
+
+The admitted P4B close-gap arm changed Prediction only through 1.85 s, while its first selected
+lane-change path appeared at 3.00 s. P2F's 5.5 m gap extended proximity but the Audi TT still
+delayed the fixed lane-change path to 5.25 s. The stop-and-go solution created overlap but failed
+the fixed Planning-valid gate and is now closed.
+
+证据与当前假设：
+
+Pinned Apollo 10 source shows `ADCTrajectoryContainer::HasOverlap` requires an obstacle candidate
+lane ID to occur in the ADC future lane sequence. Therefore placing the target wholly in an
+unrelated adjacent route does not activate this semantic family. The remaining hypothesis is that
+a narrower four-wheel target can stay completely inside lane -2, farther from the lane -1 corridor,
+while retaining the 5.5 m longitudinal trigger window. If fixed Planning selects the lane-change
+path by 3.5 s, the geometry is eligible for formal normal admission; otherwise it is rejected
+without active execution.
+
+联网检索：
+
+- Query: `CARLA 0.9.15 blueprint library vehicles Microlino`
+- URL: https://carla.readthedocs.io/en/0.9.15/bp_library/
+- Source: CARLA official 0.9.15 documentation
+- Access time: 2026-08-30
+- 关键结论: `vehicle.micro.microlino` is an installed vehicle blueprint; actor dimensions must be
+  measured from the instantiated bounding box rather than assumed from the catalogue.
+- 可信度: HIGH
+- Apollo 10 applicability: scene actor only; no Apollo behavior change.
+- Query: `CARLA 0.9.15 release asset catalogue`
+- URL: https://carla.org/2023/11/10/release-0.9.15/
+- Source: CARLA official release note
+- Access time: 2026-08-30
+- 关键结论: 0.9.15 exposes the vehicle asset catalogue/blueprint identifiers.
+- 可信度: HIGH
+- Apollo 10 applicability: indirect.
+
+设计的实验：
+
+A same-location synchronous probe measured Audi TT width/length `1.994/4.181 m` and Microlino
+`1.481/2.207 m`; Microlino reports four wheels and base type `car`. P2K freezes Microlino, continuous
+1.10 m/s motion, 5.5 m gap and 0.90 m offset away from lane -1. With a 3.5 m lane this leaves about
+0.11 m body margin inside the outer boundary. Frozen mechanism gate: first lane-change path <=3.5 s
+and first-3.5-s lane-center distance >=0.80 m. All P2 normal behavior gates remain unchanged.
+
+修改：
+
+Added candidate-scoped NPC blueprint selection to the runner, the machine-readable geometry probe,
+P2K candidate/contract and append-only ledger. The default/admitted P2 candidate still uses the
+unchanged fixed-environment Audi TT. No Prediction, Planning, Control, bridge, fault or oracle code
+changed.
+
+下一步：
+
+Execute one normal-only `SK_N01_A`. Only a complete behavior and mechanism PASS can authorize a
+separately frozen 3/3 fixed contract; active execution remains forbidden.
+
+P2K screening result:
+
+`SK_N01_A` passed every unchanged normal gate: Prediction trajectory coverage `0.993159`, Planning
+valid `0.920954`, pass margin `26.909 m`, body clearance `1.164 m`, zero collision/illegal invasion,
+and success region at 62.30 s. Target type/dimensions matched the frozen Microlino; all 1600 samples
+were lane -2 and first-3.5-s offset was at least `0.909977 m`.
+
+The first ad-hoc timeline query failed on a legitimate `target: null` diagnostic frame. The source
+run was intact. A dedicated analyzer now treats absent target records as zero trajectories and has
+a regression test for this exact case. Its machine audit passed with first trajectory-bearing
+lane-change path at `3.400000 s` and 388 overlap frames. Analyzer SHA256 is
+`c277947bee1e43090254bb5c15e081c4ec7fd43d27628cdc918ddc839f309f62`.
+
+The 3-repeat contract was frozen before formal results. Because the timing margin is only 0.10 s,
+every formal repeat must independently satisfy <=3.5 s; one valid failure rejects the set without
+threshold change.
+
+P2K formal result:
+
+`SK_F01_A` passed all behavior gates but failed the independently frozen mechanism timing gate.
+Prediction coverage was `0.993197`, Planning valid `0.942056`, pass margin `20.939 m`, body
+clearance `1.172 m`, and collision/illegal invasion were zero. The first trajectory-bearing
+lane-change path was `4.200000 s`, versus the frozen maximum `3.5 s`.
+
+This is the first formal repeat and a valid scientific failure. `SK_F02_A` and `SK_F03_A` were not
+run; no active fault arm was run. The screening-to-repeat timing shift from 3.40 to 4.20 s proves
+that a geometry depending on sub-second Apollo startup alignment is not a stable golden-case base.
+P2K and further close-gap/offset/blueprint sweeps are closed.
+
+Next hypothesis: separate stack initialization from target interaction in the physical scenario,
+so Planning is stably initialized before a continuously moving target enters the lane sequence
+shared with the ADC. Any such design must use a fixed CARLA-time actor policy, remain visible and
+physical, avoid teleportation/future GT/Apollo state, and pass a new normal-only 3/3 contract before
+the frozen fault is executed.

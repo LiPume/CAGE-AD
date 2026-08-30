@@ -3,7 +3,7 @@ protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
 current_gate: SCENE_FAULT_COMPATIBILITY_ANALYSIS
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-30T03:45:00Z"
+last_updated_at: "2026-08-30T04:28:00Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -16,7 +16,7 @@ gates:
   p1_prediction_bringup: PASS
   p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_port_fixture: PASS_P3_SEMANTIC_FIXTURE
-  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_STOP_GO_FAMILY_CLOSED
+  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2K_FORMAL_TIMING_REJECTED
   p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
   p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
   p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
@@ -117,7 +117,7 @@ reference_scene_result:
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
 terminal_reason: null
-next_action: Use captured P4B/P2F/P2J traces to preregister a distinct continuous-motion gap/timing family whose semantic trigger overlaps an already selected lane-change path; do not tune the closed stop-and-go family.
+next_action: Analyze a distinct time-separated interaction in which route Planning is stably initialized before a continuously moving target enters the shared lane sequence; do not continue close-gap, lateral-offset, blueprint, or stop-and-go sweeps.
 p3_semantic_port:
   started_at: "2026-08-29T11:20:00Z"
   pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
@@ -276,6 +276,33 @@ p2j_snapshot_materialized_stop_and_go:
   frozen_planning_valid_gate: 0.90
   status: REJECT_PLANNING_VALID_GATE
   family_disposition: CLOSED_VALID_FIXED_REJECTION
+  active_fault_runs: 0
+p2k_narrow_target_continuous:
+  screening_id: SK_N01_A
+  candidate_id: RF04_P2K_MICROLINO_GAP550_LATERALRIGHT090_ROUTE1072Y70_SLOW110_80S_V1
+  target_blueprint: vehicle.micro.microlino
+  target_width_m: 1.4809197187423706
+  target_gap_m: 5.5
+  target_offset_m: 0.90
+  contract_status: FROZEN_BEFORE_SCREENING_RESULT
+  contract_sha256: 576c94d5352bd39c0f4bb4af4d325e61db0a8c0e7cdc621a0705e13dadde3c59
+  reference_screen_runtime_sha256: 1689d9cd9382dfee763c421cb00d1bef05e85af5a25d579a91753709385fe0c9
+  screen_run: SK_N01_A
+  screen_status: SCREENING_PASS
+  screen_prediction_trajectory_coverage: 0.9931592039800995
+  screen_planning_valid_ratio: 0.9209535759096612
+  screen_pass_margin_m: 26.90866427976283
+  screen_minimum_bbox_clearance_m: 1.1639788951469534
+  screen_first_lane_change_path_elapsed_s: 3.400000050874482
+  formal_contract_sha256: 09770724c355f329ab7aee57d46896f58cf2ef74d7baaa175e0b66d281431140
+  formal_repeats: [SK_F01_A, SK_F02_A, SK_F03_A]
+  formal_repeat_1: SK_F01_A
+  formal_repeat_1_behavior_status: PASS
+  formal_repeat_1_first_overlap_elapsed_s: 4.200000062285525
+  formal_repeat_1_mechanism_status: REJECT_OVER_3_5S
+  formal_repeats_2_and_3: NOT_RUN_EARLY_STOP
+  formal_status: REJECT_EARLY_STOP_MECHANISM_TIMING_GATE
+  status: FAMILY_CLOSED_NO_ACTIVE_RUN
   active_fault_runs: 0
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
