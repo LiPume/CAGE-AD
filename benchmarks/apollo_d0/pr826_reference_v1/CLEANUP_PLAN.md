@@ -71,3 +71,10 @@ Executed 2026-08-30 UTC after validating canonical copies and common Pair A/B au
 - Retained exactly two runtime run directories: full `PZ0_C` pending S0 audit and manifest-only
   `PZ1_C` pending authorization.
 - Reduced the benchmark directory to 25 files before final validation.
+
+Pair C follow-up on 2026-08-30 UTC:
+
+- Audited PZ0_C before authorizing PZ1_C, then completed the frozen three-pair aggregate.
+- Validated `P4_SENS_PAIR_C.json`, `aggregate.json` and the final sensitivity report.
+- Removed the PZ0_C/PZ1_C raw directories (about 55 MB) after confirming no current experiment or
+  test consumed them. Compact metrics, hashes and the aggregate remain canonical.

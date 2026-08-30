@@ -25,8 +25,8 @@ entries:
     canonical_for: P3_SEMANTIC_MAPPING
   - id: v5_contract
     path: benchmarks/apollo_d0/pr826_reference_v1/P4_SENS_V5_CONFIRMATION_CONTRACT.yaml
-    status: KEEP_CURRENT_PATH_UNTIL_V5_CLOSES
-    canonical_for: P4_PERSISTENT_CONFIRMATION
+    status: KEEP_CLOSED_CONTRACT
+    canonical_for: P4_PERSISTENT_CONFIRMATION_CONTRACT
   - id: pair_a_compact
     path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_SENS_PAIR_A.json
     status: KEEP
@@ -35,6 +35,18 @@ entries:
     path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_SENS_PAIR_B.json
     status: KEEP
     canonical_for: P4_PAIR_B_AGGREGATION_INPUT
+  - id: pair_c_compact
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_SENS_PAIR_C.json
+    status: KEEP
+    canonical_for: P4_PAIR_C_AGGREGATION_INPUT
+  - id: persistent_sensitivity_aggregate
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/aggregate.json
+    status: KEEP
+    canonical_for: P4_PERSISTENT_CONFIRMATION_MACHINE_RESULT
+  - id: persistent_sensitivity_report
+    path: benchmarks/apollo_d0/pr826_reference_v1/reports/P4_PERSISTENT_SENSITIVITY_REPORT.md
+    status: KEEP
+    canonical_for: P4_PERSISTENT_CONFIRMATION
   - id: source_scene_manifest
     path: benchmarks/apollo_d0/pr826_reference_v1/configs/SENSITIVITY_SOURCE_MANIFEST.json
     status: KEEP

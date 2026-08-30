@@ -103,19 +103,24 @@ The first auditors encoded versions directly and conflated legacy `infrastructur
 Planning response quality. Cleanup introduced one contract adapter and common core with explicit
 `runtime_valid`, `transport_valid`, `semantic_valid`, `behavior_valid` and `admission_valid`.
 Regression reproduced Pair A's logical conclusion and Pair B passed. No run data, contract or gate
-changed. Compact aggregation inputs are `reports/P4_SENS_PAIR_A.json` and
-`reports/P4_SENS_PAIR_B.json`.
+changed. After repository cleanup, the already completed PZ0_C was audited first and passed every
+frozen S0 gate: overtake success, +19.104 m maximum margin, runtime/transport/semantic/behavior
+valid. Only then was PZ1_C authorized. Its runtime returned the expected normal-oracle nonzero code
+because no overtake occurred; the layered audit showed no runtime or transport failure. S1 remained
+at -6.859 m, with 1260 preserved 3.5 m transformations through 74.95 s.
 
-`PZ0_C` completed immediately before the user requested a cleanup pause; it is not counted until a
-post-cleanup S0-arm audit passes. `PZ1_C` has not run.
+Pair C passed all ten common-core checks. Across A/B/C, S0 overtook 3/3 and S1 did not overtake
+3/3. Normalized S0 and S1 manifests were identical across repetitions. Outcome:
+`STABLE_PERSISTENT_S1_CANCELLATION_3_OF_3`. Sensitivity tuning is closed.
 
-Current boundary: even a 3/3 persistent result will prove only that persistent Prediction semantic
-occupancy is a reproducible failure amplifier in this configured scenario. It will not prove that
-PR826 naturally creates the same phenotype.
+Supported claim: persistent Prediction semantic occupancy is a reproducible system-level failure
+amplifier in this configured scenario. It does not prove that PR826 naturally creates the same
+phenotype. Canonical evidence is `reports/P4_PERSISTENT_SENSITIVITY_REPORT.md` and
+`reports/aggregate.json`.
 
 ## Next natural PR826 gate
 
-Only after sensitivity confirmation may the frozen semantic port be evaluated as:
+Sensitivity confirmation is complete. The frozen semantic port may now be evaluated as:
 
 1. L0 fault activation;
 2. L1 candidate-set semantic delta;
@@ -131,4 +136,6 @@ be increased to manufacture L4.
 The cleanup removed obsolete P1/P2 candidate runs, closed P4B/v3 runs, duplicate state/report
 copies, intermediate contracts/audits/ledgers, one-off scripts, caches and temporary logs. Pair A/B
 large timelines/telemetry were removed only after compact common audits and normalized manifest
-hashes were validated. Current Pair C dependencies and Apollo/CARLA/map/build assets were retained.
+hashes were validated. Pair C raw output was retained through its common audit and aggregate, then
+became eligible for the same compact retention policy. Apollo/CARLA/map/build assets remain for the
+native mechanism screen.

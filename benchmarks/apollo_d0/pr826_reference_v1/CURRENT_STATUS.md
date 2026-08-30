@@ -13,19 +13,20 @@ Updated: 2026-08-30 UTC
   wrong-condition, target-condition, and reversibility controls.
 - P4-SENS v3 is closed historical evidence: temporary S1 (about 12–40 s) changed/delayed Planning,
   but S1 overtook 3/3. It did not establish failed-overtake scene kill.
-- Persistent privileged S1 (about 12–75 s) passed Pair A and Pair B:
+- Persistent privileged S1 (about 12–75 s) passed all three prospective pairs:
 
   | Pair | S0 | S1 | Common-core audit |
   |---|---|---|---|
   | A | overtake, max margin +24.783 m | no overtake, -11.236 m | PASS |
   | B | overtake, max margin +23.267 m | no overtake, -6.253 m | PASS |
+  | C | overtake, max margin +19.104 m | no overtake, -6.859 m | PASS |
 
-  All four arms are runtime-valid, transport-valid, and semantic-valid under the frozen gates.
-  They are explicitly not admission evidence.
+  All six arms are runtime-valid, transport-valid, semantic-valid and behavior-valid under the
+  frozen gates. `STABLE_PERSISTENT_S1_CANCELLATION_3_OF_3` is established. These privileged probes
+  are explicitly not admission evidence.
 
 ## Not established
 
-- Persistent sensitivity is not yet confirmed 3/3; Pair C is incomplete.
 - No evidence yet shows that the frozen PR826 semantic port naturally emits the persistent S1
   phenotype in this scene.
 - No PR826 L0→L4 causal chain or golden case is admitted.
@@ -33,32 +34,31 @@ Updated: 2026-08-30 UTC
 
 ## Current gate
 
-`CLEANUP_COMPLETE_AWAITING_PAIR_C_CONFIRMATION`
+`NATURAL_PR826_L0_TO_L4_MECHANISM_SCREEN_READY`
 
-The v5 contract is frozen and must not change. Pair B passed the version-independent common audit.
-`PZ0_C` finished immediately before the cleanup instruction arrived; it is retained but not yet
-counted. `PZ1_C` has only a prepared manifest and has not run.
+The v5 sensitivity contract is closed without further tuning. The three-pair aggregate and final
+sensitivity report are canonical. This result proves a repeatable interface-level failure
+amplifier, not natural PR826 reproduction.
 
 ## Only next action
 
-After user confirmation of the simplified repository, use the common audit core to check `PZ0_C`
-against the frozen S0 arm gate. Only if it passes may `PZ1_C` run. After a 3/3 aggregate, stop
-sensitivity tuning and proceed to the separate natural PR826 L0→L4 mechanism screen.
+Begin the separate frozen native PR826-family semantic-port screen. Instrument and evaluate L0
+activation → L1 candidate delta → L2 native Prediction phenotype → L3 Planning response → L4
+vehicle outcome without changing the fault predicate or using privileged S1 as the faulty arm.
 
 ## Active contract and canonical reports
 
 - Active contract: `P4_SENS_V5_CONFIRMATION_CONTRACT.yaml`
 - Canonical configured-reference report: `reports/FINAL_REFERENCE_REPORT.md`
-- Canonical Pair A/B metrics: `reports/P4_SENS_PAIR_A.json` and
-  `reports/P4_SENS_PAIR_B.json`
+- Canonical persistent-sensitivity report: `reports/P4_PERSISTENT_SENSITIVITY_REPORT.md`
+- Canonical persistent-sensitivity aggregate: `reports/aggregate.json`
 - Canonical machine state: `run_state.yaml`
 
 ## Explicit non-claim
 
-Persistent Prediction semantic occupancy has shown a repeatable failure-amplification signal in
-two pairs, but the final claim is withheld until Pair C. Even a 3/3 result will mean only:
+The established sensitivity conclusion is limited to:
 
 > Persistent Prediction semantic occupancy is a reproducible system-level failure amplifier in
 > this configured scenario.
 
-It will **not** establish that PR826 naturally produces the same phenotype.
+It does **not** establish that PR826 naturally produces the same phenotype.

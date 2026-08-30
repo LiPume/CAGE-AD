@@ -1,0 +1,69 @@
+{
+  "admission_evidence": false,
+  "analysis_type": "P4_PERSISTENT_SENSITIVITY_COMMON_AGGREGATE",
+  "claim_if_pass": "Persistent Prediction semantic occupancy is a reproducible system-level failure amplifier in this configured scenario.",
+  "classification": "NON_ADMISSION_CAUSAL_SENSITIVITY_PROBE",
+  "contract_sha256": "eb7fa709edea9f2e0710dcb9707e9a18eccace85953165e93148c7d622672e61",
+  "non_claim": "This does not establish that PR826 naturally produces the same phenotype.",
+  "pair_checks": [
+    {
+      "all_pair_checks_pass": true,
+      "expected": [
+        "PY0_A",
+        "PY1_A"
+      ],
+      "observed": [
+        "PY0_A",
+        "PY1_A"
+      ],
+      "pair_audit_sha256": "70ecbea70e1fe8651600ec3fdcfa61576c5498766de522741748d743e293e525",
+      "pair_pass": true,
+      "run_ids_match": true
+    },
+    {
+      "all_pair_checks_pass": true,
+      "expected": [
+        "PZ0_B",
+        "PZ1_B"
+      ],
+      "observed": [
+        "PZ0_B",
+        "PZ1_B"
+      ],
+      "pair_audit_sha256": "9cddf2b81581dc6459817f25708d09f50d48535927ebd94786327bbc53506a89",
+      "pair_pass": true,
+      "run_ids_match": true
+    },
+    {
+      "all_pair_checks_pass": true,
+      "expected": [
+        "PZ0_C",
+        "PZ1_C"
+      ],
+      "observed": [
+        "PZ0_C",
+        "PZ1_C"
+      ],
+      "pair_audit_sha256": "f70a79af4ad2b7964a06f6f006c71bc0bd00bf79aa3df4ffca925ae11498a45d",
+      "pair_pass": true,
+      "run_ids_match": true
+    }
+  ],
+  "repeat_matching": {
+    "s0_hashes": [
+      "7f6bee3fda0eb7d082630ab3d8e5ce3e4b929a66659bbea80d740565aa8418bf",
+      "7f6bee3fda0eb7d082630ab3d8e5ce3e4b929a66659bbea80d740565aa8418bf",
+      "7f6bee3fda0eb7d082630ab3d8e5ce3e4b929a66659bbea80d740565aa8418bf"
+    ],
+    "s0_normalized_manifests_equal": true,
+    "s1_hashes": [
+      "5ddc327d1b1bed20f8b91a18e76dd96ab221d9e9c4243a86d81d5948f49e6790",
+      "5ddc327d1b1bed20f8b91a18e76dd96ab221d9e9c4243a86d81d5948f49e6790",
+      "5ddc327d1b1bed20f8b91a18e76dd96ab221d9e9c4243a86d81d5948f49e6790"
+    ],
+    "s1_normalized_manifests_equal": true
+  },
+  "schema_version": 2,
+  "stable_persistent_s1_cancellation": true,
+  "status": "STABLE_PERSISTENT_S1_CANCELLATION_3_OF_3"
+}

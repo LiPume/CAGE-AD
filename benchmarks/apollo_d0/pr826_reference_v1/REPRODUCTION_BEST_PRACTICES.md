@@ -43,15 +43,15 @@ active. Cover the downstream decision/outcome window plus the declared predictio
 first/last transformed message, first Planning consumption and outcome time. Any window correction
 requires a new frozen contract and new runs; the earlier result remains unchanged.
 
-## Current persistent confirmation
+## Closed persistent confirmation
 
 - S0: byte-exact straight Prediction.
 - S1: target left-normal smoothstep, 3.5 m over relative 2–4 s, renewed at elapsed 12–75 s.
 - Pair audit requires matched allowed deltas, runtime-valid, transport-valid, semantic-valid,
   collision/lane-safe behavior, S0 overtake and S1 no overtake.
-- Pair A/B raw payloads may be removed after compact common audits contain final metrics and
+- Pair A/B/C raw payloads may be removed after compact common audits contain final metrics and
   normalized repeat-manifest hashes.
-- Stop sensitivity tuning after 3/3. The next stage must test the frozen native PR826 port through
+- The frozen confirmation passed 3/3; stop sensitivity tuning. The next stage must test the frozen native PR826 port through
   L0 activation → L1 candidate delta → L2 output phenotype → L3 Planning response → L4 failure.
 
 ## Common errors and fixes

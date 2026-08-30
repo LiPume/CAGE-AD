@@ -3,14 +3,14 @@ protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
 canonical: true
 mirror_rule: NO_EDITABLE_MIRROR
-last_updated_at: "2026-08-30T07:05:00Z"
-current_gate: CLEANUP_COMPLETE_AWAITING_PAIR_C_CONFIRMATION
+last_updated_at: "2026-08-30T15:20:00Z"
+current_gate: NATURAL_PR826_L0_TO_L4_MECHANISM_SCREEN_READY
 
 phases:
   p1_prediction_bringup: PASS
   p2_configured_reference: STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_fixture: P3_SEMANTIC_FIXTURE_PASS
-  p4_persistent_sensitivity: IN_PROGRESS_2_OF_3_PAIRS_PASS
+  p4_persistent_sensitivity: STABLE_PERSISTENT_S1_CANCELLATION_3_OF_3
   p4_natural_pr826_chain: NOT_STARTED
   diagnosis_agent_and_animation: OUT_OF_SCOPE
 
@@ -53,21 +53,24 @@ p4_persistent_confirmation:
     compact_audit: reports/P4_SENS_PAIR_B.json
   pair_c:
     s0_run_id: PZ0_C
-    s0_execution: COMPLETED_BEFORE_CLEANUP_INSTRUCTION_NOT_YET_COUNTED
+    s0_execution: PASS_COMMON_CORE
     s1_run_id: PZ1_C
-    s1_execution: NOT_RUN
-    status: PENDING_POST_CLEANUP_S0_AUDIT
+    s1_execution: PASS_COMMON_CORE
+    status: PASS_COMMON_CORE
+    compact_audit: reports/P4_SENS_PAIR_C.json
+  aggregate_status: STABLE_PERSISTENT_S1_CANCELLATION_3_OF_3
+  aggregate: reports/aggregate.json
+  report: reports/P4_PERSISTENT_SENSITIVITY_REPORT.md
 
 validity_model:
   fields: [runtime_valid, transport_valid, semantic_valid, behavior_valid, admission_valid]
   legacy_infrastructure_valid: COMPATIBILITY_TELEMETRY_ONLY
 
 next_action: >-
-  After user confirmation of the simplified repository, audit PZ0_C S0 with the common core;
-  only if the frozen normal-arm gate passes, execute PZ1_C and aggregate all three pairs.
+  Start the frozen native PR826-family L0-to-L4 mechanism screen without modifying the semantic
+  predicate or treating privileged S1 as a natural fault.
 
 non_claims:
-  - persistent_sensitivity_not_yet_3_of_3
   - privileged_s1_is_not_natural_pr826
   - natural_pr826_l0_to_l4_not_established
   - no_diagnosis_agent_probability_repair_or_animation
