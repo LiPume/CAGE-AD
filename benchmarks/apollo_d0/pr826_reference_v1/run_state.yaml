@@ -1,379 +1,73 @@
-schema_version: 1
-protocol_version: cage-ad-pr826-greybox-demo-v1
+schema_version: 2
+protocol: pr826-greybox-demo-v1
 status: IN_PROGRESS
-current_gate: P4_SENS_PERSISTENT_CONFIRMATION_FREEZE
-started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-30T06:16:00Z"
-bundle_root: /root/autodl_apollo10_g0_bundle
-repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
-runtime_root: /root/autodl_apollo10_g0_bundle/runtime
-state_root: /root/autodl_apollo10_g0_bundle/runtime_state/pr826_greybox_demo_v1
-scope: ONE_PR826_SEMANTIC_GOLD_CASE_AND_DEMO
-core_output: GREYBOX_DIAGNOSIS_REPORT
-optional_output: L3_FUNCTION_DRILL_DOWN
-gates:
-  p0_plan_and_research: PASS_USER_APPROVED
+canonical: true
+mirror_rule: NO_EDITABLE_MIRROR
+last_updated_at: "2026-08-30T06:35:00Z"
+current_gate: REPOSITORY_CLEANUP_BEFORE_V5_PAIR_C_CONTINUATION
+
+phases:
   p1_prediction_bringup: PASS
-  p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
-  p3_semantic_port_fixture: PASS_P3_SEMANTIC_FIXTURE
-  p4_matched_gold_case: SCENE_FAULT_PAIR_NOT_ADMITTED_P4_SENS_S1_OVERTAKE_3_OF_3
-  p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
-  p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
-  p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
-  p8_demo_video: NOT_RUN_CASE_NOT_ADMITTED
-  p9_final_audit: NOT_RUN_CASE_NOT_ADMITTED
-research_facts:
-  hint_paper_case: failed_overtake_FilterLaneSequences
-  public_scene1_case: collision_cut_in_FilterSequence
-  public_artifact_inconsistency: true
-  exact_apollo9_port_patch_found: false
-  google_drive_scenarios_audited: true
-  google_drive_pr826_failed_overtake_artifact_found: false
-  apollo10_prediction_installed: true
-public_scene1_record:
-  path: runtime/raw/pr826_greybox_demo_v1/hint_public_scene1/scene1.record
-  bytes: 139234933
-  sha256: b2d974190f8d1645d33218a2f6f78d890837a5ef8bfb0f9aa1936b55b7ad59f1
-  duration_seconds: 46.218074
-  complete: true
-  message_count: 73260
-  channel_count: 37
-  sampled_obstacle_id: 100
-  sampled_behavior: initially_near_static_then_accelerating_lane_transition
-  paper_failed_overtake_equivalence: NOT_ESTABLISHED
-deepseek:
-  secret_location: EXTERNAL_TO_WORKSPACE
-  model: deepseek-v4-pro
-  json_smoke: PASS
-  total_tokens: 43
-  secret_value_recorded: false
-tests:
-  recovered_empty_road_run: FAIL
-  recovered_empty_road_failed_checks:
-    - planning_coverage_at_least_0_95
-    - brake_active_fraction_at_most_0_10
-    - speed_optimizer_failures_zero
-  evaluator_regression_tests: 6_PASS
-  public_scene1_record_integrity: PASS
-  public_scene1_native_decode_smoke: PASS
-  apollo10_python_record_reader: FAIL_PY_SSIZE_T_CLEAN
-  state_yaml_validation: PASS
-  workspace_secret_scan: PASS
-  git_diff_check: PASS
-  prediction_semantic_slot_tests: 3_PASS
-  p3_semantic_fixture_tests: 1_PASS
-  p3_runtime_identity: PASS_160_OF_160_EXACT
-  p3_optimized_prediction_build: PASS
-  stock_prediction_smoke: PASS
-  p2_state_yaml_jsonl_validation: PASS
-  p2_screening_ledger_planned_result_pairs: 6_PASS
-  p2_reference_repeatability: FAIL_VALID_NO_OVERTAKE
-  p2_targeted_secret_content_scan: PASS
-  p2_no_residual_processes: PASS
-  bundle_upload_preflight_scan: NOT_APPLICABLE_AFTER_INSTALL_VENDOR_TEST_CERT_FALSE_POSITIVES
-stock_prediction_smoke:
-  run_id: P1_STOCK_PREDICTION_07
-  summary_path: runtime/runs/pr826_greybox_demo_v1/P1_STOCK_PREDICTION_07/summary.json
-  input_frames: 160
-  output_frames: 158
-  output_coverage: 0.9875
-  target_frames: 158
-  target_trajectory_frames: 150
-  target_trajectory_frame_coverage: 0.9493670886075949
-  target_trajectories: 300
-  critical_input_errors: 0
-  observed_obstacle_ids:
-    - 1001
-  visible_leakage_scan: PASS
-  embedded_source_timestamps_match_inputs: true
-design_freeze:
-  approved_by_user: true
-  approved_at: "2026-08-29T00:52:00Z"
-  cost_function_version: pr826-cost-v1
-  cost_raw_components:
-    - wall_time_sec
-    - simulation_class
-    - access_rank
-    - intervention_risk_rank
-  i2k_minimal_intervention_admission_required: true
-  reference_screening_append_only_ledger_required: true
-  target_prediction_trajectory_coverage_gate: 0.90
-  target_prediction_trajectory_coverage_gate_frozen_at: "2026-08-29T06:37:39Z"
-  target_prediction_trajectory_coverage_gate_scope: P2_V2_FORMAL_REFERENCE_ADMISSION
-  target_prediction_trajectory_coverage_gate_adjustment_status: FROZEN_BEFORE_FORMAL_REPEATS
-reference_scene_result:
-  candidate_id: RF01_01
-  provisional_pass: P2_REFERENCE_05_RF01_01
-  repeat_contract: pr826-reference-repeat-v1
-  first_repeat: P2_REFERENCE_06_RF01_01_REPEAT_1
-  first_repeat_infrastructure_valid: true
-  first_repeat_overtake_success: false
-  first_repeat_max_pass_margin_m: -11.225135341724448
-  first_repeat_max_abs_lateral_excursion_m: 1.3189871261702946
-  repeats_2_and_3: NOT_RUN_EARLY_VALID_FAILURE
-  fault_patch_exists: false
-  rf01_final_eligibility: REJECT_ZERO_TRAJECTORY_AND_NONREPEATABLE
-  p2d_first_physical_divergence: CONTROL_AUTOBOX_STARTUP_PHASE_2_TO_4_CARLA_FRAMES
-  p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
-blocking_issue: null
-terminal_reason: null
-next_action: Freeze and execute two prospective persistent S0/S1 confirmation pairs; combine only with the preregistered v4 pair for a 3-of-3 stability gate before inspecting natural PR826 candidate-to-output propagation.
+  p2_configured_reference: STABLE_REFERENCE_ADMITTED_3_OF_3
+  p3_semantic_fixture: P3_SEMANTIC_FIXTURE_PASS
+  p4_persistent_sensitivity: IN_PROGRESS_2_OF_3_PAIRS_PASS
+  p4_natural_pr826_chain: NOT_STARTED
+  diagnosis_agent_and_animation: OUT_OF_SCOPE
+
+configured_reference:
+  label: APOLLO_10_CONFIGURED_REFERENCE
+  carla_version: 0.9.15
+  apollo_version: 10
+  map: Town04
+  target_speed_mps: 1.10
+  prediction_behavior: STOCK
+  planning_behavior: STOCK
+  compatibility_configuration:
+    - road_width_metadata
+    - carla_lincoln_control_calibration
+    - bridge_configuration
+    - deterministic_npc_policy
+  report: reports/FINAL_REFERENCE_REPORT.md
+  audit: reports/FORMAL_REPEAT_V2_AUDIT.json
+  contract: contracts/reference_repeat_contract_v2.yaml
+
 p3_semantic_port:
-  started_at: "2026-08-29T11:20:00Z"
-  pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
-  pinned_sequence_predictor_sha256: 8c8ad816ac7aff8caefcd873f8f7c07378e1a678817854fb4d9bd1af14ec4bb5
-  historical_pr: https://github.com/ApolloAuto/apollo/pull/826
-  historical_fix_commit: 92b7434c4656555d8350fc051e5d1d5c32897db6
-  fault_patch_frozen: true
-  fixture_status: P3_SEMANTIC_FIXTURE_PASS
+  status: PASS
   semantic_patch_sha256: f00cd04565564e85b22b6f4bdabb58c907b6c14044e9ea1d624575d09ac718b6
-  build_compat_patch_sha256: 54b7aed35992e9781669bcb654ac410ba04b1b973b9fa7ab708c9392e81609fe
-  optimized_behavior_library_sha256: 251fb80d060f5c43f059ba7b188429d34f9f09be8e92e800a4a3d915a701fa71
-  optimized_component_library_sha256: 0fe5e1e75bb3736e2fe1350c960d04431e83b7531b90a55b61e8c9b35efcff70
-  runtime_identity_common_frames: 160
-  runtime_identity_mismatch_count: 0
-  p4_authorized: true
-p4_screening:
-  experiment_id: SB4_PAIR_01_SCREEN
-  scene_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
-  status: REJECT_FAULT_NOT_ACTIVATED
-  active_only_eligibility_events: 1609
-  active_only_overlap_distance_range_m: [26.717, 28.327]
-  active_only_nearby_disable_events: 0
-  prediction_changed: false
-  planning_changed: false
-  system_failure: false
-  fault_patch_changed_after_result: false
-p2b_scene_fault_matching:
-  active_fault_runs_on_close_gap_geometry: 1
-  fixed_screens:
-    - run_id: SB4B_N01_A
-      gap_m: 7.0
-      status: REJECT_SUCCESS_REGION_NOT_REACHED
-    - run_id: SB4B_N02_A
-      gap_m: 7.5
-      status: REJECT_SUCCESS_REGION_NOT_REACHED
-    - run_id: SB4B_N03_A
-      gap_m: 6.5
-      status: REJECT_SUCCESS_REGION_NOT_REACHED
-    - run_id: SB4B_N04_A
-      gap_m: 7.0
-      status: REJECT_REFERENCE_INFRASTRUCTURE_INVALID
-    - run_id: SB4B_N05_A
-      gap_m: 7.0
-      status: SCREENING_PASS
-  fixed_formal_repeats: [SB4B_F01_A, SB4B_F02_A, SB4B_F03_A]
-  fixed_formal_status: PASS_3_OF_3
-  p4b_active_run: SB4B_S01_B
-  p4b_status: REJECT_ROUTE_DOMINATED_RESPONSE
-  current_hypothesis: INCREASE_FIXED_STRAIGHT_LATERAL_SEPARATION_BEFORE_NEW_ACTIVE_RUN
-p2c_lane_borrow_screen:
-  run_id: SC_N01_A
-  status: REJECT_LONG_TERM_BLOCKING_GATE_NOT_REACHED
-  prediction_trajectory_coverage: 0.9870049504950495
-  dynamic_trajectory_frames: 1586
-  blocking_decision_frames: 10
-  max_consecutive_blocking_decision_frames: 1
-  required_long_term_cycles: 3
-  active_fault_runs: 0
-  family_disposition: CLOSED_MECHANISM_INCOMPATIBLE
-p4b_screening:
-  experiment_id: SB4B_PAIR_01_SCREEN
-  status: REJECT_ROUTE_DOMINATED_RESPONSE
-  mechanism_activated: true
-  prediction_changed: true
-  planning_changed: false
-  system_failure: false
-  changed_prediction_headers_consumed_by_planning: 34
-  first_consumption_age_s: 0.0397
-p2d_lateral_separation:
-  candidate_offset_m: 0.60
-  screen_run: SD_N01_A
-  screen_status: SCREENING_PASS
-  screen_minimum_bbox_clearance_m: 1.2104394938895435
-  formal_repeat_1: SD_F01_A
-  formal_status: REJECT_EARLY_STOP
-  formal_minimum_bbox_clearance_m: 0.8985751835219767
-  frozen_clearance_gate_m: 0.90
-  formal_repeat_2: NOT_RUN_EARLY_STOP
-  formal_repeat_3: NOT_RUN_EARLY_STOP
-  active_fault_runs: 0
-p2e_lateral_separation:
-  candidate_offset_m: 0.70
-  screen_run: SE_N01_A
-  screen_status: SCREENING_PASS
-  screen_minimum_bbox_clearance_m: 1.2858939105992368
-  screen_planning_valid_ratio: 0.9283042394014963
-  formal_repeat_1: SE_F01_A
-  formal_status: REJECT_EARLY_STOP
-  formal_minimum_bbox_clearance_m: 1.8706520643389597
-  formal_planning_valid_ratio: 0.8971321695760599
-  frozen_planning_valid_gate: 0.90
-  formal_repeat_2: NOT_RUN_EARLY_STOP
-  formal_repeat_3: NOT_RUN_EARLY_STOP
-  active_fault_runs: 0
-  family_disposition: CLOSED_NO_MORE_OFFSET_SWEEP
-p2f_earlier_interaction_gap:
-  candidate_gap_m: 5.5
-  candidate_offset_m: 0.70
-  screen_run: SF_N01_A
-  behavior_screen_status: PASS
-  prediction_trajectory_coverage: 0.9900990099009901
-  planning_valid_ratio: 0.9301745635910224
-  pass_margin_m: 23.814
-  minimum_bbox_clearance_m: 1.246716
-  first_lane_change_path_elapsed_s: 5.25
-  frozen_maximum_first_lane_change_path_elapsed_s: 3.5
-  status: REJECT_MECHANISM_TIMING_GATE
-  active_fault_runs: 0
-p2g_stop_and_go:
-  candidate_hold_s: 3.5
-  candidate_gap_m: 7.0
-  candidate_offset_m: 0.70
-  screen_run: SG_N01_A
-  mechanism_interaction_status: PASS
-  first_trajectory_lane_change_overlap_elapsed_s: 4.950000073
-  trajectory_lane_change_overlap_frames: 571
-  prediction_trajectory_coverage: 0.942450495049505
-  planning_valid_ratio: 0.865793
-  minimum_bbox_clearance_m: 0.651297
-  status: REJECT_FIXED_REFERENCE_GATES
-  active_fault_runs: 0
-p2h_projected_stop_and_go:
-  screen_run: SH_N01_A
-  intended_target_lane_id: -2
-  resolved_target_lane_id: -1
-  calculated_frozen_offset_m: -4.93845
-  target_prediction_trajectory_coverage: 0.0
-  status: IMPLEMENTATION_INVALID_WRONG_ADJACENT_LANE_WAYPOINT
-  scientific_result_valid: false
-  active_fault_runs: 0
-p2i_resolved_projected_stop_and_go:
-  screening_id: SI_N01_A
-  candidate_id: RF04_P2I_HOLD3500_RESOLVEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1
-  contract_status: FROZEN_BEFORE_SCREENING_RESULT
-  contract_sha256: 58782a6d8d8e0f02d4ac1f7886221f8f515974bd545b6c76598a8571933409f4
-  reference_screen_runtime_sha256: 1f08f04807d27f638e69ae4f09bdc48778c7c2bfb809de4ade84aac9ce8277a7
-  intended_target_lane_id: -2
-  run_id: SI_N01_A
-  observed_initial_road_lane: 47/-2
-  observed_frozen_offset_m: -8.438450066618005
-  observed_target_prediction_trajectory_coverage: 0.0
-  status: IMPLEMENTATION_INVALID_PRE_SNAPSHOT_ACTOR_TRANSFORM_READ
-  active_fault_runs: 0
-p2j_snapshot_materialized_stop_and_go:
-  screening_id: SJ_N01_A
-  candidate_id: RF04_P2J_HOLD3500_MATERIALIZEDOFFSET_GAP700_ROUTE1072Y70_SLOW110_80S_V1
-  contract_status: FROZEN_BEFORE_SCREENING_RESULT
-  reference_screen_runtime_sha256: 26901bce196d63a44b10a782d4fa9b78963c3414c3ed3bfdf24533253f599f2d
-  required_initial_road_lane: 46/-2
-  maximum_spawn_xy_materialization_error_m: 0.25
-  run_id: SJ_N01_A
-  implementation_status: PASS
-  interaction_status: PASS_358_OVERLAP_FRAMES_FIRST_AT_4_50S
-  prediction_trajectory_coverage: 0.9495955196017424
-  planning_valid_ratio: 0.893483709273183
-  frozen_planning_valid_gate: 0.90
-  status: REJECT_PLANNING_VALID_GATE
-  family_disposition: CLOSED_VALID_FIXED_REJECTION
-  active_fault_runs: 0
-p2k_narrow_target_continuous:
-  screening_id: SK_N01_A
-  candidate_id: RF04_P2K_MICROLINO_GAP550_LATERALRIGHT090_ROUTE1072Y70_SLOW110_80S_V1
-  target_blueprint: vehicle.micro.microlino
-  target_width_m: 1.4809197187423706
-  target_gap_m: 5.5
-  target_offset_m: 0.90
-  contract_status: FROZEN_BEFORE_SCREENING_RESULT
-  contract_sha256: 576c94d5352bd39c0f4bb4af4d325e61db0a8c0e7cdc621a0705e13dadde3c59
-  reference_screen_runtime_sha256: 1689d9cd9382dfee763c421cb00d1bef05e85af5a25d579a91753709385fe0c9
-  screen_run: SK_N01_A
-  screen_status: SCREENING_PASS
-  screen_prediction_trajectory_coverage: 0.9931592039800995
-  screen_planning_valid_ratio: 0.9209535759096612
-  screen_pass_margin_m: 26.90866427976283
-  screen_minimum_bbox_clearance_m: 1.1639788951469534
-  screen_first_lane_change_path_elapsed_s: 3.400000050874482
-  formal_contract_sha256: 09770724c355f329ab7aee57d46896f58cf2ef74d7baaa175e0b66d281431140
-  formal_repeats: [SK_F01_A, SK_F02_A, SK_F03_A]
-  formal_repeat_1: SK_F01_A
-  formal_repeat_1_behavior_status: PASS
-  formal_repeat_1_first_overlap_elapsed_s: 4.200000062285525
-  formal_repeat_1_mechanism_status: REJECT_OVER_3_5S
-  formal_repeats_2_and_3: NOT_RUN_EARLY_STOP
-  formal_status: REJECT_EARLY_STOP_MECHANISM_TIMING_GATE
-  status: FAMILY_CLOSED_NO_ACTIVE_RUN
-  active_fault_runs: 0
-p2l_time_separated_merge:
-  screening_id: SL_N01_A
-  candidate_id: RF04_P2L_MICROLINO_LANE3_TO_LANE2_T6D2_ROUTE1072Y70_SLOW110_80S_V1
-  contract_sha256: 1e83ff89961045ba9d599fd9483e653d38c0b8a9750c5b7d36ef0a359494cba1
-  merge_window_s: [6.0, 8.0]
-  source_target_lanes: [-3, -2]
-  policy_trigger: SIMULATION_ELAPSED_ONLY
-  status: REJECTED_PREEXECUTION_KINEMATIC_POSE_OVERRIDE
-  active_fault_runs: 0
-p4_sensitivity_probe:
+  report: reports/P3_SEMANTIC_FIXTURE_REPORT.md
+  mapping: reports/P3_SEMANTIC_MAPPING.md
+
+p4_persistent_confirmation:
   classification: NON_ADMISSION_CAUSAL_SENSITIVITY_PROBE
-  scene_source: P2N_MECHANISM_POSITIVE_BUT_CLEARANCE_REJECTED
-  admission_evidence_allowed: false
-  semantics: [S0_STRAIGHT, S1_LEFT_MERGE_OCCUPANCY, S2_NO_TRAJECTORY]
-  p2q_status: CANCELLED_BEFORE_CANDIDATE_CONTRACT_OR_RUN
-  contract_status: FROZEN_BEFORE_FIRST_RESULT
-  contract_sha256: ccf059b34196cabfeab7fbfe8f5f70cd1efb2c0d8931f18a3b22f5045fa0bcec
-  transform_unit_tests: PASS_3
-  prepare_render_dry_control: PASS
-  retained_dry_control_path: /tmp/cage-p4sens-test.ETUgXZ
-  v1_run_ids: [PS0_A, PS1_A, PS2_A]
-  v1_status: INCONCLUSIVE_GATE_CONFLATES_PLANNING_RESPONSE_WITH_INFRASTRUCTURE
-  v1_sensitivity_signal_observed: true
-  stable_sensitivity_established: true
-  v2_contract_status: FROZEN_BEFORE_FIRST_V2_RESULT
-  v2_contract_sha256: e04f314dd151ebacbad17fbf94c3afaec77d036f8118966efe21040ba8a4f559
-  v2_status: IMPLEMENTATION_INVALID_PREEXECUTION_PREPARER_STATUS_MISMATCH
-  v2_run_ids: []
-  v3_contract_status: FROZEN_BEFORE_FIRST_V3_RESULT
-  v3_contract_sha256: d8f30052e1c1005762e2e3ac1a945938e240a1b9c1fdfd0c1304fb9f3e5ba31b
-  v3_prepare_render_preflight: PASS
-  v3_retained_preflight_path: /tmp/cage-p4sens-v3-preflight.uVa5V3
-  run_ids: [PW0_A, PW1_A, PW0_B, PW1_B, PW0_C, PW1_C]
-  pass_criterion: S1_STABLY_CHANGES_PLANNING_BORROW_OR_OVERTAKE_DECISION_RELATIVE_TO_S0
-  pr826_followup_criterion: FAULTY_PREDICATE_NATURALLY_REMOVES_STRAIGHT_WHILE_RETAINING_LATERAL_CANDIDATE
-  v3_status: SCENE_CLOSED_FOR_GOLDEN_CASE
-  stable_overtake_cancellation: false
-  s1_overtake_results: [true, true, true]
-  s1_pass_6m_delay_s: [5.800000086426735, 4.6500000692904, 20.500000305473804]
-  lane_entry_delay_s: [-6.500000096857548, -23.350000347942114, 9.300000138580799]
-  matched_manifest_audit: PASS
-  pr826_active_run_authorized: false
-  disposition: SCENE_REJECTED_S1_DOES_NOT_CANCEL_OVERTAKE
-  v4_contract_sha256: d57f461ab3932f92dd0b1745fb8c861760564491fe9376111b1079d35fa31126
-  v4_run_ids: [PY0_A, PY1_A]
-  v4_status: PERSISTENT_S1_SCREEN_PASS_CONFIRMATION_REQUIRED
-  v4_active_elapsed_s: [12.0, 75.0]
-  v4_s0_overtake: true
-  v4_s1_overtake: false
-  v4_s0_max_pass_margin_m: 24.782838446819056
-  v4_s1_max_pass_margin_m: -11.236445209732068
-  v4_audit_sha256: 7392fc6fdb279ff1d4604c2c0826e3c5d0a17bac202d8d87bf6aba52cac5a6b5
-  v4_admission_evidence: false
-  v4_natural_pr826_run_authorized: false
-final_reference:
-  candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
-  classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE
-  contract_path: runtime_state/pr826_greybox_demo_v1/reference_repeat_contract_v2.yaml
-  contract_sha256: 163f523d2d552cc5627efcce67df01d074db7ea6d52d28c6ea99831f1946dfe2
-  audit_path: runtime_state/pr826_greybox_demo_v1/FORMAL_REPEAT_V2_AUDIT.json
-  audit_sha256: a241a633f285b43d5c4fb40409fa542bc12e68bd4ed591d52f51612c4955afd8
-  report_path: runtime_state/pr826_greybox_demo_v1/FINAL_REFERENCE_REPORT.md
-  report_sha256: 67b0b98c7fb50573d8f4f98be26ae0a3ba5874c53d960d793e0be2b4e6c3061d
-  formal_passes: 3
-  formal_required: 3
-  minimum_prediction_trajectory_coverage: 0.9839208410636983
-  minimum_planning_valid_ratio: 0.9415059116365899
-  minimum_pass_margin_m: 23.625378607252188
-  minimum_bbox_clearance_2d_m: 0.727381087498781
-  maximum_success_region_latency_s: 70.55000105127692
-  collisions_total: 0
-  illegal_lane_invasions_total: 0
-  fault_patch_exists: false
+  active_contract: P4_SENS_V5_CONFIRMATION_CONTRACT.yaml
+  contract_sha256: eb7fa709edea9f2e0710dcb9707e9a18eccace85953165e93148c7d622672e61
+  semantic: TARGET_LEFT_MERGE_OCCUPANCY_3_5M_RELATIVE_2_TO_4S
+  active_window_s: [12.0, 75.0]
+  pair_a:
+    run_ids: [PY0_A, PY1_A]
+    status: PASS_COMMON_CORE
+    compact_audit: reports/P4_SENS_PAIR_A.json
+  pair_b:
+    run_ids: [PZ0_B, PZ1_B]
+    status: PASS_COMMON_CORE
+    compact_audit: reports/P4_SENS_PAIR_B.json
+  pair_c:
+    s0_run_id: PZ0_C
+    s0_execution: COMPLETED_BEFORE_CLEANUP_INSTRUCTION_NOT_YET_COUNTED
+    s1_run_id: PZ1_C
+    s1_execution: NOT_RUN
+    status: PENDING_POST_CLEANUP_S0_AUDIT
+
+validity_model:
+  fields: [runtime_valid, transport_valid, semantic_valid, behavior_valid, admission_valid]
+  legacy_infrastructure_valid: COMPATIBILITY_TELEMETRY_ONLY
+
+next_action: >-
+  Complete repository cleanup and validation; audit PZ0_C S0 with the common core; only if the
+  frozen normal-arm gate passes, execute PZ1_C and aggregate all three pairs.
+
+non_claims:
+  - persistent_sensitivity_not_yet_3_of_3
+  - privileged_s1_is_not_natural_pr826
+  - natural_pr826_l0_to_l4_not_established
+  - no_diagnosis_agent_probability_repair_or_animation
