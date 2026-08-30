@@ -1768,3 +1768,71 @@ candidates:
       current pose and current CARLA lane centers; it reads no ego state, Apollo output or future GT.
       This controller evidence was obtained before any Apollo-integrated P2M result.
     screening_disposition: REJECT_FIXED_GATE_AND_INTERACTION_AFTER_PASS_OUTCOME
+  - candidate_id: RF04_P2N_MICROLINO_ACKERMANN_FORWARD16_LANE3_TO_LANE2_T6D4_ROUTE1072Y70_SLOW110_80S_V1
+    reference_label: APOLLO_10_CONFIGURED_P2N_OUTCOME_RELEVANT_PHYSICAL_MERGE_REFERENCE
+    map: Town04
+    apollo_map_variant: carla_town04_road_width_v1
+    configured_map_manifest: runtime/maps/carla_town04_road_width_v1/configured_map_manifest.json
+    configured_base_map_sha256: fac6d39f94c82796fe71c86269c74d663d9ca6bf89dbef85523b338258ab5372
+    control_calibration_variant: lincoln_carla_v17_low_speed
+    control_calibration_sha256: 2693818651d7799eac5f206b88af0c0fb86f38b34443c1b14b4ccd45ffe482aa
+    control_calibration_scope: NONNEGATIVE_ACCELERATION_AND_SPEED_AT_MOST_2_0_MPS
+    control_calibration_prior_validation: runtime_state/d0_control_loop_v17_20260811/RUN_STATE.yaml
+    carla_road_id: 46
+    carla_lane_id: -2
+    initial_npc_lane_id: -3
+    ego_spawn_carla: {x: 9.356113, y: 186.451248, z: 0.281942, yaw_deg: -90.289116}
+    route_start_apollo_xy: [9.356113, -186.451248]
+    route_end_apollo_xy: [5.124774, -70.038346]
+    route_waypoints_apollo_xy:
+      - [9.356113, -186.451248]
+      - [5.124774, -70.038346]
+    route_waypoint_lane_intent: [-2, -1]
+    npc_blueprint: vehicle.micro.microlino
+    npc_spawn_carla: {x: 12.774190, y: 170.202545, z: 0.281942, yaw_deg: -90.289124}
+    nominal_npc_gap_m: 16.25
+    npc_initial_position_relation: AHEAD_IN_ADJACENT_SOURCE_LANE
+    npc_policy:
+      type: CARLA_TIMED_ACKERMANN_LANE_MERGE
+      speed_mps: 1.10
+      traffic_manager_used: false
+      source_lane_id: -3
+      target_lane_id: -2
+      lane_change_start_s: 6.0
+      lane_change_duration_s: 4.0
+      trigger: SIMULATION_ELAPSED_SINCE_OBSERVATION_START
+      path_reference: CURRENT_CARLA_SOURCE_AND_TARGET_LANE_CENTERS
+      command_transport: VEHICLE_APPLY_ACKERMANN_CONTROL
+      lookahead_m: 3.0
+      wheelbase_m: 1.50
+      maximum_steer_rad: 0.50
+      steer_speed_rad_s: 0.50
+      acceleration_mps2: 1.0
+      jerk_mps3: 1.0
+      pose_or_velocity_override_used: false
+      apollo_output_used: false
+      ego_state_used: false
+      future_ground_truth_used: false
+    observation_window_s: 80.0
+    same_direction_adjacent_lanes: [-1, -3]
+    allowed_overtake_lane_ids: [-1]
+    allowed_lane_crossing_marking_signatures: [Broken|White|Both]
+    success_region_carla: {center_xy: [5.124774, 70.038346], radius_m: 15.0, road_id: 1072, lane_id: -1}
+    route_length_m: 116.49
+    execution_allowed: true
+    p2b_normal_only_before_new_active_run: true
+    topology_screened_before_active: true
+    p2m_physics_controller_probe: P2M_CONTROLLER_PROBE_AUDIT.json
+    fixed_future_faulty_arm_constraint: >-
+      Any fixed and later active arms must use this exact native Ackermann controller, 16.25 m
+      adjacent-lane lead, lanes, route, map, Control, timing, startup order and oracle. Only the
+      already frozen Prediction semantic switch may differ after separate 3/3 fixed admission.
+    selection_basis: >-
+      P2M measured ego gaining 10.425 m on an alongside target by physical target-lane entry at
+      11.0 s; its interaction was therefore too late. P2N changes only the normal scene's initial
+      longitudinal relation before any active result. CARLA map traversal placed the target 16.25 m
+      ahead on road 46 lane -3. Holding the previously verified physical controller fixed predicts
+      about 5.8 m target lead at lane entry: before the 6 m pass outcome and inside the historical
+      <10 m nearby semantic domain, with positive geometric clearance. This is a single
+      mechanism-derived candidate, not a parameter sweep or a fault-dose change.
+    screening_disposition: REJECT_FROZEN_MINIMUM_BODY_CLEARANCE_GATE

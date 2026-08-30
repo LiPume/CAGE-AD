@@ -1,0 +1,12 @@
+{
+  "schema_version":1,
+  "audited_at":"2026-08-30T05:50:00Z",
+  "status":"REJECT_CONTROLLER_FAMILY",
+  "scientific_change":"command a 0.20 m target-lane offset away from ego pass lane using native Ackermann physics",
+  "apollo_runs":0,
+  "fault_runs":0,
+  "initial_window_error":"The first 3 probes measured 12–18 s transient response and were rejected at median 0.556383 m; records retained.",
+  "settled_repeats":{"count":3,"statuses":["REJECT","REJECT","REJECT"],"lane_center_distance_median":[0.2696370011358572,0.2696370011358572,0.2696370011358572],"frozen_target_m":0.20,"frozen_tolerance_m":0.05,"speed_median_mps":1.096315900878143,"target_lane_fraction":1.0,"collision_count":0},
+  "lookahead_screens":[{"lookahead_m":5.0,"status":"REJECT","lane_center_distance_median":0.28157634129196407,"target_lane_fraction":0.95},{"lookahead_m":7.0,"status":"REJECT","lane_center_distance_median":0.36079670790004426,"target_lane_fraction":0.8527777777777777}],
+  "conclusion":"Changing lookahead did not satisfy the predeclared 0.20 +/- 0.05 m tracking gate and degraded target-lane timing. Lateral-offset controller route is closed without Apollo execution."
+}

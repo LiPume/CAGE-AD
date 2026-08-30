@@ -37,6 +37,7 @@ def main() -> None:
         "--expected-policy-type",
         default="CARLA_TIMED_ADJACENT_LANE_MERGE_LOCAL_VELOCITY",
     )
+    parser.add_argument("--require-target-lane-before-pass-margin-m", type=float)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     events = [json.loads(line) for line in args.timeline.read_text().splitlines() if line.strip()]
@@ -64,6 +65,21 @@ def main() -> None:
     before_lanes = sorted({int(s["npc_carla_lane_id"]) for s in before})
     after_lanes = sorted({int(s["npc_carla_lane_id"]) for s in after})
     median_speed = statistics.median(float(s["npc_speed_mps"]) for s in moving)
+    first_target_lane_s = next(
+        (float(s["elapsed_s"]) for s in samples if int(s["npc_carla_lane_id"]) == args.target_lane),
+        None,
+    )
+    first_pass_margin_s = None
+    if args.require_target_lane_before_pass_margin_m is not None:
+        first_pass_margin_s = next(
+            (
+                float(s["elapsed_s"])
+                for s in samples
+                if float(s["pass_margin_m"])
+                >= args.require_target_lane_before_pass_margin_m
+            ),
+            None,
+        )
     trigger = policy.get("trigger", policy.get("release_trigger"))
     ackermann_expected = args.expected_policy_type == "CARLA_TIMED_ACKERMANN_LANE_MERGE"
     checks = {
@@ -84,12 +100,18 @@ def main() -> None:
         >= args.minimum_post_merge_overlap_frames,
         "prediction_coverage": summary["metrics"]["target_prediction_trajectory_coverage"] >= 0.90,
     }
+    if args.require_target_lane_before_pass_margin_m is not None:
+        checks["target_lane_entry_precedes_pass_outcome"] = (
+            first_target_lane_s is not None
+            and first_pass_margin_s is not None
+            and first_target_lane_s < first_pass_margin_s
+        )
     result = {
         "schema_version": 1,
         "analysis_type": "TIMED_MERGE_FIXED_SCREEN",
         "inputs": {"timeline": str(args.timeline), "timeline_sha256": sha256(args.timeline), "summary": str(args.summary), "summary_sha256": sha256(args.summary)},
-        "frozen_gate": {"source_lane": args.source_lane, "target_lane": args.target_lane, "merge_start_s": args.merge_start_s, "merge_end_s": args.merge_end_s, "minimum_post_merge_overlap_frames": args.minimum_post_merge_overlap_frames, "expected_policy_type": args.expected_policy_type},
-        "metrics": {"before_lanes": before_lanes, "after_lanes": after_lanes, "median_speed_mps": median_speed, "post_merge_overlap_frames": len(overlap), "first_post_merge_overlap_s": min(overlap) if overlap else None, "last_post_merge_overlap_s": max(overlap) if overlap else None, "prediction_trajectory_coverage": summary["metrics"]["target_prediction_trajectory_coverage"]},
+        "frozen_gate": {"source_lane": args.source_lane, "target_lane": args.target_lane, "merge_start_s": args.merge_start_s, "merge_end_s": args.merge_end_s, "minimum_post_merge_overlap_frames": args.minimum_post_merge_overlap_frames, "expected_policy_type": args.expected_policy_type, "require_target_lane_before_pass_margin_m": args.require_target_lane_before_pass_margin_m},
+        "metrics": {"before_lanes": before_lanes, "after_lanes": after_lanes, "median_speed_mps": median_speed, "post_merge_overlap_frames": len(overlap), "first_post_merge_overlap_s": min(overlap) if overlap else None, "last_post_merge_overlap_s": max(overlap) if overlap else None, "prediction_trajectory_coverage": summary["metrics"]["target_prediction_trajectory_coverage"], "first_target_lane_s": first_target_lane_s, "first_pass_margin_s": first_pass_margin_s},
         "policy": policy,
         "checks": checks,
         "status": "PASS" if all(checks.values()) else "REJECT",

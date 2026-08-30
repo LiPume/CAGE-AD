@@ -29,6 +29,7 @@ APOLLO_CONF_ROOT="${GENERATED}/apollo_conf"
 CYBER_ROOT="${GENERATED}/cyber"
 LAUNCH=""
 STACK_PID=""
+INTERPOSER_PID=""
 RUN_STARTED_NS="$(date +%s%N)"
 CUSTOM_LIBRARY_DIR="$("${BUNDLE_ROOT}/runtime/envs/cage-ad-py310/bin/python" -c \
   'import json,sys; print(json.load(open(sys.argv[1])).get("private_prediction_runtime", {}).get("library_dir", ""))' \
@@ -59,6 +60,17 @@ stop_stack() {
       kill -KILL -- "-${STACK_PID}" 2>/dev/null || kill -KILL "${STACK_PID}" 2>/dev/null || true
     fi
     wait "${STACK_PID}" 2>/dev/null || true
+  fi
+  if [[ -n "${INTERPOSER_PID}" ]] && kill -0 "${INTERPOSER_PID}" 2>/dev/null; then
+    kill -INT -- "-${INTERPOSER_PID}" 2>/dev/null || kill -INT "${INTERPOSER_PID}" 2>/dev/null || true
+    for _ in $(seq 1 10); do
+      kill -0 "${INTERPOSER_PID}" 2>/dev/null || break
+      sleep 1
+    done
+    if kill -0 "${INTERPOSER_PID}" 2>/dev/null; then
+      kill -KILL -- "-${INTERPOSER_PID}" 2>/dev/null || kill -KILL "${INTERPOSER_PID}" 2>/dev/null || true
+    fi
+    wait "${INTERPOSER_PID}" 2>/dev/null || true
   fi
 }
 
@@ -93,6 +105,25 @@ CARLA_BRIDGE_SETTINGS_FILE="${GENERATED}/bridge_settings.yaml" \
 CARLA_BRIDGE_OBJECTS_FILE="${GENERATED}/bridge_objects.json" \
   "${BUNDLE_ROOT}/scripts/manage_carla_bridge.sh" start >>"${RUN_DIR}/bridge.log" 2>&1
 sleep 4
+
+if [[ -s "${GENERATED}/p4_sensitivity_config.json" ]]; then
+  setsid "${BUNDLE_ROOT}/scripts/apollo_host_exec.sh" bash -c \
+    'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; export CYBER_PATH="$2"; if [[ -n "$3" ]]; then export LD_LIBRARY_PATH="$3:${LD_LIBRARY_PATH:-}"; fi; shift 3; exec "$@"' bash \
+    "${APOLLO_CONF_ROOT}" "${CYBER_ROOT}" "${CUSTOM_LIBRARY_DIR}" python3 \
+    "${REPO_ROOT}/scripts/d0/pr826/p4_sensitivity_interposer.py" \
+    --config "${GENERATED}/p4_sensitivity_config.json" \
+    --telemetry "${RUN_DIR}/private_p4_sensitivity_telemetry.jsonl" \
+    --stats "${RUN_DIR}/private_p4_sensitivity_stats.json" \
+    >"${RUN_DIR}/private_p4_sensitivity_interposer.log" 2>&1 </dev/null &
+  INTERPOSER_PID=$!
+  for _ in $(seq 1 40); do
+    [[ -s "${RUN_DIR}/private_p4_sensitivity_stats.json" ]] && break
+    kill -0 "${INTERPOSER_PID}" 2>/dev/null || break
+    sleep 0.25
+  done
+  test -s "${RUN_DIR}/private_p4_sensitivity_stats.json"
+  kill -0 "${INTERPOSER_PID}"
+fi
 
 setsid "${BUNDLE_ROOT}/scripts/apollo_host_exec.sh" bash -c \
   'export APOLLO_CONF_PATH="$1:$APOLLO_CONF_PATH"; export CYBER_PATH="$2"; if [[ -n "$3" ]]; then export LD_LIBRARY_PATH="$3:${LD_LIBRARY_PATH:-}"; fi; shift 3; exec "$@"' bash \

@@ -1,9 +1,9 @@
 schema_version: 1
 protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
-current_gate: SCENE_FAULT_COMPATIBILITY_ANALYSIS_AFTER_P2M
+current_gate: P4_SENS_SEMANTIC_SENSITIVITY_PROBE_DESIGN
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-30T05:15:00Z"
+last_updated_at: "2026-08-30T05:02:19Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -16,7 +16,7 @@ gates:
   p1_prediction_bringup: PASS
   p2_reference_scene: PASS_STABLE_REFERENCE_ADMITTED_3_OF_3
   p3_semantic_port_fixture: PASS_P3_SEMANTIC_FIXTURE
-  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2M_REJECT_FIXED_AND_LATE_INTERACTION
+  p4_matched_gold_case: P4B_REJECT_ROUTE_DOMINATED_P2N_REJECT_CLEARANCE
   p5_greybox_tools: NOT_RUN_CASE_NOT_ADMITTED
   p6_interventions: NOT_RUN_CASE_NOT_ADMITTED
   p7_controller_and_report: NOT_RUN_CASE_NOT_ADMITTED
@@ -117,7 +117,7 @@ reference_scene_result:
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
 terminal_reason: null
-next_action: Use measured P2M closure kinematics to preregister one normal-only forward-offset P2N candidate whose physical merge occurs before the pass outcome and within the frozen nearby semantic domain; do not run active fault until 3/3 fixed admission.
+next_action: Freeze and execute a non-admission Prediction-to-Planning sensitivity probe with matched S0 straight, S1 left-merge occupancy, and S2 no-trajectory semantics; do not resume scene tuning unless Planning sensitivity and a natural PR826 candidate transition are both demonstrated.
 p3_semantic_port:
   started_at: "2026-08-29T11:20:00Z"
   pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
@@ -311,8 +311,22 @@ p2l_time_separated_merge:
   merge_window_s: [6.0, 8.0]
   source_target_lanes: [-3, -2]
   policy_trigger: SIMULATION_ELAPSED_ONLY
-  status: PENDING_FIXED_SCREEN
+  status: REJECTED_PREEXECUTION_KINEMATIC_POSE_OVERRIDE
   active_fault_runs: 0
+p4_sensitivity_probe:
+  classification: NON_ADMISSION_CAUSAL_SENSITIVITY_PROBE
+  scene_source: P2N_MECHANISM_POSITIVE_BUT_CLEARANCE_REJECTED
+  admission_evidence_allowed: false
+  semantics: [S0_STRAIGHT, S1_LEFT_MERGE_OCCUPANCY, S2_NO_TRAJECTORY]
+  p2q_status: CANCELLED_BEFORE_CANDIDATE_CONTRACT_OR_RUN
+  contract_status: FROZEN_BEFORE_FIRST_RESULT
+  contract_sha256: ccf059b34196cabfeab7fbfe8f5f70cd1efb2c0d8931f18a3b22f5045fa0bcec
+  transform_unit_tests: PASS_3
+  prepare_render_dry_control: PASS
+  retained_dry_control_path: /tmp/cage-p4sens-test.ETUgXZ
+  run_ids: []
+  pass_criterion: S1_STABLY_CHANGES_PLANNING_BORROW_OR_OVERTAKE_DECISION_RELATIVE_TO_S0
+  pr826_followup_criterion: FAULTY_PREDICATE_NATURALLY_REMOVES_STRAIGHT_WHILE_RETAINING_LATERAL_CANDIDATE
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
   classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE

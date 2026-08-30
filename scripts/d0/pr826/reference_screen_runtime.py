@@ -618,6 +618,9 @@ class ReferenceScreen:
                 "steer_speed_rad_s": float(policy["steer_speed_rad_s"]),
                 "acceleration_mps2": float(policy["acceleration_mps2"]),
                 "jerk_mps3": float(policy["jerk_mps3"]),
+                "target_lane_lateral_offset_m": float(
+                    policy.get("target_lane_lateral_offset_m", 0.0)
+                ),
                 "traffic_manager_used": False,
                 "future_ground_truth_used": False,
                 "apollo_output_used": False,
@@ -1184,15 +1187,21 @@ class ReferenceScreen:
                 lookahead_m = float(self.npc_policy_record["lookahead_m"])
                 source_ahead = self.next_same_lane_waypoint(source, lookahead_m)
                 target_ahead = self.next_same_lane_waypoint(target, lookahead_m)
+                target_right = target_ahead.transform.get_right_vector()
+                target_offset_m = float(
+                    self.npc_policy_record["target_lane_lateral_offset_m"]
+                )
+                target_x = target_ahead.transform.location.x + target_right.x * target_offset_m
+                target_y = target_ahead.transform.location.y + target_right.y * target_offset_m
                 linear = (
                     elapsed - float(self.npc_policy_record["lane_change_start_s"])
                 ) / float(self.npc_policy_record["lane_change_duration_s"])
                 alpha = smoothstep(linear)
                 aim = carla.Location(
                     x=(1.0 - alpha) * source_ahead.transform.location.x
-                    + alpha * target_ahead.transform.location.x,
+                    + alpha * target_x,
                     y=(1.0 - alpha) * source_ahead.transform.location.y
-                    + alpha * target_ahead.transform.location.y,
+                    + alpha * target_y,
                     z=(1.0 - alpha) * source_ahead.transform.location.z
                     + alpha * target_ahead.transform.location.z,
                 )

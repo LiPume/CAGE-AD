@@ -149,12 +149,21 @@ def run(args) -> dict:
             target = lane_waypoint(world.get_map(), transform.location, args.target_lane)
             source_ahead = next_waypoint(source, args.lookahead_m)
             target_ahead = next_waypoint(target, args.lookahead_m)
+            target_right = target_ahead.transform.get_right_vector()
+            target_x = (
+                target_ahead.transform.location.x
+                + target_right.x * args.target_lane_lateral_offset_m
+            )
+            target_y = (
+                target_ahead.transform.location.y
+                + target_right.y * args.target_lane_lateral_offset_m
+            )
             alpha = smoothstep((elapsed - args.merge_start_s) / args.merge_duration_s)
             aim = carla.Location(
                 x=(1.0 - alpha) * source_ahead.transform.location.x
-                + alpha * target_ahead.transform.location.x,
+                + alpha * target_x,
                 y=(1.0 - alpha) * source_ahead.transform.location.y
-                + alpha * target_ahead.transform.location.y,
+                + alpha * target_y,
                 z=(1.0 - alpha) * source_ahead.transform.location.z
                 + alpha * target_ahead.transform.location.z,
             )
@@ -176,6 +185,10 @@ def run(args) -> dict:
                 lane_type=carla.LaneType.Driving,
             )
             applied = actor.get_control()
+            lane_center_distance = None if nearest is None else math.hypot(
+                transform.location.x - nearest.transform.location.x,
+                transform.location.y - nearest.transform.location.y,
+            )
             samples.append({
                 "frame": int(snapshot.frame),
                 "elapsed_s": elapsed,
@@ -184,6 +197,7 @@ def run(args) -> dict:
                 "speed_mps": math.sqrt(velocity.x ** 2 + velocity.y ** 2 + velocity.z ** 2),
                 "nearest_road_id": None if nearest is None else int(nearest.road_id),
                 "nearest_lane_id": None if nearest is None else int(nearest.lane_id),
+                "nearest_lane_center_distance_m": lane_center_distance,
                 "blend_alpha": alpha,
                 "aim_xy": [float(aim.x), float(aim.y)],
                 "ackermann": {
@@ -209,6 +223,16 @@ def run(args) -> dict:
         source_fraction = sum(s["nearest_lane_id"] == args.source_lane for s in before) / max(1, len(before))
         target_fraction = sum(s["nearest_lane_id"] == args.target_lane for s in after) / max(1, len(after))
         speed_median = statistics.median(moving) if moving else 0.0
+        offset_settle_start_s = (
+            args.merge_start_s + args.merge_duration_s + 10.0
+        )
+        after_offsets = [
+            s["nearest_lane_center_distance_m"]
+            for s in samples
+            if offset_settle_start_s <= s["elapsed_s"] <= args.duration_s
+            if s["nearest_lane_center_distance_m"] is not None
+        ]
+        after_offset_median = statistics.median(after_offsets) if after_offsets else None
         gates = {
             "source_lane_fraction_at_least_0_95": source_fraction >= 0.95,
             "target_lane_fraction_at_least_0_95": target_fraction >= 0.95,
@@ -217,6 +241,11 @@ def run(args) -> dict:
             "pose_or_velocity_override_api_used_false": True,
             "traffic_manager_used_false": True,
         }
+        if args.target_lane_lateral_offset_m > 0.0:
+            gates["target_lane_offset_within_0_05_m"] = (
+                after_offset_median is not None
+                and abs(after_offset_median - args.target_lane_lateral_offset_m) <= 0.05
+            )
         return {
             "schema_version": 1,
             "probe_id": args.probe_id,
@@ -240,6 +269,8 @@ def run(args) -> dict:
             "source_lane_fraction": source_fraction,
             "target_lane_fraction": target_fraction,
             "speed_median_mps": speed_median,
+            "post_merge_lane_center_distance_median": after_offset_median,
+            "offset_settle_window_s": [offset_settle_start_s, args.duration_s],
             "collision_events": collision_events,
             "gates": gates,
             "parameters": {
@@ -283,6 +314,7 @@ def main() -> int:
     parser.add_argument("--steer-speed-rad-s", type=float, default=0.50)
     parser.add_argument("--acceleration-mps2", type=float, default=1.0)
     parser.add_argument("--jerk-mps3", type=float, default=1.0)
+    parser.add_argument("--target-lane-lateral-offset-m", type=float, default=0.0)
     args = parser.parse_args()
     result = run(args)
     atomic_json(args.output, result)

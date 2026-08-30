@@ -80,6 +80,14 @@ after spawn and the exact frozen pose after one synchronous tick.
   is not a recipe. Ego reached the 6 m pass gate at 6.9 s; NPC entered lane -2 only at 11.0 s, when
   pass margin was already 10.425 m. Post-merge channel overlap cannot establish causal relevance
   after the system outcome. Planning valid also missed its unchanged 0.90 gate.
+- P2N: behavior and mechanism passed, including target lane entry 41.7 s before the pass outcome,
+  but minimum body clearance was 0.794 m versus the frozen 0.90 m gate. The generic runner's
+  `SCREENING_PASS` is not final when a candidate contract adds stricter gates; always run and retain
+  the contract-specific audit before authorizing repeats.
+- P2O: a desired 0.20 m physical target-lane offset did not meet its frozen +/-0.05 m controller
+  tracking gate. Three settled repeats converged to 0.269637 m; 5 m and 7 m lookahead screens were
+  worse and delayed lane association. Do not pass an unverified lateral-offset controller into an
+  Apollo experiment merely because its realized direction appears safer.
 
 ## Pre-execution invariant audit
 
@@ -101,3 +109,14 @@ Apollo reference. Never substitute pose or velocity overrides if the controller 
 
 Future entries must distinguish `VERIFIED`, `SCREEN_ONLY`, `REJECTED`, and
 `IMPLEMENTATION_INVALID` explicitly.
+
+## Interface-sensitivity kill criterion
+
+Before spending additional runs tuning a scene to amplify a historical fault, isolate the relevant
+module boundary and test whether the downstream consumer responds to the required semantic delta.
+For this case, compare matched target predictions for straight motion, left-merge occupancy of the
+overtaking lane, and no trajectory. Classify these as privileged non-admission probes, preserve all
+message identity/timing fields that are not the target semantic, and never report them as natural
+fault runs. If an explicit left-merge prediction does not reproducibly change Planning, close the
+scene–mechanism pair. Only after sensitivity is established should candidate-level fault telemetry
+be checked for a natural route from the historical predicate to the same output semantic.

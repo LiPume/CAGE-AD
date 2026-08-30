@@ -2900,3 +2900,127 @@ family is closed. A distinct candidate may place the NPC ahead by a distance der
 measured approximately 0.97 m/s closure rate, so lane entry occurs while NPC is still ahead and
 within the existing `<10 m` nearby semantic domain. This is a normal-only mechanism correction,
 not a fault-dose change; it must be frozen before its first result.
+
+## Issue P2N-001 — outcome-relevant forward-offset physical merge
+
+现象与假设：P2M proved physical merge/channel overlap but ego gained 10.425 m by 11.0 s. A target
+starting 16.25 m ahead on adjacent lane -3 should therefore remain approximately 5.8 m ahead at
+physical lane entry: before the 6 m pass outcome and within the unchanged historical `<10 m`
+nearby semantic domain.
+
+证据与实验设计：A CARLA Town04 map query traversed road 46 lane -3 from the verified controller
+spawn. The 16 m forward waypoint is `(12.774190, 170.202545)`, yaw `-90.289124`; no hand-tuned
+world coordinate was guessed. P2N retains the exact P2M controller and changes only the normal
+scene's preregistered longitudinal relation. New outcome-relevance gate requires physical target
+lane entry to occur before ego first reaches +6 m pass margin. The target-lane settled window starts
+at 11.5 s, based on the prior 3/3 controller probe's 11.0 s association, rather than P2M's rejected
+10.5 s assumption. All P2 normal gates remain unchanged.
+
+修改：Added one candidate, an analyzer timing-order check, a frozen fixed-only contract and
+append-only ledger. No Prediction fault, Planning, Control, bridge, ego controller or oracle was
+changed. No active result exists for this geometry.
+
+下一步：Run exactly one `SN_N01_A`. Any behavior, mechanism or ordering failure closes the family
+before formal or active runs.
+
+P2N screening result:
+
+`SN_N01_A` passed the generic runner and every mechanism check. Prediction trajectory coverage was
+`0.939055`, Planning valid `0.940990`, target entered lane -2 at 11.00 s, the +6 m pass outcome was
+not reached until 52.70 s, and 95 trajectory-bearing lane-change Planning overlap frames were
+measured. Collision/illegal invasion were zero and success region was reached.
+
+The candidate-specific frozen contract nevertheless rejects the run: minimum 2-D body clearance
+was `0.794307 m`, below the preregistered `0.90 m` gate. The minimum occurred at 42.70 s with ego in
+lane -1 and target in lane -2; target lane-center error was only 0.000020 m, excluding controller
+drift as the explanation. `P2N_FIXED_SCREENING_AUDIT.json` is authoritative over the generic
+runner status. No formal or active run is authorized, and the safety threshold remains unchanged.
+
+This establishes a useful boundary: longitudinal timing fixed causal relevance, but adjacent-lane
+passing geometry remains 0.106 m short of the safety margin. Any successor must make one explicit
+normal-only geometric safety correction, verify it first at the controller boundary, and preserve
+the fault semantics and every oracle threshold.
+
+## Issue P2O-001 — physical lateral safety correction probe
+
+现象：P2N missed clearance by 0.106 m. Before touching Apollo, P2O commanded a 0.20 m target-lane
+offset away from lane -1 using the same native Ackermann controller. The first three 18 s probes
+were rejected because the 12–18 s measurement window still contained lane-change settling; median
+distance was 0.556383 m.
+
+排查与修正：The raw trajectory showed lane-center distance decaying from 1.35 m at 12 s to 0.33 m
+at 18 s. The controller target stayed unchanged; the probe was extended to 30 s and evaluated only
+from 20–30 s. Three settled repeats were identical at 0.269637 m, still outside the predeclared
+0.20 +/-0.05 m tracking gate. Single 5 m and 7 m lookahead screens were also rejected at 0.281576
+and 0.360797 m; the 7 m screen additionally missed the 0.95 target-lane fraction gate.
+
+结论：The initial validation-window bug is resolved and retained, but the controller family itself
+is rejected. No Apollo or fault run used the offset. Increasing lookahead did not remove curved-road
+pure-pursuit bias and degraded timing. `P2O_CONTROLLER_PROBE_AUDIT.json` freezes all results.
+
+下一步：Close lateral-offset controller tuning. Audit Town04 for a physically wider three-lane
+segment, so safety margin comes from road geometry rather than an unverified actor offset.
+
+Town04 wider-lane audit result:
+
+A 2 m CARLA waypoint inventory found one driving-lane width value only: `3.5 m`. There are 56
+same-direction groups with at least three lanes, but none has minimum width above 3.5 m. Road 45 is
+longer than road 46 yet not wider. `TOWN04_WIDE_LANE_AUDIT.json` records the result. Therefore a
+Town04 road change cannot solve P2N's 0.106 m clearance deficit by physical lane width and random
+map/road screening is excluded.
+
+The remaining normal-only explanation is longitudinal phase: P2N minimum clearance occurred while
+ego was still laterally offset inside lane -1 and only 3.676 m longitudinally behind target. A
+single map-derived 20.25 m initial lead can delay encounter by roughly four seconds without changing
+controller, fault, route or oracle, allowing ego more time to reach the lane center. This is the
+last longitudinal timing candidate in this family; it must be frozen before execution.
+
+## Issue P4-SENS-001 — test Planning sensitivity before any further scene tuning
+
+现象：The next queued action was a P2Q longitudinal-separation candidate, but that action still
+optimized normal-scene geometry without first answering the decisive interface question: whether
+Planning changes its borrow/overtake behavior when target obstacle `1001` is predicted to occupy
+the adjacent overtaking lane. P2Q had no candidate record, contract, manifest, or run and was
+cancelled before execution.
+
+当前假设：
+
+- H1: a 2–4 s left-merge Prediction semantic for the target changes Planning's path/speed or lane
+  borrow decision relative to an otherwise identical straight semantic.
+- H2: Planning is route dominated and remains behaviorally insensitive even to an explicit
+  left-lane occupancy prediction; if so, this scene is incompatible with the research mechanism.
+- H3: no-trajectory behavior differs from both S0 and S1 and helps distinguish trajectory-content
+  sensitivity from mere trajectory presence.
+
+设计的实验：Open an explicitly non-admission `P4-SENS` boundary probe. Prediction writes to a
+private raw topic; a dedicated interposer preserves target ID, headers, timestamps, obstacle count,
+non-target obstacles, and message structure. S0 forwards the stock straight output, S1 applies a
+smooth 2–4 s left-normal displacement to the target trajectory so that it occupies ego's adjacent
+overtaking lane, and S2 removes only the target trajectory set. Planning, Control, CARLA, route,
+NPC physics, and success oracle remain unchanged. The probe may not be cited as a golden-case arm.
+
+判定：Only if S1 reproducibly changes Planning relative to S0 will candidate-level PR826 telemetry
+be evaluated for the natural transition `STRAIGHT enabled -> disabled` while a lateral candidate
+remains enabled and becomes an emitted trajectory. Scene tuning and formal repeats remain paused.
+
+修改：Both resumable run-state copies now point to `P4_SENS_SEMANTIC_SENSITIVITY_PROBE_DESIGN`.
+P2Q is recorded as cancelled before candidate/contract/run creation. No Prediction predicate,
+Planning, Control, bridge, CARLA scene, or admitted P2 artifact changed.
+
+下一步：Freeze the non-admission probe contract, implement and identity-test the dedicated
+Prediction boundary transform, then execute S0/S1/S2 under matched manifests.
+
+P4-SENS implementation control result:
+
+The first dry-run shell command was rejected before execution because it contained automatic
+`rm -rf` cleanup, which the execution safety policy forbids. No project or runtime file changed.
+The retry retained a uniquely named `/tmp/cage-p4sens-test.ETUgXZ` directory and passed manifest
+preparation plus launch rendering. The generated Prediction config contained exactly
+`prediction_topic: "/apollo/prediction_raw"`; the private configuration preserved the non-admission
+classification and frozen 3.5 m / 2–4 s S1 parameters.
+
+Three host-mode protobuf controls passed: S0 serialized identity, S1 field preservation with a
+3.5 m endpoint displacement, and S2 target-trajectory-only removal. Python compilation, shell
+syntax, YAML/JSON/JSONL validation and `git diff --check` passed. Contract
+`P4_SENS_CONTRACT.yaml` was frozen before any canonical P4-SENS manifest or result, SHA256
+`ccf059b34196cabfeab7fbfe8f5f70cd1efb2c0d8931f18a3b22f5045fa0bcec`.

@@ -207,6 +207,49 @@ def main() -> None:
             f"\n--static_obstacle_speed_threshold={threshold:.6f}\n",
         )
     prediction_flags = custom_flags("modules/prediction/conf/prediction.conf", "prediction.conf")
+    prediction_config_path = "modules/prediction/conf/prediction_conf.pb.txt"
+    sensitivity_probe = manifest.get("p4_sensitivity_probe")
+    if sensitivity_probe is not None:
+        if manifest.get("phase") != "P4_SENSITIVITY_PROBE_NON_ADMISSION":
+            raise SystemExit("sensitivity probe is forbidden outside its non-admission phase")
+        if manifest.get("admission_evidence") is not False:
+            raise SystemExit("sensitivity probe manifest must forbid admission evidence")
+        required_probe_keys = {
+            "classification", "semantic", "target_obstacle_id", "active_elapsed_s",
+            "contract_path", "contract_sha256",
+        }
+        allowed_probe_keys = required_probe_keys | {
+            "lateral_offset_m", "relative_start_s", "relative_end_s",
+        }
+        if not required_probe_keys <= set(sensitivity_probe):
+            raise SystemExit("sensitivity probe is missing required keys")
+        if set(sensitivity_probe) - allowed_probe_keys:
+            raise SystemExit("sensitivity probe has undeclared keys")
+        if sensitivity_probe["classification"] != "NON_ADMISSION_CAUSAL_SENSITIVITY_PROBE":
+            raise SystemExit("sensitivity probe classification mismatch")
+        semantic = sensitivity_probe["semantic"]
+        if semantic not in {"S0_STRAIGHT", "S1_LEFT_MERGE_OCCUPANCY", "S2_NO_TRAJECTORY"}:
+            raise SystemExit("unknown sensitivity semantic")
+        if semantic == "S1_LEFT_MERGE_OCCUPANCY":
+            if not {"lateral_offset_m", "relative_start_s", "relative_end_s"} <= set(sensitivity_probe):
+                raise SystemExit("S1 sensitivity parameters are incomplete")
+        prediction_config_source = (
+            apollo / "modules/prediction/conf/prediction_conf.pb.txt"
+        )
+        prediction_config_text = prediction_config_source.read_text()
+        old_topic = 'prediction_topic: "/apollo/prediction"'
+        if prediction_config_text.count(old_topic) != 1:
+            raise SystemExit("cannot uniquely remap Prediction output topic")
+        prediction_config_text = prediction_config_text.replace(
+            old_topic, 'prediction_topic: "/apollo/prediction_raw"'
+        )
+        generated_prediction_config = output / "prediction_conf_sensitivity.pb.txt"
+        atomic_text(generated_prediction_config, prediction_config_text)
+        prediction_config_path = str(generated_prediction_config)
+        atomic_text(
+            output / "p4_sensitivity_config.json",
+            json.dumps(sensitivity_probe, indent=2, sort_keys=True) + "\n",
+        )
     prediction_library = "modules/prediction/libprediction_component.so"
     private_prediction = manifest.get("private_prediction_runtime")
     if private_prediction is not None:
@@ -267,7 +310,7 @@ def main() -> None:
     prediction_dag = output / "prediction.dag"
     atomic_text(prediction_dag, component_dag(
         prediction_library, "PredictionComponent", "prediction",
-        "modules/prediction/conf/prediction_conf.pb.txt", prediction_flags,
+        prediction_config_path, prediction_flags,
         '''      readers: [{
         channel: "/apollo/perception/obstacles"
         qos_profile: { depth: 1 }
