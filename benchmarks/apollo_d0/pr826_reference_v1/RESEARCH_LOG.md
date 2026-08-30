@@ -3118,3 +3118,74 @@ transform failure: Apollo-generated `*_pb2.py` packages live in the AEM host env
 the unchanged test through `scripts/apollo_host_exec.sh` with the repository `src` path produced
 `3/3 PASS`. The verified recipe is to execute Apollo/Cyber protobuf tests in AEM host mode; Conda
 remains limited to CARLA clients and offline analyzers.
+
+## Issue P4-SENS-004 — temporal coverage flaw and route-neutral LaneBorrow feasibility
+
+现象：V3's explicit semantic was active only at route elapsed `12–40 s`, while S1 reached the +6 m
+pass point at `58.75`, `63.10`, and `62.75 s`. The last altered message was at `39.95 s`; therefore
+the experiment established a temporary Planning response but did not keep the declared adjacent
+lane occupied through the system outcome.
+
+本地源码证据：Pinned Apollo 10 `LaneBorrowPath::IsNecessaryToBorrowLane()` requires a single
+reference line, side-pass speed, a long-term blocking obstacle, destination/intersection gates and
+a side-passable obstacle. `PathBoundsDeciderUtil::IsWithinPathDeciderScopeObstacle()` rejects an
+obstacle whenever `!obstacle.IsStatic()` even if its speed is below
+`static_obstacle_speed_threshold`. `Obstacle::CreateObstacles()` copies
+`PredictionObstacle.is_static` into every per-trajectory Planning obstacle. Prediction's pinned
+still threshold is `0.99 m/s`; a 1.10 m/s trajectory-bearing target is consequently dynamic.
+
+既有反证：P2C already ran the proposed route-neutral same-lane slow target with Planning's speed
+threshold raised from `0.5` to `1.2 m/s`. It retained trajectory-bearing Prediction frames but
+produced only isolated blocking decisions, never reached the three-cycle LaneBorrow gate, and did
+not overtake. Re-running that same configuration would add no information.
+
+联网检索（accessed 2026-08-30 UTC）：
+
+- Query: `Apollo lane borrow slow moving obstacle`; Source: Apollo GitHub issue #8808;
+  URL: https://github.com/ApolloAuto/apollo/issues/8808; conclusion: maintainers/users identify
+  lane borrow/sidepass as static-obstacle-only; applicability: historical but consistent with the
+  pinned Apollo 10 source; confidence: high after local verification.
+- Query: `Apollo lane borrow predicted trajectory`; Source: Apollo GitHub issue #14627;
+  URL: https://github.com/ApolloAuto/apollo/issues/14627; conclusion: an opposing dynamic vehicle's
+  predicted trajectory can affect behavior after lane borrow begins, but the issue also documents
+  missing/limited lane-borrow recovery logic; applicability: conceptual, Apollo 6 case; confidence:
+  medium.
+- Query: `Apollo Planning obstacle predicted trajectory ST boundary`; Source: official Apollo
+  source `st_obstacles_processor.h` and `st_boundary_mapper.cc` on GitHub;
+  URLs: https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/st_bounds_decider/st_obstacles_processor.h and
+  https://github.com/ApolloAuto/apollo/blob/master/modules/planning/tasks/speed_bounds_decider/st_boundary_mapper.cc;
+  conclusion: moving predicted trajectories are mapped against the chosen path in ST space, while
+  no-trajectory dynamic obstacles fall back to current-position/static treatment; applicability:
+  architecture-consistent, pinned source remains authoritative; confidence: high.
+
+结论：The suggested route-neutral 1.10 m/s LaneBorrow reference is not achievable through the
+existing stock/config-only gate because trajectory-bearing and static-borrow semantics are mutually
+exclusive at the current interface. A Planning source patch would change baseline capability and
+is not authorized. Before opening a new scene, correct the temporal coverage question with one
+non-admission persistent S0/S1 screen.
+
+计划实验：Freeze P4-SENS v4 before execution. Preserve S1's 3.5 m displacement and 2–4 s relative
+merge exactly, but renew it from route elapsed `12–75 s`, covering the 80 s observation deadline
+through the prediction horizon. Run one matched S0/S1 pair. If S1 still overtakes, close this scene
+without a natural PR826 run. If it cancels, require a new three-pair confirmation contract before
+examining natural PR826 propagation.
+
+V4 audit implementation note: the generic sensitivity analyzer stopped before output with
+`KeyError: planning_delta_any` because the system-kill contract intentionally declared
+`screen_gate` instead of copying v3's low-level response section. The frozen v4 contract and both
+runs remain unchanged. A dedicated offline auditor now consumes only the already frozen v4
+transport, semantic, and system-kill fields; it introduces no replacement threshold.
+
+V4 result: `PY0_A` and `PY1_A` completed the full observation. S0 forwarded 1630 messages with
+1260 active identity messages and zero mismatches; it overtook, reached +6 m at `40.15 s`, and ended
+with `+24.783 m` maximum pass margin. S1 forwarded 1615 messages, transformed all 1260 active target
+messages from `12.00–74.95 s`, preserved all declared fields, and was consumed by Planning. It did
+not overtake, never reached +6 m, and ended with `-11.236 m` maximum pass margin. Both arms passed
+the separated transport gates, had no collision/illegal invasion, and accepted the route.
+
+The first aligned Planning delta followed at `12.05 s`, after active Prediction consumption.
+`P4_SENS_V4_PERSISTENT_SCREEN_AUDIT.json` records
+`PERSISTENT_S1_SCREEN_PASS_CONFIRMATION_REQUIRED`; this is evidence that temporal coverage was the
+missing factor in v3, not evidence of a natural PR826 fault. Freeze two additional matched pairs so
+the preregistered v4 pair plus prospective confirmations can establish 3/3 stability before any
+natural fault run.

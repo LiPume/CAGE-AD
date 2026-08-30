@@ -137,3 +137,17 @@ still overtook. Therefore:
 P4-SENS v3 is a verified sensitivity-probe recipe and a verified negative scene–fault result, not
 golden-case admission. Authoritative artifacts are `P4_SENS_V3_STABILITY_AUDIT.json`,
 `P4_SENS_V3_MATCHED_MANIFEST_AUDIT.json`, and `P4_SENS_V3_SCENE_KILL_AUDIT.json`.
+
+## Prediction-intervention temporal coverage
+
+An intervention that renews a 2–4 s future trajectory on every cycle is only present while the
+boundary transform remains active. The active window must cover the downstream decision/outcome
+window plus the declared prediction horizon. P4-SENS v3 stopped at 40 s, while its S1 pass outcomes
+were at 58.75–63.10 s; it therefore proved temporary sensitivity but could not test persistent
+lane occupancy at the outcome. The frozen v4 screen extended only the active window to 75 s and
+produced S0 overtake versus S1 no-overtake with valid transport and semantic preservation.
+
+Record first/last transformed message time, first Planning consumption time, and outcome time in
+every boundary intervention. Treat a temporal-coverage correction as a new contract and new runs;
+never rewrite the earlier disposition. One positive corrected pair still requires prospective
+repeat confirmation and is not a natural-fault or admission result.

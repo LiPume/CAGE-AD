@@ -1,9 +1,9 @@
 schema_version: 1
 protocol_version: cage-ad-pr826-greybox-demo-v1
 status: IN_PROGRESS
-current_gate: P4_SENS_COMPLETE_SCENE_CLOSED
+current_gate: P4_SENS_PERSISTENT_CONFIRMATION_FREEZE
 started_at: "2026-08-29T00:00:00Z"
-last_updated_at: "2026-08-30T05:59:24Z"
+last_updated_at: "2026-08-30T06:16:00Z"
 bundle_root: /root/autodl_apollo10_g0_bundle
 repository: /root/autodl_apollo10_g0_bundle/project/CAGE-AD
 runtime_root: /root/autodl_apollo10_g0_bundle/runtime
@@ -117,7 +117,7 @@ reference_scene_result:
   p2d_first_outcome_relevant_planning_divergence: EARLY_NEAR_ZERO_SPEED_PIECEWISE_JERK_FALLBACK
 blocking_issue: null
 terminal_reason: null
-next_action: Design a route-neutral normal-only scene where fixed straight Prediction permits borrowing the only legal adjacent lane and the same frozen S1 occupancy semantic must cancel borrowing before any natural PR826 active run is authorized.
+next_action: Freeze and execute two prospective persistent S0/S1 confirmation pairs; combine only with the preregistered v4 pair for a 3-of-3 stability gate before inspecting natural PR826 candidate-to-output propagation.
 p3_semantic_port:
   started_at: "2026-08-29T11:20:00Z"
   pinned_application_pnc_commit: d994e55fb3c3cf88222f8b4813fa5425cc7c1f56
@@ -347,6 +347,17 @@ p4_sensitivity_probe:
   matched_manifest_audit: PASS
   pr826_active_run_authorized: false
   disposition: SCENE_REJECTED_S1_DOES_NOT_CANCEL_OVERTAKE
+  v4_contract_sha256: d57f461ab3932f92dd0b1745fb8c861760564491fe9376111b1079d35fa31126
+  v4_run_ids: [PY0_A, PY1_A]
+  v4_status: PERSISTENT_S1_SCREEN_PASS_CONFIRMATION_REQUIRED
+  v4_active_elapsed_s: [12.0, 75.0]
+  v4_s0_overtake: true
+  v4_s1_overtake: false
+  v4_s0_max_pass_margin_m: 24.782838446819056
+  v4_s1_max_pass_margin_m: -11.236445209732068
+  v4_audit_sha256: 7392fc6fdb279ff1d4604c2c0826e3c5d0a17bac202d8d87bf6aba52cac5a6b5
+  v4_admission_evidence: false
+  v4_natural_pr826_run_authorized: false
 final_reference:
   candidate_id: RF04_13_SLOW_110_LANE_TANGENT_LC_LONG_80S_MAP_WIDTH_V1_CTRL_V17
   classification: APOLLO_10_CONFIGURED_MAP_AND_CONTROL_REFERENCE
